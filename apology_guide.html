@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ?ш낵臾??묒꽦 ?ㅽ뒠?붿삤 - SafeHappE</title>
+    <title>AI 사과문 작성 스튜디오 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Nanum+Myeongjo:wght@400;700&display=swap"
@@ -127,7 +127,7 @@
         }
 
         .check-indicator::after {
-            content: '??;
+            content: '✔';
             color: #1a1a2e;
             font-size: 12px;
             font-weight: bold;
@@ -201,7 +201,6 @@
             background: var(--secondary);
             margin-right: 8px;
         }
-        }
     </style>
 </head>
 
@@ -210,21 +209,24 @@
     <div class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="index.html" class="logo" style="font-size: 1.5rem;">AI ?묒꽦 ?꾩슦誘?/a>
+            <a href="index.html" class="logo">
+                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #fff;">Safe<span
+                        style="background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HappE.</span></span>
+            </a>
 
             <nav class="nav-links" style="margin-top: 20px;">
                 <!-- Studio Home / Wizard -->
                 <div class="nav-item active" id="menuHome" onclick="showWizard()">
                     <i class="fas fa-layer-group"></i>
-                    <span>?ㅽ뒠?붿삤 ??/span>
+                    <span>스튜디오 홈</span>
                 </div>
                 <div class="nav-item" id="menuDraft" onclick="showWizard()">
                     <i class="fas fa-magic"></i>
-                    <span>AI 珥덉븞 ?앹꽦</span>
+                    <span>AI 초안 생성</span>
                 </div>
                 <div class="nav-item" id="menuRef" onclick="showReferences()">
                     <i class="fas fa-book-open"></i>
-                    <span>?좏삎蹂??ш낵臾??덉떆</span>
+                    <span>유형별 사과문 예시</span>
                 </div>
 
                 <div
@@ -233,7 +235,7 @@
 
                 <div class="nav-item" onclick="confirmReturn()">
                     <i class="fas fa-undo"></i>
-                    <span>?뚯븘媛湲?(?묒꽦 痍⑥냼)</span>
+                    <span>돌아가기 (작성 취소)</span>
                 </div>
             </nav>
         </aside>
@@ -246,32 +248,31 @@
                 <div class="wizard-card">
 
                     <!-- View 1: Wizard (Default) -->
-                    <!-- View 1: Wizard (Default) -->
                     <div id="wizardPanel">
-                        <h3 style="margin-bottom: 15px;"><i class="fas fa-robot"></i> AI ?묒꽦 ?ㅼ젙</h3>
+                        <h3 style="margin-bottom: 15px;"><i class="fas fa-robot"></i> AI 작성 설정</h3>
 
                         <!-- 1. Basic Info -->
                         <div class="form-section" style="margin-bottom: 25px;">
-                            <label class="form-label">1. 湲곕낯 ?뺣낫</label>
+                            <label class="form-label">1. 기본 정보</label>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <div>
-                                    <span style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">?ш굔
-                                        ?좏삎</span>
+                                    <span style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">사건
+                                        유형</span>
                                     <select class="select-input" id="caseType">
-                                        <option value="assault">??뻾/?곹빐</option>
-                                        <option value="traffic">援먰넻?ш퀬</option>
-                                        <option value="defamation">紐낆삁?쇱넀</option>
-                                        <option value="fraud">湲덉쟾臾몄젣</option>
+                                        <option value="assault">폭행/상해</option>
+                                        <option value="traffic">교통사고</option>
+                                        <option value="defamation">명예훼손</option>
+                                        <option value="fraud">금전문제</option>
                                     </select>
                                 </div>
                                 <div>
                                     <span
-                                        style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">愿怨?/span>
+                                        style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">관계</span>
                                     <select class="select-input" id="relationship">
-                                        <option value="acquaintance">吏??/option>
-                                        <option value="stranger">珥덈㈃</option>
-                                        <option value="coworker">吏곸옣?숇즺</option>
-                                        <option value="friend">移쒓뎄</option>
+                                        <option value="acquaintance">지인</option>
+                                        <option value="stranger">초면</option>
+                                        <option value="coworker">직장동료</option>
+                                        <option value="friend">친구</option>
                                     </select>
                                 </div>
                             </div>
@@ -279,98 +280,98 @@
 
                         <!-- 2. Cause (Checkbox) -->
                         <div class="form-section" style="margin-bottom: 25px;">
-                            <label class="form-label">2. ?ш굔 諛쒖깮 ?먯씤 (以묐났 ?좏깮 媛??</label>
+                            <label class="form-label">2. 사건 발생 원인 (중복 선택 가능)</label>
                             <div class="check-group" id="causeGroup">
                                 <label class="custom-check">
                                     <input type="checkbox" value="alcohol">
                                     <div class="check-indicator"></div>
-                                    <span>?좉???痍⑥쨷 (?먮떒?????</span>
+                                    <span>술기운/취중 (판단력 저하)</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="anger">
                                     <div class="check-indicator"></div>
-                                    <span>?쒓컙?곸씤 遺꾨끂/媛먯젙 議곗젅 ?ㅽ뙣</span>
+                                    <span>순간적인 분노/감정 조절 실패</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="mistake">
                                     <div class="check-indicator"></div>
-                                    <span>?ㅽ빐??李⑷컖?쇰줈 ?명븳 ?ㅼ닔</span>
+                                    <span>오해와 착각으로 인한 실수</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="careless">
                                     <div class="check-indicator"></div>
-                                    <span>遺二쇱쓽/?덉씪???앷컖</span>
+                                    <span>부주의/안일한 생각</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="financial">
                                     <div class="check-indicator"></div>
-                                    <span>寃쎌젣???대젮?/?앺솢怨?/span>
+                                    <span>경제적 어려움/생활고</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- 3. Damage (Checkbox) -->
                         <div class="form-section" style="margin-bottom: 25px;">
-                            <label class="form-label">3. ?쇳빐 ?댁슜 (以묐났 ?좏깮 媛??</label>
+                            <label class="form-label">3. 피해 내용 (중복 선택 가능)</label>
                             <div class="check-group" id="damageGroup">
                                 <label class="custom-check">
                                     <input type="checkbox" value="physical">
                                     <div class="check-indicator"></div>
-                                    <span>?좎껜???곹빐/?듭쬆</span>
+                                    <span>신체적 상해/통증</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="mental">
                                     <div class="check-indicator"></div>
-                                    <span>?뺤떊??異⑷꺽/?몃씪?곕쭏</span>
+                                    <span>정신적 충격/트라우마</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="money">
                                     <div class="check-indicator"></div>
-                                    <span>湲덉쟾???먯떎/李⑤웾 ?뚯넀</span>
+                                    <span>금전적 손실/차량 파손</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="honor">
                                     <div class="check-indicator"></div>
-                                    <span>紐낆삁 ?ㅼ텛/?섏튂??/span>
+                                    <span>명예 실추/수치심</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- 4. Recovery & Promise (Checkbox) -->
                         <div class="form-section" style="margin-bottom: 25px;">
-                            <label class="form-label">4. ?몃젰 諛??쎌냽</label>
+                            <label class="form-label">4. 노력 및 약속</label>
                             <div class="check-group" id="effortGroup">
                                 <label class="custom-check">
                                     <input type="checkbox" value="comp">
                                     <div class="check-indicator"></div>
-                                    <span>?⑹쓽湲?諛곗긽/移섎즺鍮?吏湲?/span>
+                                    <span>합의금 배상/치료비 지급</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="habit">
                                     <div class="check-indicator"></div>
-                                    <span>?섎せ???듦? 媛쒖꽑(湲덉＜ ??</span>
+                                    <span>잘못된 습관 개선(금주 등)</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="counsel">
                                     <div class="check-indicator"></div>
-                                    <span>?곷떞/援먯쑁 ?댁닔</span>
+                                    <span>상담/교육 이수</span>
                                 </label>
                                 <label class="custom-check">
                                     <input type="checkbox" value="delete">
                                     <div class="check-indicator"></div>
-                                    <span>寃뚯떆湲 ??젣 諛??뺤젙</span>
+                                    <span>게시글 삭제 및 정정</span>
                                 </label>
                             </div>
                         </div>
 
                         <div style="margin-top: 20px;">
-                            <label class="form-label">?댁“ (Tone)</label>
+                            <label class="form-label">어조 (Tone)</label>
                             <div class="tone-selector">
                                 <div class="tone-option selected" onclick="selectTone(this, 'emotional')">
-                                    <i class="fas fa-heart"></i><br>媛먯꽦???몄냼
+                                    <i class="fas fa-heart"></i><br>감성적 호소
                                 </div>
                                 <div class="tone-option" onclick="selectTone(this, 'formal')">
-                                    <i class="fas fa-user-tie"></i><br>?뺤쨷/寃⑹떇
+                                    <i class="fas fa-user-tie"></i><br>정중/격식
                                 </div>
                             </div>
                         </div>
@@ -378,30 +379,30 @@
 
                         <button class="btn btn-primary" style="margin-top: 30px; width: 100%;"
                             onclick="generateDraft()">
-                            <i class="fas fa-pen-fancy"></i> AI 珥덉븞 ?앹꽦?섍린
+                            <i class="fas fa-pen-fancy"></i> AI 초안 생성하기
                         </button>
                     </div>
 
                     <!-- View 2: Reference Library (Hidden Default) -->
                     <div id="referencePanel" style="display: none;">
-                        <h3 style="margin-bottom: 20px;"><i class="fas fa-book-open"></i> ?좏삎蹂??ш낵臾??덉떆</h3>
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-book-open"></i> 유형별 사과문 예시</h3>
                         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
-                            ?ш굔 ?좏삎蹂꾨줈 寃利앸맂 ?ш낵臾??덉떆瑜?李멸퀬?섏뿬 ???곹솴??留욊쾶 ?섏젙?대낫?몄슂.
+                            사건 유형별로 검증된 사과문 예시를 참고하여 내 상황에 맞게 수정해보세요.
                         </p>
 
                         <!-- Category: Assault -->
                         <div class="ref-category">
                             <h4
                                 style="color: #4ade80; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
-                                <i class="fas fa-fist-raised"></i> ??뻾/?곹빐
+                                <i class="fas fa-fist-raised"></i> 폭행/상해
                             </h4>
                             <div class="ref-item" onclick="applyExample('assault1')">
-                                <h5>?곕컻????뻾 (?좎옄由???</h5>
-                                <p style="font-size: 0.8rem; color: #999;">?쒓컙??媛먯젙??李몄? 紐삵븯怨?..</p>
+                                <h5>우발적 폭행 (술자리 등)</h5>
+                                <p style="font-size: 0.8rem; color: #999;">순간의 감정을 참지 못하고..</p>
                             </div>
                             <div class="ref-item" onclick="applyExample('assault2')">
-                                <h5>?곹빐 ?쇳빐 諛쒖깮 (?꾩튂)</h5>
-                                <p style="font-size: 0.8rem; color: #999;">移섎즺媛 ?꾩슂???곸쿂瑜??낇엺 ??..</p>
+                                <h5>상해 피해 발생 (전치)</h5>
+                                <p style="font-size: 0.8rem; color: #999;">치료가 필요한 상처를 입힘..</p>
                             </div>
                         </div>
 
@@ -409,15 +410,15 @@
                         <div class="ref-category" style="margin-top: 20px;">
                             <h4
                                 style="color: #ff6b6b; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
-                                <i class="fas fa-bullhorn"></i> 紐⑥슃/紐낆삁?쇱넀
+                                <i class="fas fa-bullhorn"></i> 모욕/명예훼손
                             </h4>
                             <div class="ref-item" onclick="applyExample('defam1')">
-                                <h5>?⑤씪???볤?/寃뚯떆湲</h5>
-                                <p style="font-size: 0.8rem; color: #999;">?듬챸???ㅼ뿉 ?⑥뼱 ?곸쿂瑜?..</p>
+                                <h5>악플/댓글/게시글</h5>
+                                <p style="font-size: 0.8rem; color: #999;">익명의 뒤에 숨어 상처를..</p>
                             </div>
                             <div class="ref-item" onclick="applyExample('defam2')">
-                                <h5>?⑦넚諛???諛쒖뼵</h5>
-                                <p style="font-size: 0.8rem; color: #999;">?щ읉???덈뒗 怨듦컙?먯꽌 寃쎌넄?섍쾶...</p>
+                                <h5>단체 채팅방 발언</h5>
+                                <p style="font-size: 0.8rem; color: #999;">여럿이 있는 공간에서 경솔하게...</p>
                             </div>
                         </div>
 
@@ -425,11 +426,11 @@
                         <div class="ref-category" style="margin-top: 20px;">
                             <h4
                                 style="color: #f9cb28; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
-                                <i class="fas fa-car-crash"></i> 援먰넻?ш퀬
+                                <i class="fas fa-car-crash"></i> 교통사고
                             </h4>
                             <div class="ref-item" onclick="applyExample('traffic1')">
-                                <h5>遺二쇱쓽???묒큺?ш퀬</h5>
-                                <p style="font-size: 0.8rem; color: #999;">?덉쟾嫄곕━瑜?誘명솗蹂댄븯??..</p>
+                                <h5>부주의한 접촉사고</h5>
+                                <p style="font-size: 0.8rem; color: #999;">안전거리를 미확보하여..</p>
                             </div>
                         </div>
 
@@ -437,18 +438,18 @@
                         <div class="ref-category" style="margin-top: 20px;">
                             <h4
                                 style="color: #aaa; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
-                                <i class="fas fa-coins"></i> ?ш린/湲고?
+                                <i class="fas fa-coins"></i> 사기/기타
                             </h4>
                             <div class="ref-item" onclick="applyExample('fraud1')">
-                                <h5>湲덉쟾 梨꾨Т 遺덉씠??/h5>
-                                <p style="font-size: 0.8rem; color: #999;">?쎌냽???좎쭨??蹂?쒗븯吏 紐삵빐...</p>
+                                <h5>금전 채무 불이행</h5>
+                                <p style="font-size: 0.8rem; color: #999;">약속한 날짜를 변제하지 못해...</p>
                             </div>
                         </div>
 
                         <!-- Load/Return Button -->
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                             <button class="btn btn-primary" style="width: 100%;" onclick="showWizard()">
-                                <i class="fas fa-check"></i> ???댁슜?쇰줈 ?몄쭛 怨꾩냽?섍린
+                                <i class="fas fa-check"></i> 이 내용으로 편집 계속하기
                             </button>
                         </div>
 
@@ -459,23 +460,23 @@
                 <div class="editor-card">
                     <div
                         style="margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <input type="text" id="docTitle" placeholder="?쒕ぉ (?먮룞 ?앹꽦?⑸땲??"
+                        <input type="text" id="docTitle" placeholder="제목 (자동 생성됩니다)"
                             style="width: 70%; border:none; font-size: 1.5rem; font-weight: bold; font-family: 'Nanum Myeongjo'; outline: none; color: #333;">
-                        <span style="font-size: 0.9rem; color: #999;" id="wordCount">0??/span>
+                        <span style="font-size: 0.9rem; color: #999;" id="wordCount">0자</span>
                     </div>
 
                     <textarea class="paper-input" id="mainEditor"
-                        placeholder="?쇱そ 硫붾돱?먯꽌 ?ㅼ젙???꾨즺?섍퀬 [珥덉븞 ?앹꽦?섍린]瑜??뚮윭二쇱꽭??&#13;&#10;AI媛 ?곹솴??留욌뒗 理쒖쟻???ш낵臾몄쓣 ?묒꽦?대뱶由쎈땲??"
+                        placeholder="왼쪽 메뉴에서 설정을 완료하고 [초안 생성하기]를 눌러주세요.&#13;&#10;AI가 상황에 맞는 최적의 사과문을 작성해드립니다."
                         oninput="updateWordCount()"></textarea>
 
                     <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
                         <button class="btn btn-glass" style="border: 1px solid #ddd; color: #666;"
                             onclick="copyToClipboard()">
-                            <i class="fas fa-copy"></i> 蹂듭궗
+                            <i class="fas fa-copy"></i> 복사
                         </button>
                         <button class="btn btn-primary" onclick="applyAndReturn()"
                             style="background: linear-gradient(135deg, #4ade80, #22c55e); box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);">
-                            <i class="fas fa-check-double"></i> 珥덉븞 ?꾩꽦: ?묒꽦 ?섏씠吏???곸슜?섍린
+                            <i class="fas fa-check-double"></i> 초안 완성: 작성 페이지에 적용하기
                         </button>
                     </div>
                 </div>
@@ -495,29 +496,29 @@
 
         function updateWordCount() {
             const text = document.getElementById('mainEditor').value;
-            document.getElementById('wordCount').innerText = text.length + '??;
+            document.getElementById('wordCount').innerText = text.length + '자';
         }
 
         // Sentence Mapping Data
         const textMap = {
             cause: {
-                alcohol: "?뱀떆 ????좎뿉 痍⑦빐 ?댁꽦?곸씤 ?먮떒???대젮???곹깭??쇰ŉ,",
-                anger: "?쒓컙?곸쑝濡?移섎????ㅻⅤ??媛먯젙??二쇱껜?섏? 紐삵뻽怨?",
-                mistake: "?곷?諛⑹쓽 ?섎룄瑜??ㅽ빐?섍굅???곹솴???섎せ ?먮떒?섏뿬,",
-                careless: "????덉씪?섍퀬 遺二쇱쓽???쒕룄濡??명빐,",
-                financial: "寃쎌젣?곸쑝濡?沅곷컯???곹솴?먯꽌 ?섎せ???먮떒???대졇?쇰ŉ,"
+                alcohol: "당시 과한 음주에 취해 이성적인 판단이 어려운 상태였으며,",
+                anger: "순간적으로 치미는 감정을 주체하지 못했고,",
+                mistake: "상대방의 의도를 오해하거나 상황을 잘못 판단하여,",
+                careless: "저의 안일하고 부주의한 태도로 인해,",
+                financial: "경제적으로 궁박한 상황에서 잘못된 판단을 내렸으며,"
             },
             damage: {
-                physical: "?살쓣 ???녿뒗 ?좎껜??怨좏넻怨??곹빐瑜?,
-                mental: "?됱깮 吏?곌린 ?섎뱺 ?뺤떊??異⑷꺽怨??몃씪?곕쭏瑜?,
-                money: "媛먮떦?섍린 ?섎뱺 湲덉쟾???먯떎怨??ъ궛 ?쇳빐瑜?,
-                honor: "留롮? ?щ엺???욎뿉?쒖쓽 ?섏튂?ш낵 紐낆삁 ?ㅼ텛瑜?
+                physical: "씻을 수 없는 신체적 고통과 상해를,",
+                mental: "평생 지우기 힘든 정신적 충격과 트라우마를,",
+                money: "감당하기 힘든 금전적 손실과 재산 피해를,",
+                honor: "많은 사람들 앞에서의 수치심과 명예 실추를"
             },
             effort: {
-                comp: "?쇳빐?먮텇猿섏꽌 ?⑸뱷?섏떎 ???덈뒗 ?섏????쇳빐 諛곗긽怨?移섎즺鍮?吏?먯쓣 ?쎌냽?쒕━硫?",
-                habit: "?ㅼ떆???대윴 ?쇱씠 ?녿룄濡?湲덉＜瑜??ы븿???앺솢 ?듦???泥좎???媛쒖꽑?섍퀬,",
-                counsel: "?꾨Ц?곸씤 ?щ━ ?곷떞怨?援먯쑁???댁닔?섏뿬 ???먯떊???뚯븘蹂닿퀬,",
-                delete: "臾몄젣媛 ??寃뚯떆湲??利됱떆 ??젣?섍퀬 ?뺤젙臾몄쓣 寃뚯떆?섏뿬 紐낆삁 ?뚮났???꾪빐 ?몃젰?섎ŉ,"
+                comp: "피해자분께서 납득하실 수 있는 수준의 피해 배상과 치료비 지원을 약속드리며,",
+                habit: "다시는 이런 일이 없도록 금주를 포함한 생활 습관을 철저히 개선하고,",
+                counsel: "전문적인 심리 상담과 교육을 이수하여 저 자신을 돌아보고,",
+                delete: "문제가 된 게시글은 즉시 삭제하고 정정문을 게시하여 명예 회복을 위해 노력하며,"
             }
         };
 
@@ -531,7 +532,7 @@
         function generateDraft() {
             const btn = document.querySelector('.btn-primary');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ?앹꽦 以?..';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 생성 중...';
             btn.disabled = true;
 
             setTimeout(() => {
@@ -540,53 +541,53 @@
                 const damages = getCheckedValues('damageGroup');
                 const efforts = getCheckedValues('effortGroup');
 
-                let draftTitle = "吏꾩떖?쇰줈 ?ъ즲??留먯????щ┰?덈떎";
+                let draftTitle = "진심으로 사죄의 말씀을 올립니다";
 
                 // 1. Salutation
                 const salutations = {
-                    'stranger': "?좎깮?섍퍡,\n\n?쇰㈃?앸룄 ?녿뒗 ?濡??명빐 ?살쓣 ???녿뒗 ?쇳빐瑜??낆쑝???좎깮?섍퍡",
-                    'acquaintance': "?덈뀞?섏떗?덇퉴, OO?낅땲??\n\n?됱냼 ?뚭퀬 吏?대뜕 ?ъ씠?꾩뿉??遺덇뎄?섍퀬 ???遺덈??ㅻ윭???됰룞?쇰줈 ???ㅻ쭩媛먯쓣 ?쒕젮",
-                    'coworker': "OOO?섍퍡,\n\n?④퍡 ?쇳븯???숇즺濡쒖꽌 紐⑤쾾???섏뼱?????쒓?, ?ㅽ엳?????먮? ?쇱튂寃??섏뼱",
-                    'friend': "移쒓뎄??\n\n?곕━媛 ?볦븘?붾뜕 ?곗젙???앷컖?섎㈃ ?대윴 湲???곕뒗 寃껋“李??덈Т??遺?꾨읇怨?誘몄븞??
+                    'stranger': "선생님께,\n\n일면식도 없는 저로 인해 씻을 수 없는 피해를 입으신 선생님께",
+                    'acquaintance': "안녕하십니까, OO입니다.\n\n평소 알고 지내던 사이임에도 불구하고 저의 불미스러운 행동으로 큰 실망감을 드려",
+                    'coworker': "OOO님께,\n\n함께 일하는 동료로서 모범이 되어야 할 제가, 오히려 큰 피해를 끼치게 되어",
+                    'friend': "친구야.\n\n우리가 쌓아왔던 우정을 생각하면 이런 글을 쓰는 것조차 너무나 부끄럽고 미안해."
                 };
-                let text = salutations[relation] + " 二꾩넚?섎떎??留먯???癒쇱? ?щ┰?덈떎.\n\n";
+                let text = salutations[relation] + " 죄송하다는 말씀 먼저 올립니다.\n\n";
 
                 // 2. Incident & Cause (Smooth Combo)
-                text += "吏???ш굔 ?뱀떆, ";
+                text += "지난 사건 당시, ";
                 if (causes.length > 0) {
                     // Combine mapped strings
                     const causeSentences = causes.map(c => textMap.cause[c] || "").join(" ");
-                    text += causeSentences + " ?뚯씠?????녿뒗 ?섎せ???吏瑜닿퀬 留먯븯?듬땲??";
+                    text += causeSentences + " 돌이킬 수 없는 잘못을 저지르고 말았습니다.";
                 } else {
-                    text += "????깆닕?섏? 紐삵븳 ?쒕룄? ?섎せ???먮떒?쇰줈 ?명빐 ???ㅼ닔瑜??吏덈??듬땲??";
+                    text += "저의 성숙하지 못한 태도와 잘못된 판단으로 인해 끔찍한 실수를 저질렀습니다.";
                 }
-                text += " 洹??대뼡 蹂紐낆쑝濡쒕룄 ????됰룞???뺣떦?붾맆 ???놁쓬??堉덉?由ш쾶 ?먮겮怨?源딆씠 ?꾪쉶?섍퀬 ?덉뒿?덈떎.\n\n";
+                text += " 그 어떤 변명으로도 저의 행동이 정당화될 수 없음을 뼈저리게 느끼고 깊이 후회하고 있습니다.\n\n";
 
                 // 3. Damage Acknowledgment
                 if (damages.length > 0) {
-                    text += "臾댁뾿蹂대떎 ?濡??명빐 ?쇳빐?먮떂猿섏꽌 寃れ쑝?⑥쓣 ";
-                    const damageList = damages.map(d => textMap.damage[d] || "").join(" ?먰븳 ");
-                    text += damageList + " ?앷컖?섎㈃, 二꾩콉媛먯뿉 怨좉컻瑜????섍? ?놁뒿?덈떎. ";
-                    text += "媛?댁옄???쒓? 洹?怨좏넻??源딆씠瑜?媛먰엳 ???ㅼ븘由??섎뒗 ?녾쿋吏留? 留??쒓컙 媛??源딆씠 ?듦컧?섍퀬 ?덉뒿?덈떎.";
+                    text += "무엇보다 저로 인해 피해자님께서 겪으셨을 ";
+                    const damageList = damages.map(d => textMap.damage[d] || "").join(" 또한 ");
+                    text += damageList + " 생각하면, 죄책감에 고개를 들 수가 없습니다. ";
+                    text += "가해자인 제가 그 고통의 깊이를 감히 다 헤아릴 수는 없겠지만, 매 순간 가슴 깊이 통감하고 있습니다.";
                 } else {
-                    text += "????됰룞?쇰줈 ?명빐 ?낆쑝???좊Т?뺤쓽 ?쇳빐? 留덉쓬???⑥븯???곸쿂?????源딆씠 ?ъ즲?쒕┰?덈떎.";
+                    text += "저의 행동으로 인해 입으신 유무형의 피해와 마음의 남았을 상처에 대해 깊이 사죄드립니다.";
                 }
                 text += "\n\n";
 
                 // 4. Recovery & Promise
-                text += "?대? 踰뚯뼱吏??쇱쓣 ?섎룎由??섎뒗 ?녾쿋吏留? ?욎쑝濡??쒓? ?????덈뒗 紐⑤뱺 梨낆엫???ㅽ븯怨좎옄 ?⑸땲??\n";
+                text += "이미 벌어진 일을 되돌릴 수는 없겠지만, 앞으로 제가 할 수 있는 모든 책임을 다하고자 합니다.\n";
                 if (efforts.length > 0) {
                     const effortSentences = efforts.map(e => textMap.effort[e] || "").join(" ");
-                    text += "?곗꽑 " + effortSentences + " ?쇳빐?먮떂???뚮났??理쒖슦?좎씠 ?????덈룄濡??쒓? ?????덈뒗 紐⑤뱺 ?몃젰???ㅽ븯寃좎뒿?덈떎.\n";
+                    text += "우선 " + effortSentences + " 피해자님의 회복을 최우선이 될 수 있도록 제가 할 수 있는 모든 노력을 다하겠습니다.\n";
                 } else {
-                    text += "踰뺤쟻??梨낆엫? 臾쇰줎, ?꾩쓽?곸씤 梨낆엫源뚯? ?앷퉴吏 ?ㅽ븯寃좎뒿?덈떎.\n";
+                    text += "법적인 책임은 물론, 도의적인 책임까지 끝까지 다하겠습니다.\n";
                 }
 
                 // 5. Closing
                 if (selectedTone === 'emotional') {
-                    text += "\n?쇳빐?먮텇猿섏꽌 寃れ쑝?⑥쓣 怨좏넻怨??먮젮???留ㅼ씪 ?앷컖?섎ŉ 諛섏꽦?섍퀬 ?덉뒿?덈떎. 遺????吏꾩떖 ?대┛ ?ш낵媛 議곌툑?대굹留??욧린瑜?媛꾩젅??湲곕룄?⑸땲??\n\n?뺣쭚 二꾩넚?⑸땲??";
+                    text += "\n피해자분께서 겪으셨을 고통과 두려움에 매일 생각하며 반성하고 있습니다. 부디 저의 진심 어린 사과가 조금이나마 닿기를 간절히 기도합니다.\n\n정말 죄송합니다.";
                 } else {
-                    text += "\n諛쒖깮??紐⑤뱺 ?쇳빐??????앷퉴吏 梨낆엫??吏?寃껋씠硫? ?ㅼ떆??遺덈??ㅻ윭???쇱씠 諛쒖깮?섏? ?딅룄濡?媛곷퀎??二쇱쓽?섎ŉ ?닿쿋?듬땲??\n\n二꾩넚?⑸땲??";
+                    text += "\n발생한 모든 피해에 대해 끝까지 책임을 질 것이며, 다시는 불미스러운 일이 발생하지 않도록 각별히 주의하며 살겠습니다.\n\n죄송합니다.";
                 }
 
                 document.getElementById('docTitle').value = draftTitle;
@@ -599,15 +600,33 @@
         }
 
         function applyRef(id) {
+            // Deprecated function name in some places, unifying to applyExample
+            applyExample(id);
+        }
+
+        function applyExample(id) {
+            let text = exampleTexts[id];
+            if (!text) return;
+
+            // Strip out the title header [Category - Title] if it exists
+            // Regex matches [Anything] at the start of the string, plus following newlines
+            text = text.replace(/^\[.*?\]\s*/, '');
+
             const textarea = document.getElementById('mainEditor');
-            let textToInsert = "";
 
-            if (id === 'ref1') textToInsert = "????쒖닚媛꾩쓽 ?섎せ???먮떒?쇰줈 ?명빐 ?살쓣 ???녿뒗 ?곸쿂瑜??쒕┛ ?? 源딆씠 諛섏꽦?섍퀬 ?덉뒿?덈떎. ";
-            if (id === 'ref2') textToInsert = "移섎즺鍮??꾩븸怨??꾩옄猷뚮? ?ы븿?섏뿬 ?쇳빐?먮텇猿섏꽌 ?⑸뱷?섏떎 ???덈뒗 ?섏??쇰줈 ?쇳빐瑜?蹂?쒗븯寃좎뒿?덈떎. ";
+            // Overwrite existing text
+            textarea.value = text;
+            textarea.scrollTop = 0; // Scroll to top
 
-            textarea.setRangeText(textToInsert, textarea.selectionStart, textarea.selectionEnd, 'end');
-            textarea.focus();
             updateWordCount();
+
+            // Visual Feedback
+            document.querySelectorAll('.ref-card').forEach(el => el.style.border = '1px solid rgba(255,255,255,0.1)');
+            document.querySelector(`[onclick="applyExample('${id}')"]`)?.closest('.ref-card')?.setAttribute('style', 'border: 1px solid var(--primary) !important');
+            const btn = document.querySelector(".btn-primary[onclick='applyAndReturn()']");
+            // Highlight the confirm button
+            btn.classList.add("btn-highlight-pulse"); // CSS animation class could be added
+            alert("선택하신 예시문이 에디터에 적용되었습니다.\n내용을 수정하신 후, 우측 하단 [초안 완성: 작성 페이지에 적용하기]를 눌러주세요.");
         }
 
         function copyToClipboard() {
@@ -615,11 +634,11 @@
             copyText.select();
             copyText.setSelectionRange(0, 99999);
             document.execCommand("copy");
-            alert("?대┰蹂대뱶??蹂듭궗?섏뿀?듬땲??");
+            alert("클립보드에 복사되었습니다.");
         }
 
         function confirmReturn() {
-            if (confirm("?묒꽦 以묒씤 ?댁슜????λ릺吏 ?딆뒿?덈떎.\n?뺣쭚 ?ㅽ뒠?붿삤瑜??섍??쒓쿋?듬땲源?")) {
+            if (confirm("작성 중인 내용은 저장되지 않습니다.\n정말 스튜디오를 나가시겠습니까?")) {
                 location.href = 'apology_write.html';
             }
         }
@@ -628,15 +647,18 @@
         function applyAndReturn() {
             const text = document.getElementById("mainEditor").value;
             if (text.length < 10) {
-                alert("?댁슜???덈Т 吏㏃뒿?덈떎. 理쒖냼 10???댁긽 ?묒꽦?댁＜?몄슂.");
+                alert("내용이 너무 짧습니다. 최소 10자 이상 작성해주세요.");
                 return;
             }
 
-            if (confirm("?꾩꽦??珥덉븞???ш낵臾??묒꽦 ?섏씠吏???곸슜?섏떆寃좎뒿?덇퉴?\n(湲곗〈 ?묒꽦 ?댁슜? ?移섎맗?덈떎)")) {
+            if (confirm("완성된 초안을 사과문 작성 페이지에 적용하시겠습니까?\n(기존 작성 내용은 대치됩니다)")) {
                 // Save to localStorage 'Packet'
                 localStorage.setItem('saved_apology_text', text);
+                localStorage.setItem('show_draft_applied_msg', 'true');
 
                 // Redirect to standalone write page
+                location.href = 'case_detail.html'; // Changed flow: clicking apply goes back to case detail? No, should go to write page.
+                // Wait, apology_write.html is the write page. 
                 location.href = 'apology_write.html';
             }
         }
@@ -672,98 +694,68 @@
 
         // --- Reference Data & Logic ---
         const exampleTexts = {
-            'assault1': `[??뻾 - ?좎옄由??곕컻]
-議닿꼍?섎뒗 ?쇳빐?먮떂猿?
-?덈뀞?섏떗?덇퉴. 吏??X??X?? OO?먯꽌??遺덈??ㅻ윭???쇰줈 ?쇳빐?먮떂猿??살쓣 ???녿뒗 ?곸쿂瑜??낇엺 ?띻만?숈엯?덈떎.
+            'assault1': `[폭행 - 술자리 우발]
+존경하는 피해자님께
+안녕하십니까. 지난 X월 X일 OO에서 저의 불미스러운 일로 피해자님께 씻을 수 없는 상처를 입힌 홍길동입니다.
 
-癒쇱? ?대뼡 蹂紐낅낫?? ???誘몄꽦?숉븯怨???젰?곸씤 ?됰룞?쇰줈 ?명빐 ?≪껜?? ?뺤떊??怨좏넻??寃れ쑝?⑥쓣 ?쇳빐?먮떂猿?癒몃━ ?숈뿬 源딆씠 ?ъ즲?쒕┰?덈떎. ?좎뿉 痍⑦빐 ?곕컻?곸쑝濡??吏瑜??됰룞?댁뿀?ㅺ퀬???섎굹, ?대뒗 寃곗퐫 ?⑹꽌諛쏆쓣 ???녿뒗 ????섎せ?대ŉ, ?뱀떆 ???紐⑥뒿???덈Т??遺?꾨읇怨??꾪쉶?ㅻ읇?듬땲??
+먼저 어떤 변명보다, 저의 미성숙하고 폭력적인 행동으로 인해 육체적, 정신적 고통을 겪으셨을 피해자님께 머리 숙여 깊이 사죄드립니다. 술에 취해 우발적으로 이성을 잃고 행동하였다고는 하나, 이는 결코 용서받을 수 없는 저의 잘못이며, 당시 저의 모습이 너무나 부끄럽고 후회스럽습니다.
 
-?ш굔 吏곹썑遺??吏湲덇퉴吏, ????섎せ???됰룞????몄뿉寃??쇰쭏????怨듯룷? ?쇳빐瑜?以????덈뒗吏 堉덉?由ш쾶 源⑤떕怨??덉뒿?덈떎. ?쇳빐?먮떂猿섏꽌 ?먮겮?⑥쓣 紐⑤㈇媛먭낵 異⑷꺽???앷컖?섎㈃, ?낆씠 ??媛쒕씪????留먯씠 ?놁뒿?덈떎.
+사건 직후부터 지금까지, 저의 잘못된 행동이 타인에게 얼마나 큰 공포와 피해를 줄 수 있는지 뼈저리게 깨닫고 있습니다. 피해자님께서 느끼셨을 모멸감과 충격을 생각하면, 입이 열 개라도 할 말이 없습니다.
 
-?욎쑝濡??깆떎??寃쎌같 議곗궗???꾪븯?????二꾧컪???ш쾶 諛쏄쿋?듬땲?? ?먰븳, ?쇳빐?먮떂??移섎즺? ?뚮났???꾪빐 ?쒓? ?????덈뒗 紐⑤뱺 梨낆엫???ㅽ븯寃좎뒿?덈떎. ?ㅼ떆???좊줈 ?명빐 ?대윭???ㅼ닔瑜?諛섎났?섏? ?딅룄濡? 湲덉＜瑜??ы븿??紐⑤뱺 ?몃젰???ㅽ븷 寃껋쓣 ?쎌냽?쒕┰?덈떎.
+앞으로 성실히 경찰 조사에 임하여 저의 죄값을 달게 받겠습니다. 또한, 피해자님의 치료와 회복을 위해 제가 할 수 있는 모든 책임을 다하겠습니다. 다시는 술로 인해 이러한 실수를 반복하지 않도록, 금주를 포함한 모든 노력을 다할 것을 약속드립니다.
 
-遺???덇렇?ъ슫 留덉쓬?쇰줈 ????ш낵瑜?諛쏆븘二쇱떆湲?媛꾩껌?쒕━硫? ?ㅼ떆 ?쒕쾲 吏꾩떖?쇰줈 二꾩넚?⑸땲??`,
+부디 너그러운 마음으로 저의 사과를 받아주시기 간청드리며, 다시 한번 진심으로 죄송합니다.`,
 
-            'assault2': `[?곹빐 - ?꾩튂 諛쒖깮]
-?쇳빐?먮떂猿??щ┰?덈떎.
-OOO?낅땲?? ????쒖닚媛꾩쓽 ?섎せ???먮떒?쇰줈 ?명빐 ?꾩튂 X二쇱쓽 ?곹빐瑜??낆쑝?쒓퀬, 蹂묒썝 移섎즺瑜?諛쏆쑝硫?怨좏넻諛쏄퀬 怨꾩떊 ?쇳빐?먮떂???앷컖?섎㈃ 二꾩콉媛먯뿉 ?좎쓣 ?대? ?섍? ?놁뒿?덈떎.
+            'assault2': `[상해 - 전치 발생]
+피해자님께 사죄드립니다.
+OOO입니다. 저의 한순간의 잘못된 판단으로 인해 전치 X주의 상해를 입으시고, 병원 치료를 받으며 고통받고 계신 피해자님을 생각하면 죄책감에 잠을 이루 수가 없습니다.
 
-嫄닿컯?섏뀛?????좎껜???곸쿂瑜??낇엳怨? ?쇱긽?앺솢????吏?μ쓣 ?쒕┛ ?먯뿉 ???源딆씠 諛섏꽦?섍퀬 ?덉뒿?덈떎. 臾댁뾿蹂대떎 ?????젰?곸씤 ?됰룞???쇳빐?먮떂猿??쇰쭏?????몃씪?곕쭏媛 ?섏뿀?꾩? 吏먯옉議곗감 ?섍린 ?먮졄?듬땲??
+건강하셨던 신체에 상처를 입히고, 일상생활에 큰 지장을 드린 점에 대해 깊이 반성하고 있습니다. 무엇보다 저의 폭력적인 행동이 피해자님께 얼마나 큰 트라우마가 되었을지 짐작조차 하기 두렵습니다.
 
-?쒓? ?吏瑜??쇱뿉 ??댁꽌??踰뺤쟻??泥섎쾶???ш쾶 諛쏄쿋?듬땲?? 洹몄? 蹂꾨룄濡? ?쇳빐?먮떂猿섏꽌 遺?댄븯??移섎즺鍮??꾩븸怨??쇱떎?섏엯, 洹몃━怨??뺤떊???꾩옄猷뚮? ?ы븿?섏뿬 ?쇳빐?먮떂猿섏꽌 ?⑸뱷?섏떎 ???덈뒗 ?섏??쇰줈 諛곗긽??寃껋쓣 ?쎌냽?쒕┰?덈떎.
+제가 저지른 일에 대해서는 법적인 처벌을 달게 받겠습니다. 그와 별도로, 피해자님께서 부담하신 치료비 전액과 일실수입, 그리고 정신적 위자료를 포함하여 피해자님께서 납득하실 수 있는 수준으로 배상할 것을 약속드립니다.
 
-?대쾲 ?쇱쓣 怨꾧린濡??щ엺???щ엺????섎뒗 ?쒕룄??????ㅼ떆 ?쒕쾲 源딆씠 ?깆같?섍퀬, ?됱깮 ?띿즲?섎뒗 留덉쓬?쇰줈 ?닿쿋?듬땲?? ?뺣쭚 二꾩넚?⑸땲??`,
+이번 일을 계기로 사람과 사람을 대하는 태도에 대해 다시 한번 깊이 성찰하고, 평생 속죄하는 마음으로 살겠습니다. 정말 죄송합니다.`,
 
-            'defam1': `[紐낆삁?쇱넀 - ?낆꽦 ?볤?]
-?쇳빐?먮떂猿?吏꾩떖?쇰줈 ?ъ즲?쒕┰?덈떎.
-????명꽣??而ㅻ??덊떚(?먮뒗 SNS)???쇳빐?먮떂??????덉쐞 ?ъ떎怨?鍮꾨갑???볤???寃뚯떆?덈뜕 ?뱀궗?먯엯?덈떎.
+            'defam1': `[명예훼손 - 악성 댓글]
+피해자님께 진심으로 사죄드립니다.
+저는 인터넷 커뮤니티(또는 SNS)에 피해자님에 대한 허위 사실과 비방의 댓글을 게시했던 당사자입니다.
 
-?듬챸???ㅼ뿉 ?⑥뼱, 援곗쨷?щ━???⑹벝???쇳빐?먮떂猿??살쓣 ???녿뒗 ?곸쿂瑜??쒕졇?듬땲?? "?⑤뱾?????섎땲源?, "媛蹂띻쾶 ??湲?대땲源??쇰뒗 ?덉씪???앷컖???뱀궗?먯뿉寃뚮뒗 鍮꾩닔媛 ?섏뼱 苑귦옄 ???덈떎??寃껋쓣 ?ㅻ뒭寃뚯빞 堉덉?由ш쾶 源⑤떖?섏뒿?덈떎.
+익명의 뒤에 숨어, 군중심리에 휩쓸려 피해자님께 씻을 수 없는 상처를 드렸습니다. "남들도 하니까", "가볍게 쓴 글이니까"라는 안일한 생각이 당사자에게는 비수가 되어 꽂힐 수 있다는 것을 뒤늦게야 뼈저리게 깨달았습니다.
 
-?묒꽦??寃뚯떆湲? 利됱떆 ??젣?섏??쇰ŉ, 而ㅻ??덊떚 愿由ъ옄?먭쾶 ?붿껌?섏뿬 愿??湲곕줉???⑥? ?딅룄濡?議곗튂?섏??듬땲?? ?섏?留??대? ?쇱쭊 留먮뱾濡??명빐 ?쇳빐?먮떂猿섏꽌 寃れ쑝???섏튂?ш낵 紐낆삁 ?ㅼ텛瑜??섎룎由????녿떎???ъ떎??留덉쓬??臾닿쾪?듬땲??
+작성한 게시글은 즉시 삭제하였으며, 커뮤니티 관리자에게 요청하여 관련 기록이 남지 않도록 조치하였습니다. 하지만 이미 퍼진 말들로 인해 피해자님께서 겪으신 수치심과 명예 실추를 되돌릴 수 없다는 사실에 마음이 무겁습니다.
 
-?욎쑝濡쒕뒗 ?⑤씪?몄긽?먯꽌 ??몄쓣 議댁쨷?섎ŉ, ?ㅼ떆???대윭??鍮꾧쾪???됰룞???섏? ?딄쿋?듬땲?? ???寃쎌넄???먭??쎌씠 珥덈옒??寃곌낵?????源딆씠 諛섏꽦?섎ŉ, ?쇳빐?먮떂猿??ㅼ떆 ?쒕쾲 癒몃━ ?숈뿬 ?ш낵?쒕┰?덈떎.`,
+앞으로는 온라인상에서 타인을 존중하며, 다시는 이러한 비열한 행동을 하지 않겠습니다. 저의 경솔한 손가락이 초래한 결과에 대해 깊이 반성하며, 피해자님께 다시 한번 머리 숙여 사과드립니다.`,
 
-            'defam2': `[紐⑥슃 - ?⑥껜 梨꾪똿諛?
-OOO?섍퍡,
-吏??O??O?? ?⑥껜 梨꾪똿諛⑹뿉???쒓? OOO?섏쓣 吏移?븯硫?紐⑥슃?곸씤 ?몄궗瑜???寃껋뿉 ???源딆씠 ?ш낵?쒕┰?덈떎.
+            'defam2': `[모욕 - 단체 채팅방]
+OOO님께,
+지난 O월 O일, 단체 채팅방에서 제가 OOO님을 지칭하며 모욕적인 언사를 했던 것에 대해 깊이 사과드립니다.
 
-留롮? ?щ엺?ㅼ씠 ?덈뒗 怨듦컻?곸씤 怨듦컙?먯꽌, OOO?섏쓽 ?멸꺽??紐⑤룆?섍퀬 紐낆삁瑜??쇱넀?섎뒗 諛쒖뼵????寃껋? 紐낅갚??????섎せ?낅땲?? ?뱀떆 遺꾩쐞湲곗뿉 ?⑹벝???щ?濡??섏쭊 留먯씠 OOO?섍퍡 ?쇰쭏?????섏튂?ъ쓣 ?덇꺼?쒕졇?꾩? 源딆씠 ?앷컖?섏? 紐삵뻽?듬땲??
+많은 사람들이 있는 공개적인 공간에서, OOO님의 인격을 모독하고 명예를 훼손하는 발언을 한 것은 명백한 저의 잘못입니다. 당시 분위기에 휩쓸려 내뱉은 말이 OOO님께 얼마나 큰 수치심을 안겨드렸을지 깊이 생각하지 못했습니다.
 
-?대떦 梨꾪똿諛⑹뿉 ?덈뜕 紐⑤뱺 遺꾨뱾?먭쾶 ??諛쒖뼵???섎せ?섏뿀?뚯쓣 ?뺤젙?섍퀬 怨듦컻?곸쑝濡??ш낵?섏??듬땲?? ?섏?留??닿쾬?쇰줈 OOO?섏쓽 ?곸쿂媛 ?꾨Ъ吏 ?딆쑝由щ씪??寃껋쓣 ???뚭퀬 ?덉뒿?덈떎.
+해당 채팅방에 있던 모든 분들에게 제 발언이 잘못되었음을 인정하고 공개적으로 사과하였습니다. 하지만 이것으로 OOO님의 상처가 아물지 않으리라는 것을 잘 알고 있습니다.
 
-???臾대??④낵 寃쎌넄?⑥쓣 ?⑹꽌??二쇱떗?쒖삤. ?욎쑝濡쒕뒗 留먯쓽 臾닿쾶瑜?臾닿쾪寃??ш린怨? ??몄쓣 諛곕젮?섎뒗 ?щ엺???섎룄濡??몃젰?섍쿋?듬땲?? 二꾩넚?⑸땲??`,
+저의 무례함과 경솔함을 용서해 주십시오. 앞으로는 말의 무게를 무겁게 여기고, 타인을 배려하는 사람이 되도록 노력하겠습니다. 죄송합니다.`,
 
-            'traffic1': `[援먰넻?ш퀬 - ?덉쟾?댁쟾 遺덉씠??
-?쇳빐?먮떂猿?
-?덈뀞?섏떗?덇퉴. 吏??X??X??諛쒖깮??援먰넻?ш퀬??媛??李⑤웾 ?댁쟾??OOO?낅땲??
+            'traffic1': `[교통사고 - 안전운전 불이행]
+피해자님께
+안녕하십니까. 지난 X월 X일 발생한 교통사고의 가해 차량 운전자 OOO입니다.
 
-???遺二쇱쓽? ?덉쟾嫄곕━ 誘명솗蹂??먮뒗 ?좏샇 ?꾨컲)濡??명빐 ?ш퀬瑜??좊컻?섍퀬, ?쇳빐?먮떂???뚯쨷??李⑤웾 ?뚯넀怨??좎껜??怨좏넻??珥덈옒????吏꾩떖?쇰줈 ?ш낵?쒕┰?덈떎. 諛붿걯???쇱긽 ?以묒뿉 ? ?뚮Ц??遺덊븘?뷀븳 ?쒓컙??類뤾린怨? 蹂묒썝 移섎즺? 李⑤웾 ?섎━ ??踰덇굅濡쒖???寃れ쑝?쒓쾶 ?섏뼱 ?덈Т??二꾩넚?⑸땲??
+저의 부주의와 안전거리 미확보(또는 신호 위반)로 인해 사고를 유발하고, 피해자님의 소중한 차량 파손과 신체적 고통을 초래한 점 진심으로 사과드립니다. 바쁘신 일상 와중에 저 때문에 불필요한 시간을 뺏기고, 병원 치료와 차량 수리 등 번거로움을 겪으시게 되어 너무나 죄송합니다.
 
-?ш퀬 ?뱀떆 ?? 留덉쓬???쒕?濡??ш낵議곗감 ?쒕━吏 紐삵븳 寃?媛숈븘 ?대궡 留덉쓬??嫄몃졇?듬땲?? ?쇳빐?먮떂??鍮좊Ⅸ 苡뚯쑀瑜?吏꾩떖?쇰줈 湲곗썝?섎ŉ, 李⑤웾 ?섎━ 湲곌컙 ?숈븞 寃れ쑝??遺덊렪?⑥뿉 ??댁꽌???↔뎄?ㅻ윭??留덉쓬肉먯엯?덈떎.
+사고 당시 제가 마음을 제대로 사과조차 드리지 못한 것 같아 내내 마음이 걸렸습니다. 피해자님의 빠른 쾌유를 진심으로 기원하며, 차량 수리 기간 동안 겪으실 불편함에 대해서도 송구스러운 마음뿐입니다.
 
-蹂댄뿕?щ? ?듯븳 諛곗긽 泥섎━???蹂꾧컻濡? ?멸컙?곸씤 ?꾩쓽瑜??ㅽ빐 ?ш낵?쒕━怨??띠뼱 ?쒖쓣 ?ㅼ뿀?듬땲?? ?욎쑝濡쒕뒗 ?댁쟾?瑜??≪쓣 ?뚮쭏???쇳빐?먮떂???앷컖?섎ŉ, ?ㅼ떆???대윴 ?ш퀬瑜??댁? ?딅룄濡??덉쟾 ?댁쟾??留뚯쟾??湲고븯寃좎뒿?덈떎. 二꾩넚?⑸땲??`,
+보험사를 통한 배상 처리와는 별개로, 인간적인 사의를 전해 사과드리고 싶어 펜을 들었습니다. 앞으로는 운전대를 잡을 때마다 피해자님을 생각하며, 다시는 이런 사고를 내지 않도록 안전 운전에 만전을 기하겠습니다. 죄송합니다.`,
 
-            'fraud1': `[?ш린/梨꾨Т遺덉씠??- 湲덉쟾 臾몄젣]
-梨꾧텒??OOO?섍퍡,
-?쎌냽?쒕┛ ?좎쭨??梨꾨Т瑜?蹂?쒗븯吏 紐삵븯怨? ?곕씫議곗감 ?쒕?濡??우? ?딆븘 OOO?섍퍡 湲덉쟾???먰빐? ?щ젮瑜??쇱퀜?쒕┛ ?? 源딆씠 ?ъ즲?쒕┰?덈떎.
+            'fraud1': `[사기/채무불이행 - 금전 문제]
+채권자 OOO님께,
+약속드린 날짜에 채무를 변제하지 못하고, 연락조차 제대로 받지 않아 OOO님께 금전적 피해와 염려를 끼쳐드린 점 깊이 사죄드립니다.
 
-誘욧퀬 ?덉쓣 鍮뚮젮二쇱떊 OOO?섏쓽 ?좊ː瑜??踰꾨┛ ?됰룞??????낆씠 ??媛쒕씪????留먯씠 ?놁뒿?덈떎. "怨?媛싳쓣 ???덇쿋吏"?쇰뒗 ?덉씪???앷컖?쇰줈 臾대━?섍쾶 ?먭툑???듯넻?섎떎媛 ?곹솴???낇솕?섏뿀怨? ?먮젮??留덉쓬???곕씫???쇳븯??鍮꾧쾪???됰룞源뚯? ?吏덈??듬땲?? ?대뒗 紐낅갚??????섎せ?낅땲??
+믿고 돈을 빌려주신 OOO님의 신뢰를 저버린 행동은 제가 입이 열 개라도 할 말이 없습니다. "곧 갚을 수 있겠지"라는 안일한 생각으로 무리하게 자금을 융통하다가 상황이 악화되었고, 두려운 마음에 연락을 피하는 비겁한 행동까지 저질렀습니다. 이는 명백한 저의 잘못입니다.
 
-?꾩옱 ????곹솴???대졄湲??섏?留? OOO?섏쓽 ?덉? ?쒓? ? ?섎젮 ?쇳빐?쒕씪??諛섎뱶???꾩븸 蹂?쒗븯寃좎뒿?덈떎. 援ъ껜?곸쑝濡쒕뒗 留ㅼ썡 X留뚯썝?? X媛쒖썡??嫄몄퀜 遺꾪븷 ?곹솚?섍퀬???섏삤?? 遺????踰덈쭔 ??湲고쉶瑜?二쇱떆湲곕? 媛꾩껌?쒕┰?덈떎.
+현재 저의 상황이 어렵기는 하지만, OOO님의 돈은 제가 굶어 죽는 한이 있어도 반드시 전액 변제하겠습니다. 구체적으로는 매월 X만원씩 X개월에 걸쳐 분할 상환하고자 하오니, 부디 한번만 더 기회를 주시기를 간청드립니다.
 
-?덈낫??以묒슂???좊ː瑜??껋? ??源딆씠 ?듦컧?섍퀬 ?덉쑝硫? ??뼱吏?붾씪??諛섎뱶???쎌냽???댄뻾?섏뿬 OOO?섍퍡 ?쇳빐媛 媛吏 ?딅룄濡?理쒖꽑???ㅽ븯寃좎뒿?덈떎. ?ㅼ떆 ?쒕쾲 怨좉컻 ?숈뿬 ?ъ즲?쒕┰?덈떎.`
+돈보다 중요한 신뢰를 잃은 점 깊이 통감하고 있으며, 늦어지더라도 반드시 약속을 이행하여 OOO님께 피해가 가지 않도록 최선을 다하겠습니다. 다시 한번 고개 숙여 사죄드립니다.`
         };
-
-        function applyRef(id) {
-            // Deprecated function name in some places, unifying to applyExample
-            applyExample(id);
-        }
-
-        function applyExample(id) {
-            let text = exampleTexts[id];
-            if (!text) return;
-
-            // Strip out the title header [Category - Title] if it exists
-            // Regex matches [Anything] at the start of the string, plus following newlines
-            text = text.replace(/^\[.*?\]\s*/, '');
-
-            const textarea = document.getElementById('mainEditor');
-
-            // Overwrite existing text
-            textarea.value = text;
-            textarea.scrollTop = 0; // Scroll to top
-
-            updateWordCount();
-
-            // Visual Feedback
-            document.querySelectorAll('.ref-card').forEach(el => el.style.border = '1px solid rgba(255,255,255,0.1)');
-            document.querySelector(`[onclick="applyExample('${id}')"]`)?.closest('.ref-card')?.setAttribute('style', 'border: 1px solid var(--primary) !important');
-            const btn = document.querySelector(".btn-primary[onclick='applyAndReturn()']");
-            // Highlight the confirm button
-            btn.classList.add("btn-highlight-pulse"); // CSS animation class could be added
-            alert("?좏깮?섏떊 ?덉떆臾몄씠 ?먮뵒?곗뿉 ?곸슜?섏뿀?듬땲??\n?댁슜???섏젙???? ?곗륫 ?섎떒??[珥덉븞 ?꾩꽦: ?묒꽦 ?섏씠吏???곸슜?섍린]瑜??뚮윭二쇱꽭??");
-        }
     </script>
 </body>
 

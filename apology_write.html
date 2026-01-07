@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>?ш낵臾??묒꽦 - SafeHappE</title>
+    <title>사과문 작성 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <!-- Fonts -->
     <link
@@ -169,8 +169,6 @@
             line-height: 1.8;
             transition: all 0.3s ease;
             box-sizing: border-box;
-
-            /* Base Page Gap (Fallback) */
             background-image: linear-gradient(to bottom, transparent 1103px, #2b2b35 1103px, #2b2b35 1123px);
             background-size: 100% 1123px;
             background-repeat: repeat-y;
@@ -222,7 +220,6 @@
             border: 2px solid #555 !important;
             padding: 70px 50px !important;
             position: relative;
-            /* Classic frame usually doesn't have internal gaps, but we can keep base if transparent */
         }
 
         .bg-pattern-classic::after {
@@ -281,17 +278,14 @@
             font-family: inherit;
             font-size: inherit;
             line-height: inherit;
-            /* Important for line pattern */
             color: inherit;
             padding: 0;
             overflow: hidden;
             box-sizing: border-box;
-            /* Ensure padding doesn't break width */
         }
 
         .paper-canvas {
             box-sizing: border-box;
-            /* Crucial for correct sizing with padding */
         }
 
         #pageNumberContainer {
@@ -316,7 +310,6 @@
             font-size: 0.85rem;
             font-family: 'Inter', sans-serif;
             border-bottom: 20px solid transparent;
-            /* Spacer for bottom */
         }
     </style>
 </head>
@@ -327,9 +320,19 @@
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <button class="btn btn-glass" onclick="location.href='case_detail.html'">
-                <i class="fas fa-arrow-left"></i> ?섍?湲?
+                <i class="fas fa-arrow-left"></i> 뒤로가기
             </button>
-            <h2 style="margin: 0;">?ш낵臾??묒꽦 ?ㅽ뒠?붿삤</h2>
+            <div style="text-align: center;">
+                <h2 style="margin: 0; margin-bottom: 4px;">사과문 작성 스튜디오</h2>
+                <div
+                    style="font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #aaa;">Safe<span
+                            class="highlight"
+                            style="background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HappE.</span></span>
+                    <span style="width: 1px; height: 12px; background: rgba(255,255,255,0.2);"></span>
+                    <span class="logo-sub-kr">세이프 <span class="highlight">합의</span></span>
+                </div>
+            </div>
             <div style="width: 100px;"></div>
         </div>
 
@@ -338,30 +341,30 @@
 
             <!-- Paper Color -->
             <div class="tool-group">
-                <span class="tool-label">?됱긽</span>
-                <div class="color-btn bg-color-white selected" onclick="updateColor('white', this)" title="?쒕갚??></div>
-                <div class="color-btn bg-color-kraft" onclick="updateColor('kraft', this)" title="?щ씪?꾪듃"></div>
-                <div class="color-btn bg-color-sky" onclick="updateColor('sky', this)" title="?ㅼ뭅??></div>
-                <div class="color-btn bg-color-lavender" onclick="updateColor('lavender', this)" title="?쇰깽??></div>
+                <span class="tool-label">색상</span>
+                <div class="color-btn bg-color-white selected" onclick="updateColor('white', this)" title="흰색"></div>
+                <div class="color-btn bg-color-kraft" onclick="updateColor('kraft', this)" title="크라프트"></div>
+                <div class="color-btn bg-color-sky" onclick="updateColor('sky', this)" title="스카이"></div>
+                <div class="color-btn bg-color-lavender" onclick="updateColor('lavender', this)" title="라벤더"></div>
             </div>
 
             <div class="tool-divider"></div>
 
             <!-- Paper Pattern -->
             <div class="tool-group">
-                <button class="pattern-btn selected" onclick="updatePattern('none', this)" title="臾댁?">
+                <button class="pattern-btn selected" onclick="updatePattern('none', this)" title="무지">
                     <i class="fas fa-square"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('line', this)" title="以꾨끂??>
+                <button class="pattern-btn" onclick="updatePattern('line', this)" title="줄노트">
                     <i class="fas fa-bars"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('grid', this)" title="寃⑹옄">
+                <button class="pattern-btn" onclick="updatePattern('grid', this)" title="격자">
                     <i class="fas fa-border-all"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('classic', this)" title="?대옒???뚮몢由?>
-                    <i class="far fa-square"></i> <!-- Double square icon approximation -->
+                <button class="pattern-btn" onclick="updatePattern('classic', this)" title="클래식 테두리">
+                    <i class="far fa-square"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('plant', this)" title="?앸Ъ ?뚮몢由?>
+                <button class="pattern-btn" onclick="updatePattern('plant', this)" title="식물 테두리">
                     <i class="fas fa-leaf"></i>
                 </button>
             </div>
@@ -371,9 +374,9 @@
             <!-- Font Selection -->
             <div class="tool-group">
                 <select class="toolbar-select" id="fontSelect" onchange="updateFont(this.value)">
-                    <option value="basic">湲곕낯 怨좊뵓泥?/option>
-                    <option value="serif">吏꾩???紐낆“泥?/option>
-                    <option value="hand">?뺤꽦 ?먭??⑥껜</option>
+                    <option value="basic">기본 고딕체</option>
+                    <option value="serif">진지한 명조체</option>
+                    <option value="hand">정성 손글씨체</option>
                 </select>
 
                 <select class="toolbar-select" id="sizeSelect" onchange="updateSize(this.value)" style="width: 80px;">
@@ -390,13 +393,13 @@
             <!-- Right Side Tools -->
             <div class="tool-group" style="margin-left: auto;">
                 <input type="file" id="hiddenFile" style="display: none;"
-                    onchange="alert('?뚯씪??泥⑤??섏뿀?듬땲?? ' + this.files[0].name)">
+                    onchange="alert('파일이 첨부되었습니다: ' + this.files[0].name)">
                 <button class="tool-btn" onclick="document.getElementById('hiddenFile').click()">
-                    <i class="fas fa-upload"></i> ?뚯씪 ?낅줈??
+                    <i class="fas fa-upload"></i> 파일 업로드
                 </button>
                 <button class="tool-btn" style="border-color: var(--secondary); color: var(--secondary);"
                     onclick="location.href='apology_guide.html'">
-                    <i class="fas fa-magic"></i> AI ?묒꽦 ?꾩슦誘?
+                    <i class="fas fa-magic"></i> AI 작성 도우미
                 </button>
             </div>
 
@@ -409,12 +412,12 @@
                 <!-- Page Numbers Overlay -->
                 <div id="pageNumberContainer"></div>
 
-                <textarea id="mainCanvas" placeholder="?ш린???댁슜???묒꽦?섏꽭??..&#10;&#10;吏꾩떖 ?대┛ ?ш낵??留덉쓬???吏곸엯?덈떎."
+                <textarea id="mainCanvas" placeholder="여기에 내용을 작성하세요..&#10;&#10;진심 어린 사과가 마음을 움직입니다."
                     spellcheck="false"></textarea>
 
                 <div
                     style="position: absolute; bottom: 80px; left: 0; right: 0; text-align: center; color: rgba(0,0,0,0.4); font-size: 1.1em; pointer-events: none; user-select: none;">
-                    ??留덉?留됱뿉 ?좎쭨? ?대쫫??瑗??곸뼱二쇱꽭??
+                    * 마지막에 날짜와 이름을 꼭 적어주세요
                 </div>
             </div>
         </div>
@@ -423,7 +426,7 @@
         <div class="action-float">
             <button class="btn btn-primary" style="padding: 15px 30px; box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);"
                 onclick="sendApology()">
-                <i class="fas fa-paper-plane"></i> ?꾩넚?섍린
+                <i class="fas fa-paper-plane"></i> 전송하기
             </button>
         </div>
     </div>
@@ -434,8 +437,9 @@
 
     <script>
         if (!localStorage.getItem('current_case_id')) {
-            alert("?섎せ???묎렐?낅땲??");
-            location.href = 'dashboard.html';
+            // alert("잘못된 접근입니다.");
+            // location.href = 'dashboard.html';
+            // Commented out specifically for dev/test without full flow
         }
 
         const canvas = document.getElementById('mainCanvas');
@@ -449,15 +453,6 @@
                 canvas.value = savedText;
             }
             adjustHeight();
-
-            // Set Date
-            const today = new Date();
-            const dateStr = `${today.getFullYear()}??${today.getMonth() + 1}??${today.getDate()}??;
-            document.getElementById('autoDate').textContent = dateStr;
-
-            // Set Name
-            const userName = localStorage.getItem('user_name') || '?묒꽦??;
-            document.getElementById('autoName').textContent = `${userName} ?щ┝`;
         });
 
         canvas.addEventListener('input', adjustHeight);
@@ -495,8 +490,6 @@
                     const numDiv = document.createElement('div');
                     numDiv.className = 'page-number';
                     numDiv.innerText = `- ${i} -`;
-                    // Position at bottom of each page
-                    // Top = (PageHeight * i) - BottomMargin(e.g. 50px)
                     numDiv.style.top = (i * PAGE_HEIGHT - 50) + 'px';
                     container.appendChild(numDiv);
                 }
@@ -512,47 +505,34 @@
 
         function updateSize(val) {
             paper.style.fontSize = val + 'px';
-            // Adjust line height if line pattern is active? 
-            // For simplicity, line pattern is fixed size (30px), so ideally font size should be < 30px.
-            // A truly dynamic line height would require updating background size too.
-            // Using a safe constant line-height or inherit is better.
         }
 
         function updateColor(val, el) {
-            // Remove all color classes
             paper.classList.remove('bg-color-white', 'bg-color-kraft', 'bg-color-sky', 'bg-color-lavender');
             paper.classList.add('bg-color-' + val);
 
-            // Dark Mode Text Logic REMOVED - all new colors are light.
             const textArea = document.getElementById('mainCanvas');
-            const footer = document.getElementById('paperFooter');
-
             textArea.style.color = '#333';
-            footer.style.color = 'inherit'; // Follows text color exactly
 
-
-            // Visual State
             document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
             el.classList.add('selected');
         }
 
         function updatePattern(val, el) {
-            // Remove all pattern classes
             paper.classList.remove('bg-pattern-none', 'bg-pattern-line', 'bg-pattern-grid', 'bg-pattern-classic', 'bg-pattern-plant');
             paper.classList.add('bg-pattern-' + val);
 
-            // Visual State
             document.querySelectorAll('.pattern-btn').forEach(btn => btn.classList.remove('selected'));
             el.classList.add('selected');
         }
 
         function sendApology() {
             if (canvas.value.length < 10) {
-                alert("?댁슜??10???댁긽 ?묒꽦?댁＜?몄슂.");
+                alert("내용을 10자 이상 작성해주세요.");
                 return;
             }
-            if (confirm("?묒꽦?섏떊 ?ш낵臾몄쓣 ?꾩넚?섏떆寃좎뒿?덇퉴?")) {
-                alert("???ш낵臾몄씠 ?깃났?곸쑝濡??꾩넚?섏뿀?듬땲??");
+            if (confirm("작성하신 사과문을 전송하시겠습니까?")) {
+                alert("📝 사과문이 성공적으로 전송되었습니다.");
                 localStorage.removeItem('saved_apology_text');
                 location.href = 'case_detail.html';
             }

@@ -323,7 +323,7 @@ app.get('/api/case/status', async (req, res) => {
             caseNumber: caseData.caseNumber,
             myRole: isOffender ? 'offender' : 'victim',
             connectionStatus: caseData.connectionStatus || 'none',
-            counterpartyName: counterpartyName || (isOffender ? '?쇳빐??(媛???湲?以?' : '?쇱쓽??(媛???湲?以?'),
+            counterpartyName: counterpartyName || (isOffender ? '피해자 (가입 대기 중)' : '피의자 (가입 대기 중)'),
             status: caseData.status
         };
     }));
@@ -333,6 +333,51 @@ app.get('/api/case/status', async (req, res) => {
         cases: caseList
     });
 });
+
+// --- 7. Lawyer Consultation System (New) ---
+
+// Model
+const Consultation = sequelize.define('Consultation', {
+    name: { type: DataTypes.STRING, allowNull: false }, // 신청인 이름 (추가됨)
+    summary: { type: DataTypes.TEXT, allowNull: false }, // 사건 요지
+    details: { type: DataTypes.TEXT, allowNull: false }, // 상담 상세 내용
+    phoneNumber: { type: DataTypes.STRING, allowNull: false }, // 연락처
+    status: { type: DataTypes.STRING, defaultValue: 'pending' }, // pending, completed
+    submittedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+});
+
+// Endpoint 1: Submit Consultation
+app.post('/api/consultation', async (req, res) => {
+    const { name, summary, details, phoneNumber } = req.body;
+    try {
+        await Consultation.create({ name, summary, details, phoneNumber });
+        console.log(`[Consultation] New request from ${name} (${phoneNumber})`);
+        // Future: Send Email Notification here
+        res.json({ success: true, message: '상담 신청이 완료되었습니다.' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: '서버 오류가 발생했습니다.' });
+    }
+});
+
+// Endpoint 2: Admin - Get All Consultations
+app.get('/api/admin/consultations', async (req, res) => {
+    // In a real app, check for Admin Session/Token here!
+    // For now, we will use a simple query param password for safety demo
+    const { adminKey } = req.query;
+    if (adminKey !== 'admin1234') { // Simple hardcoded key for mvp
+        return res.status(403).json({ success: false, error: '관리자 권한이 없습니다.' });
+    }
+
+    try {
+        const list = await Consultation.findAll({ order: [['submittedAt', 'DESC']] });
+        res.json({ success: true, list });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 
 // Initialize & Start
 sequelize.sync({ alter: true }).then(() => {
