@@ -1,7 +1,9 @@
 ﻿// Dashboard - Main Navigation
 document.addEventListener('DOMContentLoaded', () => {
     const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const DEMO_MODE = !IS_LOCAL;
+    // 배포 시 정식 모드 (백엔드 연결)
+    const DEMO_MODE = false;
+    const API_BASE = IS_LOCAL ? 'http://localhost:3000/api' : '/api';
 
     // Initialize
     loadUserInfo();
@@ -160,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ]
                 };
             } else {
-                const res = await fetch(`http://localhost:3000/api/case/status?userId=${userId}`);
+                const res = await fetch(`${API_BASE}/case/status?userId=${userId}`);
                 data = await res.json();
             }
 
@@ -774,7 +776,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`http://localhost:3000/api/case/link`, {
+            const res = await fetch(`${API_BASE}/case/link`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

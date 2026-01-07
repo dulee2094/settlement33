@@ -1,7 +1,8 @@
 // Case Detail Page - Sidebar Menu Version
 document.addEventListener('DOMContentLoaded', () => {
     const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const DEMO_MODE = !IS_LOCAL;
+    // 배포 시 정식 모드
+    const DEMO_MODE = false;
 
     // Load case data
     loadCaseData();

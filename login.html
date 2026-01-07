@@ -140,13 +140,20 @@
     </section>
 
     <script>
-        // API 설정 - 로컬 개발 vs 배포 환경 자동 감지
+        // API 설정
         const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const API_BASE = IS_LOCAL ? 'http://localhost:3000/api' : null; // 배포 환경에서는 데모 모드
-        const DEMO_MODE = !IS_LOCAL; // 배포 환경에서는 데모 모드 활성화
+        // 배포 환경과 로컬(서버 실행) 환경 모두 상대 경로 '/api'를 사용하면 됩니다.
+        // 단, VSCode Live Server 등으로 열었을 경우를 대비해 로컬이면 전체 경로를 씁니다.
+        const API_BASE = IS_LOCAL ? 'http://localhost:3000/api' : '/api';
+
+        // 정식 모드 전환: API 서버가 있으면 데모 모드를 끕니다.
+        // 배포 환경(Render)에서는 백엔드가 실행되므로 DEMO_MODE = false로 설정합니다.
+        const DEMO_MODE = false;
 
         if (DEMO_MODE) {
             console.log('🎭 데모 모드로 실행 중 (백엔드 없음)');
+        } else {
+            console.log('🚀 정식 모드로 실행 중 (DB 저장)');
         }
 
 
