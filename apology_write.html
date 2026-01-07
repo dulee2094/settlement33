@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사과문 작성 - SafeSettlement</title>
+    <title>?ш낵臾??묒꽦 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <!-- Fonts -->
     <link
@@ -327,9 +327,9 @@
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <button class="btn btn-glass" onclick="location.href='case_detail.html'">
-                <i class="fas fa-arrow-left"></i> 나가기
+                <i class="fas fa-arrow-left"></i> ?섍?湲?
             </button>
-            <h2 style="margin: 0;">사과문 작성 스튜디오</h2>
+            <h2 style="margin: 0;">?ш낵臾??묒꽦 ?ㅽ뒠?붿삤</h2>
             <div style="width: 100px;"></div>
         </div>
 
@@ -338,30 +338,30 @@
 
             <!-- Paper Color -->
             <div class="tool-group">
-                <span class="tool-label">색상</span>
-                <div class="color-btn bg-color-white selected" onclick="updateColor('white', this)" title="순백색"></div>
-                <div class="color-btn bg-color-kraft" onclick="updateColor('kraft', this)" title="크라프트"></div>
-                <div class="color-btn bg-color-sky" onclick="updateColor('sky', this)" title="스카이"></div>
-                <div class="color-btn bg-color-lavender" onclick="updateColor('lavender', this)" title="라벤더"></div>
+                <span class="tool-label">?됱긽</span>
+                <div class="color-btn bg-color-white selected" onclick="updateColor('white', this)" title="?쒕갚??></div>
+                <div class="color-btn bg-color-kraft" onclick="updateColor('kraft', this)" title="?щ씪?꾪듃"></div>
+                <div class="color-btn bg-color-sky" onclick="updateColor('sky', this)" title="?ㅼ뭅??></div>
+                <div class="color-btn bg-color-lavender" onclick="updateColor('lavender', this)" title="?쇰깽??></div>
             </div>
 
             <div class="tool-divider"></div>
 
             <!-- Paper Pattern -->
             <div class="tool-group">
-                <button class="pattern-btn selected" onclick="updatePattern('none', this)" title="무지">
+                <button class="pattern-btn selected" onclick="updatePattern('none', this)" title="臾댁?">
                     <i class="fas fa-square"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('line', this)" title="줄노트">
+                <button class="pattern-btn" onclick="updatePattern('line', this)" title="以꾨끂??>
                     <i class="fas fa-bars"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('grid', this)" title="격자">
+                <button class="pattern-btn" onclick="updatePattern('grid', this)" title="寃⑹옄">
                     <i class="fas fa-border-all"></i>
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('classic', this)" title="클래식 테두리">
+                <button class="pattern-btn" onclick="updatePattern('classic', this)" title="?대옒???뚮몢由?>
                     <i class="far fa-square"></i> <!-- Double square icon approximation -->
                 </button>
-                <button class="pattern-btn" onclick="updatePattern('plant', this)" title="식물 테두리">
+                <button class="pattern-btn" onclick="updatePattern('plant', this)" title="?앸Ъ ?뚮몢由?>
                     <i class="fas fa-leaf"></i>
                 </button>
             </div>
@@ -371,9 +371,9 @@
             <!-- Font Selection -->
             <div class="tool-group">
                 <select class="toolbar-select" id="fontSelect" onchange="updateFont(this.value)">
-                    <option value="basic">기본 고딕체</option>
-                    <option value="serif">진지한 명조체</option>
-                    <option value="hand">정성 손글씨체</option>
+                    <option value="basic">湲곕낯 怨좊뵓泥?/option>
+                    <option value="serif">吏꾩???紐낆“泥?/option>
+                    <option value="hand">?뺤꽦 ?먭??⑥껜</option>
                 </select>
 
                 <select class="toolbar-select" id="sizeSelect" onchange="updateSize(this.value)" style="width: 80px;">
@@ -390,13 +390,13 @@
             <!-- Right Side Tools -->
             <div class="tool-group" style="margin-left: auto;">
                 <input type="file" id="hiddenFile" style="display: none;"
-                    onchange="alert('파일이 첨부되었습니다: ' + this.files[0].name)">
+                    onchange="alert('?뚯씪??泥⑤??섏뿀?듬땲?? ' + this.files[0].name)">
                 <button class="tool-btn" onclick="document.getElementById('hiddenFile').click()">
-                    <i class="fas fa-upload"></i> 파일 업로드
+                    <i class="fas fa-upload"></i> ?뚯씪 ?낅줈??
                 </button>
                 <button class="tool-btn" style="border-color: var(--secondary); color: var(--secondary);"
                     onclick="location.href='apology_guide.html'">
-                    <i class="fas fa-magic"></i> AI 작성 도우미
+                    <i class="fas fa-magic"></i> AI ?묒꽦 ?꾩슦誘?
                 </button>
             </div>
 
@@ -409,12 +409,12 @@
                 <!-- Page Numbers Overlay -->
                 <div id="pageNumberContainer"></div>
 
-                <textarea id="mainCanvas" placeholder="여기에 내용을 작성하세요...&#10;&#10;진심 어린 사과는 마음을 움직입니다."
+                <textarea id="mainCanvas" placeholder="?ш린???댁슜???묒꽦?섏꽭??..&#10;&#10;吏꾩떖 ?대┛ ?ш낵??留덉쓬???吏곸엯?덈떎."
                     spellcheck="false"></textarea>
 
                 <div
                     style="position: absolute; bottom: 80px; left: 0; right: 0; text-align: center; color: rgba(0,0,0,0.4); font-size: 1.1em; pointer-events: none; user-select: none;">
-                    ※ 마지막에 날짜와 이름을 꼭 적어주세요.
+                    ??留덉?留됱뿉 ?좎쭨? ?대쫫??瑗??곸뼱二쇱꽭??
                 </div>
             </div>
         </div>
@@ -423,7 +423,7 @@
         <div class="action-float">
             <button class="btn btn-primary" style="padding: 15px 30px; box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);"
                 onclick="sendApology()">
-                <i class="fas fa-paper-plane"></i> 전송하기
+                <i class="fas fa-paper-plane"></i> ?꾩넚?섍린
             </button>
         </div>
     </div>
@@ -434,7 +434,7 @@
 
     <script>
         if (!localStorage.getItem('current_case_id')) {
-            alert("잘못된 접근입니다.");
+            alert("?섎せ???묎렐?낅땲??");
             location.href = 'dashboard.html';
         }
 
@@ -452,12 +452,12 @@
 
             // Set Date
             const today = new Date();
-            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            const dateStr = `${today.getFullYear()}??${today.getMonth() + 1}??${today.getDate()}??;
             document.getElementById('autoDate').textContent = dateStr;
 
             // Set Name
-            const userName = localStorage.getItem('user_name') || '작성자';
-            document.getElementById('autoName').textContent = `${userName} 올림`;
+            const userName = localStorage.getItem('user_name') || '?묒꽦??;
+            document.getElementById('autoName').textContent = `${userName} ?щ┝`;
         });
 
         canvas.addEventListener('input', adjustHeight);
@@ -548,11 +548,11 @@
 
         function sendApology() {
             if (canvas.value.length < 10) {
-                alert("내용을 10자 이상 작성해주세요.");
+                alert("?댁슜??10???댁긽 ?묒꽦?댁＜?몄슂.");
                 return;
             }
-            if (confirm("작성하신 사과문을 전송하시겠습니까?")) {
-                alert("✅ 사과문이 성공적으로 전송되었습니다.");
+            if (confirm("?묒꽦?섏떊 ?ш낵臾몄쓣 ?꾩넚?섏떆寃좎뒿?덇퉴?")) {
+                alert("???ш낵臾몄씠 ?깃났?곸쑝濡??꾩넚?섏뿀?듬땲??");
                 localStorage.removeItem('saved_apology_text');
                 location.href = 'case_detail.html';
             }

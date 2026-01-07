@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px;">김피해님이 메시지를 전송했습니다</div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제12345 • 10분 전</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제12345 ? 10분 전</div>
                             </div>
                             <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">확인</button>
                         </div>
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px;">이피해님이 합의금을 제안했습니다</div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제67890 • 1시간 전</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제67890 ? 1시간 전</div>
                             </div>
                             <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">확인</button>
                         </div>
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px;">사과문 전송이 완료되었습니다</div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제12345 • 어제</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제12345 ? 어제</div>
                             </div>
                         </div>
 
@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; margin-bottom: 5px;">새로운 사건이 등록되었습니다</div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제11111 • 2일 전</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제11111 ? 2일 전</div>
                             </div>
                         </div>
                     </div>
@@ -687,13 +687,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div style="padding: 20px; background: rgba(255,255,255,0.03); border-radius: 8px; text-align: center;">
                             <i class="fas fa-envelope" style="font-size: 2rem; color: var(--secondary); margin-bottom: 10px;"></i>
                             <div style="font-weight: 600; margin-bottom: 5px;">이메일 문의</div>
-                            <div style="font-size: 0.9rem; color: var(--text-muted);">support@safesettlement.com</div>
+                            <div style="font-size: 0.9rem; color: var(--text-muted);">support@SafeHappE.com</div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">24시간 접수</div>
                         </div>
                         <div style="padding: 20px; background: rgba(255,255,255,0.03); border-radius: 8px; text-align: center;">
                             <i class="fab fa-kickstarter-k" style="font-size: 2rem; color: #FFE812; margin-bottom: 10px;"></i>
                             <div style="font-weight: 600; margin-bottom: 5px;">카카오톡 상담</div>
-                            <div style="font-size: 0.9rem; color: var(--text-muted);">@SafeSettlement</div>
+                            <div style="font-size: 0.9rem; color: var(--text-muted);">@SafeHappE</div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">평일 09:00 - 18:00</div>
                         </div>
                     </div>
@@ -736,18 +736,131 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==================== INITIALIZE CASE DETAIL NAV ====================
     // Legacy logic for open_detail removed as it is handled by redirection at the top.
     // ==================== CASE REGISTRATION MODAL ====================
+    // ==================== NEW: Room & Choice Logic ====================
     window.openRegisterModal = function () {
-        document.getElementById('registerModal').style.display = 'flex';
+        // Open Choice Modal instead of direct register
+        document.getElementById('choiceModal').style.display = 'flex';
     };
 
-    window.closeRegisterModal = function () {
-        document.getElementById('registerModal').style.display = 'none';
-        document.getElementById('registerCaseForm').reset();
+    window.closeChoiceModal = function () {
+        document.getElementById('choiceModal').style.display = 'none';
     };
 
-    window.submitRegisterCase = async function (e) {
+    // Create Room
+    window.openCreateRoomModal = function () {
+        closeChoiceModal();
+        document.getElementById('createRoomModal').style.display = 'flex';
+    };
+    window.closeCreateRoomModal = function () {
+        document.getElementById('createRoomModal').style.display = 'none';
+    };
+    window.submitCreateRoom = async function (e) {
         e.preventDefault();
+        const title = document.getElementById('roomTitle').value;
+        const password = document.getElementById('roomPassword').value;
+        const summary = document.getElementById('roomSummary').value;
+        const userId = localStorage.getItem('user_id');
 
+        const radios = document.getElementsByName('roomRole');
+        let role = null;
+        for (const r of radios) if (r.checked) role = r.value;
+
+        if (!title || !password || !role) return alert('필수 정보를 입력해주세요.');
+
+        try {
+            const res = await fetch(`${API_BASE}/case/create-room`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, role, roomTitle: title, roomPassword: password, summary })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('목록에 방이 개설되었습니다!');
+                closeCreateRoomModal();
+                fetchAllCases();
+            } else {
+                alert('개설 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류 발생: ' + err.message);
+        }
+    };
+
+    // Join Room
+    window.openJoinRoomModal = function () {
+        closeChoiceModal();
+        document.getElementById('joinRoomModal').style.display = 'flex';
+        document.getElementById('roomListArea').innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">검색어를 입력하고 찾기를 눌러주세요.</div>';
+    };
+    window.closeJoinRoomModal = function () {
+        document.getElementById('joinRoomModal').style.display = 'none';
+        document.getElementById('roomSearchInput').value = '';
+    };
+    window.searchRooms = async function () {
+        const query = document.getElementById('roomSearchInput').value;
+        if (!query) return;
+
+        const listArea = document.getElementById('roomListArea');
+        listArea.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 검색중...</div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/case/search?query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+
+            if (data.success && data.rooms.length > 0) {
+                listArea.innerHTML = '';
+                data.rooms.forEach(room => {
+                    const div = document.createElement('div');
+                    div.className = 'glass-card';
+                    div.style.padding = '15px';
+                    div.style.cursor = 'pointer';
+                    div.style.marginBottom = '10px';
+                    div.style.border = '1px solid rgba(255,255,255,0.1)';
+                    div.innerHTML = `
+                        <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">${room.roomTitle}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">
+                            방장: ${room.creatorRole} | 개설: ${new Date(room.createdAt).toLocaleDateString()}
+                        </div>
+                    `;
+                    div.onclick = () => tryJoinRoom(room.id, room.roomTitle);
+                    listArea.appendChild(div);
+                });
+            } else {
+                listArea.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">검색 결과가 없습니다.</div>';
+            }
+        } catch (err) {
+            listArea.innerHTML = '<div style="text-align: center; padding: 20px; color: #ff6b6b;">오류가 발생했습니다.</div>';
+        }
+    };
+
+    window.tryJoinRoom = async function (roomId, roomTitle) {
+        const password = prompt(`[${roomTitle}] 방에 입장하려면 비밀번호를 입력하세요:`);
+        if (!password) return;
+
+        const userId = localStorage.getItem('user_id');
+        try {
+            const res = await fetch(`${API_BASE}/case/join-room`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, caseId: roomId, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert('입장 성공! 합의 방으로 연결되었습니다.');
+                closeJoinRoomModal();
+                fetchAllCases();
+            } else {
+                alert('입장 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류: ' + err.message);
+        }
+    };
+
+    // Legacy Register Function (Hidden but kept if needed, or repurposed)
+    window.submitRegisterCase_Legacy = async function (e) {
+        e.preventDefault();
         const roleInputs = document.getElementsByName('caseRole');
         let selectedRole = null;
         for (const radio of roleInputs) {
@@ -768,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (DEMO_MODE) {
             // Simulation for Demo Mode
-            alert('☑️ 데모 모드: 사건이 등록되었습니다.\n' + caseNumber + ' (' + selectedRole + ')');
+            alert('?? 데모 모드: 사건이 등록되었습니다.\n' + caseNumber + ' (' + selectedRole + ')');
             closeRegisterModal();
             // Reload cases (mock)
             loadPage('cases');
@@ -857,9 +970,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
 
-                <!-- 3. Why SafeSettlement -->
+                <!-- 3. Why SafeHappE -->
                 <div class="glass-card" style="background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(124, 58, 237, 0.1)); border: 1px solid rgba(255,255,255,0.1);">
-                    <h3 style="text-align: center; margin-bottom: 30px;">SafeSettlement는 무엇이 다른가요?</h3>
+                    <h3 style="text-align: center; margin-bottom: 30px;">SafeHappE는 무엇이 다른가요?</h3>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; text-align: center;">
                         <div>
                             <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 1.5rem;">

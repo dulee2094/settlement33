@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
@@ -36,7 +36,9 @@ const Case = sequelize.define('Case', {
     victimPhone: { type: DataTypes.STRING }, // Encrypted in real app
     inviteToken: { type: DataTypes.STRING },
     connectionStatus: { type: DataTypes.ENUM('none', 'invited', 'pending', 'connected'), defaultValue: 'none' },
-    summary: { type: DataTypes.TEXT } // Added brief case description
+    summary: { type: DataTypes.TEXT }, // Added brief case description
+    roomTitle: { type: DataTypes.STRING }, // New: Private Room Title
+    roomPassword: { type: DataTypes.STRING } // New: Room Password
 });
 
 const Proposal = sequelize.define('Proposal', {
@@ -133,10 +135,10 @@ app.post('/api/case/invite', async (req, res) => {
     }
 
     // Always send the mock SMS (whether linked to real case or not)
-    const inviteLink = `https://safesettlement.com/invite/${token}`;
+    const inviteLink = `https://SafeHappE.com/invite/${token}`;
 
     console.log(`[SMS MOCK] To: ${victimPhone}`);
-    console.log(`[SMS MOCK] From: ${senderName || 'SafeSettlement'}`);
+    console.log(`[SMS MOCK] From: ${senderName || 'SafeHappE'}`);
     console.log(`[SMS MOCK] Message: Case "${caseNumber}" settlement requested.`);
     console.log(`[SMS MOCK] Link: ${inviteLink} (Unique Access)`);
     if (customMessage) console.log(`[SMS MOCK] Custom Msg: "${customMessage}"`);
@@ -162,6 +164,103 @@ app.post('/api/case/accept', async (req, res) => {
         res.json({ success: true });
     } else {
         res.status(404).json({ success: false, error: 'Case not found or permission denied' });
+    }
+});
+
+// --- NEW: Private Room Features ---
+
+// 4.6 Create Private Room
+app.post('/api/case/create-room', async (req, res) => {
+    const { userId, role, roomTitle, roomPassword, summary } = req.body;
+
+    // Generate a unique case number (internal)
+    const caseNumber = 'ROOM-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+    try {
+        const newCase = {
+            caseNumber,
+            roomTitle, // New Field
+            roomPassword, // New Field
+            summary,
+            status: 'pending',
+            connectionStatus: 'pending'
+        };
+
+        if (role === 'offender') newCase.offenderId = userId;
+        else if (role === 'victim') newCase.victimId = userId;
+
+        const caseData = await Case.create(newCase);
+        res.json({ success: true, caseId: caseData.id });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// 4.7 Search Rooms
+app.get('/api/case/search', async (req, res) => {
+    const { query } = req.query;
+    const { Op } = require('sequelize');
+
+    try {
+        const cases = await Case.findAll({
+            where: {
+                roomTitle: {
+                    [Op.like]: `%${query}%`
+                },
+                // Only show rooms that are not full
+                [Op.or]: [
+                    { offenderId: null },
+                    { victimId: null }
+                ]
+            },
+            limit: 20
+        });
+
+        // Map to safe public info
+        const result = cases.map(c => ({
+            id: c.id,
+            roomTitle: c.roomTitle,
+            creatorRole: c.offenderId ? '?쇱쓽?? : '?쇳빐??,
+            createdAt: c.createdAt
+        }));
+
+        res.json({ success: true, rooms: result });
+    } catch (e) {
+        console.error(e);
+        res.json({ success: false, error: e.message });
+    }
+});
+
+// 4.8 Join Room
+app.post('/api/case/join-room', async (req, res) => {
+    const { userId, caseId, password } = req.body;
+
+    try {
+        const caseData = await Case.findByPk(caseId);
+
+        if (!caseData) return res.json({ success: false, error: '議댁옱?섏? ?딅뒗 諛⑹엯?덈떎.' });
+        if (caseData.roomPassword !== password) return res.json({ success: false, error: '鍮꾨?踰덊샇媛 ?쇱튂?섏? ?딆뒿?덈떎.' });
+
+        // Determine Role
+        let myRole = '';
+        if (caseData.offenderId && !caseData.victimId) {
+            caseData.victimId = userId;
+            myRole = 'victim';
+        } else if (!caseData.offenderId && caseData.victimId) {
+            caseData.offenderId = userId;
+            myRole = 'offender';
+        } else {
+            return res.json({ success: false, error: '?대? ?몄썝??媛??李?諛⑹엯?덈떎.' });
+        }
+
+        caseData.connectionStatus = 'connected';
+        await caseData.save();
+
+        res.json({ success: true, role: myRole });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
@@ -224,7 +323,7 @@ app.get('/api/case/status', async (req, res) => {
             caseNumber: caseData.caseNumber,
             myRole: isOffender ? 'offender' : 'victim',
             connectionStatus: caseData.connectionStatus || 'none',
-            counterpartyName: counterpartyName || (isOffender ? '피해자 (가입 대기 중)' : '피의자 (가입 대기 중)'),
+            counterpartyName: counterpartyName || (isOffender ? '?쇳빐??(媛???湲?以?' : '?쇱쓽??(媛???湲?以?'),
             status: caseData.status
         };
     }));

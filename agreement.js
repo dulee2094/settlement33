@@ -1,4 +1,4 @@
-// Signature Pad Logic
+﻿// Signature Pad Logic
 const canvas = document.getElementById('signaturePad');
 const ctx = canvas.getContext('2d');
 let painting = false;
@@ -65,13 +65,13 @@ confirmBtn.addEventListener('click', () => {
     // In real app, we would check pixels or save dataURL
 
     // Visual feedback
-    confirmBtn.textContent = '서명 완료';
+    confirmBtn.textContent = '?쒕챸 ?꾨즺';
     confirmBtn.classList.remove('btn-primary');
     confirmBtn.classList.add('btn-glass');
     confirmBtn.disabled = true;
 
     // Update Document
-    document.getElementById('sign-place-1').textContent = '홍길동 (서명완료)';
+    document.getElementById('sign-place-1').textContent = '?띻만??(?쒕챸?꾨즺)';
     document.getElementById('sign-place-1').style.color = 'black';
     document.getElementById('sign-place-1').style.fontWeight = 'bold';
 
@@ -80,10 +80,10 @@ confirmBtn.addEventListener('click', () => {
     paymentCard.style.pointerEvents = 'auto';
 
     // Update Step Indicator
-    stepIndicator[0].textContent = '1. 완료';
+    stepIndicator[0].textContent = '1. ?꾨즺';
     stepIndicator[2].classList.add('active'); // Highlight Payment Step
 
-    alert('전자 서명이 완료되었습니다. 다음 단계인 결제를 진행해주세요.');
+    alert('?꾩옄 ?쒕챸???꾨즺?섏뿀?듬땲?? ?ㅼ쓬 ?④퀎??寃곗젣瑜?吏꾪뻾?댁＜?몄슂.');
 });
 
 // Payment Logic
@@ -98,8 +98,8 @@ methods.forEach(method => {
 });
 
 payBtn.addEventListener('click', () => {
-    if (confirm('에스크로 계좌로 3,500,000원 입금을 요청하시겠습니까?')) {
-        payBtn.textContent = '입금 확인 요청중...';
+    if (confirm('?먯뒪?щ줈 怨꾩쥖濡?3,500,000???낃툑???붿껌?섏떆寃좎뒿?덇퉴?')) {
+        payBtn.textContent = '?낃툑 ?뺤씤 ?붿껌以?..';
         payBtn.disabled = true;
 
         // Simulate API call
@@ -122,7 +122,7 @@ function downloadMockPDF() {
     // Create a dummy link to download a file
     const link = document.createElement('a');
     link.href = 'data:application/pdf;base64,JVBERi0xL...'; // Dummy Data header
-    link.download = '2024형제12345_합의서_최종.pdf';
+    link.download = '2024?뺤젣12345_?⑹쓽??理쒖쥌.pdf';
     link.click();
 }
 

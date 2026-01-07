@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>블라인드 합의 제안 - SafeSettlement</title>
+    <title>釉붾씪?몃뱶 ?⑹쓽 ?쒖븞 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
@@ -19,28 +19,28 @@
     <div class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="index.html" class="logo">SafeSettlement.</a>
+            <a href="index.html" class="logo">SafeHappE.</a>
             <nav class="nav-links">
                 <div class="nav-item active" onclick="location.href='dashboard.html'">
                     <i class="fas fa-chart-pie"></i>
-                    <span>사건 현황 (블라인드)</span>
+                    <span>?ш굔 ?꾪솴 (釉붾씪?몃뱶)</span>
                 </div>
                 <div class="nav-item">
                     <i class="fas fa-comments"></i>
-                    <span>안심 채팅</span>
+                    <span>?덉떖 梨꾪똿</span>
                 </div>
                 <div class="nav-item">
                     <i class="fas fa-file-signature"></i>
-                    <span>합의서 관리</span>
+                    <span>?⑹쓽??愿由?/span>
                 </div>
                 <div class="nav-item">
                     <i class="fas fa-gavel"></i>
-                    <span>변호사 중재</span>
+                    <span>蹂?몄궗 以묒옱</span>
                 </div>
                 <div style="flex: 1;"></div>
                 <div class="nav-item">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>로그아웃</span>
+                    <span>濡쒓렇?꾩썐</span>
                 </div>
             </nav>
         </aside>
@@ -49,15 +49,15 @@
         <main class="main-content">
             <div class="top-bar">
                 <div>
-                    <h2 style="margin-bottom: 5px;">블라인드 합의 제안</h2>
-                    <p style="color: var(--text-muted);">감정 소모 없이 희망 금액을 조율해보세요.</p>
+                    <h2 style="margin-bottom: 5px;">釉붾씪?몃뱶 ?⑹쓽 ?쒖븞</h2>
+                    <p style="color: var(--text-muted);">媛먯젙 ?뚮え ?놁씠 ?щ쭩 湲덉븸??議곗쑉?대낫?몄슂.</p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center;">
                     <button class="btn btn-glass" style="font-size: 0.85rem;" onclick="location.href='dashboard.html'">
-                        <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> 뒤로가기
+                        <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> ?ㅻ줈媛湲?
                     </button>
                     <span class="status-badge" id="statusBadge"
-                        style="background: var(--bg-card); color: var(--text-muted);">제안 대기중</span>
+                        style="background: var(--bg-card); color: var(--text-muted);">?쒖븞 ?湲곗쨷</span>
                 </div>
             </div>
 
@@ -68,34 +68,34 @@
                 <div class="glass-card" style="height: 100%;">
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h3>나의 희망 금액</h3>
+                        <h3>?섏쓽 ?щ쭩 湲덉븸</h3>
                         <span
-                            style="font-size: 0.8rem; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 12px;">비공개
-                            안전 보장 <i class="fas fa-lock s"></i></span>
+                            style="font-size: 0.8rem; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 12px;">鍮꾧났媛?
+                            ?덉쟾 蹂댁옣 <i class="fas fa-lock s"></i></span>
                     </div>
 
                     <div style="text-align: center; margin-bottom: 40px;">
-                        <p style="color: var(--text-muted); margin-bottom: 10px;">상대방에게 구체적인 금액이 노출되지 않습니다.</p>
+                        <p style="color: var(--text-muted); margin-bottom: 10px;">?곷?諛⑹뿉寃?援ъ껜?곸씤 湲덉븸???몄텧?섏? ?딆뒿?덈떎.</p>
                         <div style="position: relative; max-width: 300px; margin: 0 auto;">
                             <span
-                                style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted); font-weight: bold;">만원</span>
+                                style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted); font-weight: bold;">留뚯썝</span>
                             <input type="number" id="myAmount" class="form-input"
                                 style="padding-right: 70px; font-size: 1.5rem; font-weight: bold; text-align: center;"
                                 placeholder="0">
                         </div>
-                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">* 예: 300만원 입력 시 300만 입력</p>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">* ?? 300留뚯썝 ?낅젰 ??300留??낅젰</p>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                        <h4 style="margin-bottom: 15px;"><i class="fas fa-balance-scale"></i> AI 분석 가이드</h4>
+                        <h4 style="margin-bottom: 15px;"><i class="fas fa-balance-scale"></i> AI 遺꾩꽍 媛?대뱶</h4>
                         <ul
                             style="font-size: 0.9rem; color: var(--text-muted); text-align: left; list-style: disc; padding-left: 20px;">
-                            <li>유사 판례 평균: <strong>350만원 ~ 400만원</strong></li>
-                            <li>너무 낮은 금액은 상대방의 거부감을 유발할 수 있습니다.</li>
+                            <li>?좎궗 ?먮? ?됯퇏: <strong>350留뚯썝 ~ 400留뚯썝</strong></li>
+                            <li>?덈Т ??? 湲덉븸? ?곷?諛⑹쓽 嫄곕?媛먯쓣 ?좊컻?????덉뒿?덈떎.</li>
                         </ul>
                     </div>
 
-                    <button class="btn btn-primary" style="width: 100%;" onclick="submitProposal()">제안 등록하기</button>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="submitProposal()">?쒖븞 ?깅줉?섍린</button>
                 </div>
 
                 <!-- Right: Gap Analysis Result -->
@@ -106,15 +106,15 @@
                         <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
                             <i class="fas fa-user-secret"></i>
                         </div>
-                        <h3>상대방의 제안을 기다리고 있습니다</h3>
-                        <p style="color: var(--text-muted); margin-top: 10px;">양측 모두 제안을 등록하면<br>금액 차이(Gap) 범위만 알려드립니다.
+                        <h3>?곷?諛⑹쓽 ?쒖븞??湲곕떎由ш퀬 ?덉뒿?덈떎</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">?묒륫 紐⑤몢 ?쒖븞???깅줉?섎㈃<br>湲덉븸 李⑥씠(Gap) 踰붿쐞留??뚮젮?쒕┰?덈떎.
                         </p>
                     </div>
 
                     <div id="resultState" style="display: none; width: 100%;">
                         <div style="margin-bottom: 30px;">
-                            <span style="font-size: 0.9rem; color: var(--secondary);">분석 완료</span>
-                            <h2 style="font-size: 2rem; margin-top: 10px;" id="gapTitle">금액 차이가 큽니다</h2>
+                            <span style="font-size: 0.9rem; color: var(--secondary);">遺꾩꽍 ?꾨즺</span>
+                            <h2 style="font-size: 2rem; margin-top: 10px;" id="gapTitle">湲덉븸 李⑥씠媛 ?쎈땲??/h2>
                         </div>
 
                         <!-- Gauge Visual -->
@@ -126,22 +126,22 @@
 
                             <!-- Markers -->
                             <div style="position: absolute; left: 20%; top: 25px; font-size: 0.7rem; color: #aaa;">|
-                                100만 이내</div>
+                                100留??대궡</div>
                             <div style="position: absolute; left: 50%; top: 25px; font-size: 0.7rem; color: #aaa;">|
-                                500만 이내</div>
+                                500留??대궡</div>
                             <div style="position: absolute; left: 80%; top: 25px; font-size: 0.7rem; color: #aaa;">|
-                                1000만 이상</div>
+                                1000留??댁긽</div>
                         </div>
 
                         <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 30px;" id="gapDesc">
-                            양측의 의견 차이가 <strong>500만원 ~ 1000만원</strong> 사이입니다.<br>
-                            직접적인 대화보다는 전문가의 중재를 고려해보시는 것이 좋습니다.
+                            ?묒륫???섍껄 李⑥씠媛 <strong>500留뚯썝 ~ 1000留뚯썝</strong> ?ъ씠?낅땲??<br>
+                            吏곸젒?곸씤 ??붾낫?ㅻ뒗 ?꾨Ц媛??以묒옱瑜?怨좊젮?대낫?쒕뒗 寃껋씠 醫뗭뒿?덈떎.
                         </p>
 
                         <div id="actionButtons">
-                            <button class="btn btn-glass" style="margin-right: 10px;">금액 수정 제안</button>
+                            <button class="btn btn-glass" style="margin-right: 10px;">湲덉븸 ?섏젙 ?쒖븞</button>
                             <button class="btn btn-primary"
-                                style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">변호사 중재 신청</button>
+                                style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">蹂?몄궗 以묒옱 ?좎껌</button>
                         </div>
                     </div>
 
@@ -151,21 +151,21 @@
 
             <!-- Proposal History Section -->
             <div class="glass-card" style="margin-top: 20px;">
-                <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> 제안 히스토리</h3>
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> ?쒖븞 ?덉뒪?좊━</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; text-align: left;">
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
-                                <th style="padding: 15px; font-weight: 500;">회차</th>
-                                <th style="padding: 15px; font-weight: 500;">일시</th>
-                                <th style="padding: 15px; font-weight: 500;">나의 제안 (원)</th>
-                                <th style="padding: 15px; font-weight: 500;">분석 결과</th>
+                                <th style="padding: 15px; font-weight: 500;">?뚯감</th>
+                                <th style="padding: 15px; font-weight: 500;">?쇱떆</th>
+                                <th style="padding: 15px; font-weight: 500;">?섏쓽 ?쒖븞 (??</th>
+                                <th style="padding: 15px; font-weight: 500;">遺꾩꽍 寃곌낵</th>
                             </tr>
                         </thead>
                         <tbody id="historyTableBody">
                             <tr>
                                 <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-muted);">
-                                    아직 제안 내역이 없습니다.
+                                    ?꾩쭅 ?쒖븞 ?댁뿭???놁뒿?덈떎.
                                 </td>
                             </tr>
                         </tbody>
@@ -183,13 +183,13 @@
         // Mock function to simulate Blind Gap Logic - 5 Level System + Man-won Unit + Over-offer Check
         function submitProposal() {
             const rawInput = parseInt(document.getElementById('myAmount').value);
-            if (!rawInput) return alert('희망 금액을 입력해주세요.');
+            if (!rawInput) return alert('?щ쭩 湲덉븸???낅젰?댁＜?몄슂.');
 
             // Convert Man-won to Won
             const myAmount = rawInput * 10000;
 
             const btn = document.querySelector('.btn-primary');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석중...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 遺꾩꽍以?..';
             btn.disabled = true;
 
             // Simulate Server Delay and Victim's Hidden Amount
@@ -239,52 +239,52 @@
                     color = '#4ade80'; // Green
 
                     if (isOverOffer) {
-                        title = "즉시 합의가 가능합니다!";
-                        desc = `제안하신 금액이 상대방의 기대치를 충족합니다.<br>지금 바로 합의를 진행하셔도 좋습니다.`;
+                        title = "利됱떆 ?⑹쓽媛 媛?ν빀?덈떎!";
+                        desc = `?쒖븞?섏떊 湲덉븸???곷?諛⑹쓽 湲곕?移섎? 異⑹”?⑸땲??<br>吏湲?諛붾줈 ?⑹쓽瑜?吏꾪뻾?섏뀛??醫뗭뒿?덈떎.`;
                     } else {
-                        title = "축하합니다! 합의 성사 직전입니다";
-                        desc = `양측의 제안 금액 차이가 <strong>10% 이내</strong>(약 ${diff.toLocaleString()}원)입니다.<br>사실상 합의가 성사된 상태이며, 아주 조금만 더 배려하면 즉시 타결됩니다.`;
+                        title = "異뺥븯?⑸땲?? ?⑹쓽 ?깆궗 吏곸쟾?낅땲??;
+                        desc = `?묒륫???쒖븞 湲덉븸 李⑥씠媛 <strong>10% ?대궡</strong>(??${diff.toLocaleString()}???낅땲??<br>?ъ떎???⑹쓽媛 ?깆궗???곹깭?대ŉ, ?꾩＜ 議곌툑留???諛곕젮?섎㈃ 利됱떆 ?寃곕맗?덈떎.`;
                     }
 
                     width = '98%'; // Max full
-                    badgeText = '성사 확실';
-                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #4ade80; color: #000;">지금 바로 합의하기</button>';
+                    badgeText = '?깆궗 ?뺤떎';
+                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #4ade80; color: #000;">吏湲?諛붾줈 ?⑹쓽?섍린</button>';
                 } else if (gapPercent <= 30) {
                     // Level 2: Blue Zone
                     level = 2;
                     color = '#3b82f6'; // Blue
-                    title = "긍정적 조율 단계입니다";
-                    desc = `서로의 의견 차이가 <strong>크지 않습니다.</strong><br>안심 채팅을 통해 구체적인 사정을 설명하면 충분히 간극을 좁힐 수 있습니다.`;
+                    title = "湲띿젙??議곗쑉 ?④퀎?낅땲??;
+                    desc = `?쒕줈???섍껄 李⑥씠媛 <strong>?ъ? ?딆뒿?덈떎.</strong><br>?덉떖 梨꾪똿???듯빐 援ъ껜?곸씤 ?ъ젙???ㅻ챸?섎㈃ 異⑸텇??媛꾧레??醫곹옄 ???덉뒿?덈떎.`;
                     width = '75%';
-                    badgeText = '조율 가능';
-                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;">수정 제안하기</button><button class="btn btn-primary">안심 채팅방 열기</button>';
+                    badgeText = '議곗쑉 媛??;
+                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;">?섏젙 ?쒖븞?섍린</button><button class="btn btn-primary">?덉떖 梨꾪똿諛??닿린</button>';
                 } else if (gapPercent <= 60) {
                     // Level 3: Yellow Zone
                     level = 3;
                     color = '#facc15'; // Yellow
-                    title = "전문가의 중재가 필요합니다";
-                    desc = `시각 차이가 다소 큽니다. 개인 간의 대화로는 감정이 상할 수 있습니다.<br><strong>변호사 중재</strong>나 <strong>AI 판례 분석</strong> 리포트를 참고하세요.`;
+                    title = "?꾨Ц媛??以묒옱媛 ?꾩슂?⑸땲??;
+                    desc = `?쒓컖 李⑥씠媛 ?ㅼ냼 ?쎈땲?? 媛쒖씤 媛꾩쓽 ??붾줈??媛먯젙???곹븷 ???덉뒿?덈떎.<br><strong>蹂?몄궗 以묒옱</strong>??<strong>AI ?먮? 遺꾩꽍</strong> 由ы룷?몃? 李멸퀬?섏꽭??`;
                     width = '50%';
-                    badgeText = '중재 권장';
-                    actionButtons.innerHTML = '<button class="btn btn-glass">수정 제안하기</button><button class="btn btn-primary" style="background: #facc15; color: #000;">변호사 중재 신청</button>';
+                    badgeText = '以묒옱 沅뚯옣';
+                    actionButtons.innerHTML = '<button class="btn btn-glass">?섏젙 ?쒖븞?섍린</button><button class="btn btn-primary" style="background: #facc15; color: #000;">蹂?몄궗 以묒옱 ?좎껌</button>';
                 } else if (gapPercent <= 100) {
                     // Level 4: Orange Zone
                     level = 4;
                     color = '#fb923c'; // Orange
-                    title = "입장 차이가 매우 큽니다";
-                    desc = `현재 상태로는 합의가 어렵습니다. 상대방은 귀하와 <strong>전혀 다른 기준</strong>을 가지고 있습니다.<br>잠시 냉각기를 가지는 것을 추천합니다.`;
+                    title = "?낆옣 李⑥씠媛 留ㅼ슦 ?쎈땲??;
+                    desc = `?꾩옱 ?곹깭濡쒕뒗 ?⑹쓽媛 ?대졄?듬땲?? ?곷?諛⑹? 洹?섏? <strong>?꾪? ?ㅻⅨ 湲곗?</strong>??媛吏怨??덉뒿?덈떎.<br>?좎떆 ?됯컖湲곕? 媛吏??寃껋쓣 異붿쿇?⑸땲??`;
                     width = '25%';
-                    badgeText = '심각한 격차';
-                    actionButtons.innerHTML = '<button class="btn btn-glass">제안 보류하기</button>';
+                    badgeText = '?ш컖??寃⑹감';
+                    actionButtons.innerHTML = '<button class="btn btn-glass">?쒖븞 蹂대쪟?섍린</button>';
                 } else {
                     // Level 5: Red Zone
                     level = 5;
                     color = '#ef4444'; // Red
-                    title = "합의점 도출이 불가능해 보입니다";
-                    desc = `간극이 너무 큽니다 (100% 이상 차이).<br>사실상 결렬 상태입니다. 형사 조정 절차나 정식 재판을 준비하시는 것이 효율적입니다.`;
+                    title = "?⑹쓽???꾩텧??遺덇??ν빐 蹂댁엯?덈떎";
+                    desc = `媛꾧레???덈Т ?쎈땲??(100% ?댁긽 李⑥씠).<br>?ъ떎??寃곕젹 ?곹깭?낅땲?? ?뺤궗 議곗젙 ?덉감???뺤떇 ?ы뙋??以鍮꾪븯?쒕뒗 寃껋씠 ?⑥쑉?곸엯?덈떎.`;
                     width = '10%';
-                    badgeText = '결렬 위기';
-                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #ef4444;">형사 절차 안내 보기</button>';
+                    badgeText = '寃곕젹 ?꾧린';
+                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #ef4444;">?뺤궗 ?덉감 ?덈궡 蹂닿린</button>';
                 }
 
                 // Update UI Elements
@@ -320,11 +320,11 @@
                 }
 
                 rangeElement.innerHTML = `
-                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">상대방 제안 예상 범위</div>
+                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">?곷?諛??쒖븞 ?덉긽 踰붿쐞</div>
                     <div style="font-size: 1.2rem; font-weight: bold; color: #fff; filter: blur(${level >= 4 ? '5px' : '0px'}); transition: filter 0.5s;">
-                        ${minRange.toLocaleString()}원 ~ ${maxRange.toLocaleString()}원
+                        ${minRange.toLocaleString()}??~ ${maxRange.toLocaleString()}??
                     </div>
-                     ${level >= 4 ? '<div style="font-size:0.7rem; color:#ef4444; margin-top:5px;">격차가 너무 커서 범위조차 흐릿합니다.</div>' : ''}
+                     ${level >= 4 ? '<div style="font-size:0.7rem; color:#ef4444; margin-top:5px;">寃⑹감媛 ?덈Т 而ㅼ꽌 踰붿쐞議곗감 ?먮┸?⑸땲??</div>' : ''}
                 `;
 
                 // Add to History
@@ -343,7 +343,7 @@
                 proposalHistory.unshift(historyItem); // Add to top
                 updateHistoryUI();
 
-                btn.innerHTML = '수정 제안하기';
+                btn.innerHTML = '?섏젙 ?쒖븞?섍린';
                 btn.disabled = false;
                 btn.classList.add('btn-glass');
                 btn.classList.remove('btn-primary');
@@ -356,7 +356,7 @@
 
             tbody.innerHTML = proposalHistory.map(item => `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 15px;">${item.round}차</td>
+                    <td style="padding: 15px;">${item.round}李?/td>
                     <td style="padding: 15px; color: var(--text-muted); font-size: 0.9rem;">${item.time}</td>
                     <td style="padding: 15px; font-weight: bold;">${item.amount.toLocaleString()}</td>
                     <td style="padding: 15px;">

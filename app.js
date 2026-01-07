@@ -1,4 +1,4 @@
-// DOM Elements
+﻿// DOM Elements
 const header = document.querySelector('header');
 const fadeElements = document.querySelectorAll('.glass-card, .section-header, .hero-text, .hero-visual');
 
