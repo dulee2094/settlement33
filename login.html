@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - SafeSettlement</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .switch-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .switch-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .switch-btn.active {
+            background: var(--bg-glass);
+            color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 20px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: #FEE500;
+            color: #191919;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="auth-container">
+        <div class="auth-box glass-card">
+            <h2 style="margin-bottom: 10px;">SafeSettlement.</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">안전하고 공정한 합의를 위한 첫 걸음</p>
+
+
+
+            <!-- Login / Signup Container -->
+            <div id="form-auth-container">
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">이메일</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">비밀번호</label>
+                        <input type="password" id="loginPw" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">로그인</button>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
+                        계정이 없으신가요? <span onclick="toggleSignupMode(true)"
+                            style="color: var(--secondary); cursor: pointer; font-weight: 600;">회원가입</span>
+                    </p>
+                </form>
+
+                <!-- Signup Form (Hidden initially) -->
+                <form id="signupForm" onsubmit="handleSignup(event)" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">이름</label>
+                        <input type="text" id="regName" class="form-input" placeholder="홍길동" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">휴대폰 번호 (선택)</label>
+                        <input type="tel" id="regPhone" class="form-input" placeholder="01012345678">
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">* 합의 요청 문자를 받으셨다면 입력해주세요.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">이메일</label>
+                        <input type="email" id="regEmail" class="form-input" placeholder="example@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">비밀번호</label>
+                        <input type="password" id="regPw" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <!-- Role selection removed -->
+                    <button type="submit" class="btn btn-primary"
+                        style="width: 100%; margin-top: 10px; background: var(--secondary);">가입하기</button>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
+                        이미 계정이 있으신가요? <span onclick="toggleSignupMode(false)"
+                            style="color: var(--primary); cursor: pointer; font-weight: 600;">로그인</span>
+                    </p>
+                </form>
+
+                <div class="divider">
+                    <span>또는</span>
+                </div>
+
+                <button class="social-btn"><i class="fas fa-comment" style="margin-right:8px;"></i> 카카오로 시작하기</button>
+            </div>
+
+            <!-- Verify Form (Hidden by default) -->
+
+
+        </div>
+    </section>
+
+    <script>
+        // API 설정 - 로컬 개발 vs 배포 환경 자동 감지
+        const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_BASE = IS_LOCAL ? 'http://localhost:3000/api' : null; // 배포 환경에서는 데모 모드
+        const DEMO_MODE = !IS_LOCAL; // 배포 환경에서는 데모 모드 활성화
+
+        if (DEMO_MODE) {
+            console.log('🎭 데모 모드로 실행 중 (백엔드 없음)');
+        }
+
+
+
+        function toggleSignupMode(showSignup) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+
+            if (showSignup) {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            } else {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            }
+        }
+
+        // 1. Handle Signup
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPw').value;
+            const name = document.getElementById('regName').value;
+            // Role removed
+            const phoneNumber = document.getElementById('regPhone').value;
+
+            if (DEMO_MODE) {
+                // 데모 모드: localStorage에 저장
+                const userId = Date.now(); // 간단한 ID 생성
+                localStorage.setItem('demo_user', JSON.stringify({ userId, email, name, phoneNumber }));
+                alert('✅ 데모 모드: 가입이 완료되었습니다!\n로그인해주세요.');
+                toggleSignupMode(false);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, name, phoneNumber })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('가입이 완료되었습니다! 로그인해주세요.');
+                    toggleSignupMode(false); // Switch to login
+                } else {
+                    alert('가입 실패: ' + data.error);
+                }
+            } catch (err) {
+                alert('서버 연결 오류: ' + err.message + '\n\n[해결 방법]\n1. Node.js가 설치되어 있는지 확인하세요.\n2. 터미널에서 "node server.js"를 실행하세요.');
+                console.error(err);
+            }
+        }
+
+        // 2. Handle Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPw').value;
+
+            if (DEMO_MODE) {
+                // 데모 모드: localStorage에서 확인
+                const demoUser = JSON.parse(localStorage.getItem('demo_user') || 'null');
+                if (demoUser && demoUser.email === email) {
+                    localStorage.setItem('user_id', demoUser.userId);
+                    localStorage.setItem('user_name', demoUser.name);
+                    // Role removed
+                    alert(`✅ 데모 모드: ${demoUser.name}님 환영합니다.`);
+                    location.href = 'dashboard.html';
+                } else {
+                    alert('❌ 데모 모드: 먼저 회원가입을 해주세요.');
+                }
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Save User Info
+                    localStorage.setItem('user_id', data.userId);
+                    localStorage.setItem('user_name', data.name);
+                    // Role removed
+
+                    alert(`${data.name}님 환영합니다.`);
+                    location.href = 'dashboard.html';
+                } else {
+                    alert('로그인 실패: 아이디 또는 비밀번호를 확인하세요.');
+                }
+            } catch (err) {
+                alert('서버 연결 오류. 서버가 실행 중인지 확인해주세요.');
+                console.error(err);
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사과문 작성 - SafeSettlement</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Noto+Serif+KR:wght@400;700&family=Nanum+Pen+Script&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Standalone Page Styles */
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .write-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- New Word-Processor Toolbar --- */
+        .toolbar-panel {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            background: #2b2b35;
+            /* Dark solid color for better contrast */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            /* Slightly sharper corners like software */
+            padding: 10px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .tool-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-label {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-right: 5px;
+            display: none;
+            /* Icon based mostly */
+        }
+
+        /* Dropdown Selects */
+        .toolbar-select {
+            background: #1e1e24;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .toolbar-select:hover {
+            border-color: #666;
+        }
+
+        /* Color Circles */
+        .color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.selected {
+            box-shadow: 0 0 0 2px #fff;
+            border-color: transparent;
+        }
+
+        /* Pattern Buttons */
+        .pattern-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: #1e1e24;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .pattern-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .pattern-btn.selected {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* Action Buttons in Toolbar */
+        .tool-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Live Editor Canvas --- */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .paper-canvas {
+            width: 100%;
+            max-width: 800px;
+            min-height: 1123px;
+            /* A4 Height */
+            background-color: #fff;
+            /* Default */
+            color: #333;
+            padding: 80px 60px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            font-size: 16px;
+            line-height: 1.8;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+
+            /* Base Page Gap (Fallback) */
+            background-image: linear-gradient(to bottom, transparent 1103px, #2b2b35 1103px, #2b2b35 1123px);
+            background-size: 100% 1123px;
+            background-repeat: repeat-y;
+        }
+
+        /* --- Colors --- */
+        .bg-color-white {
+            background-color: #ffffff;
+        }
+
+        .bg-color-kraft {
+            background-color: #e6dfcc;
+            border: 1px solid #d4c5a9;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .bg-color-sky {
+            background-color: #e3f2fd;
+        }
+
+        .bg-color-lavender {
+            background-color: #f3e5f5;
+        }
+
+        /* --- Patterns & Frames --- */
+        .bg-pattern-none {
+            /* Keep base gap */
+        }
+
+        .bg-pattern-line {
+            /* Layer: Line Pattern, THEN Gap Gradient */
+            background-image:
+                linear-gradient(#ccc 1px, transparent 1px),
+                linear-gradient(to bottom, transparent 1103px, #2b2b35 1103px, #2b2b35 1123px);
+            background-size: 100% 34px, 100% 1123px;
+            line-height: 34px !important;
+        }
+
+        .bg-pattern-grid {
+            background-image:
+                linear-gradient(#ddd 1px, transparent 1px),
+                linear-gradient(90deg, #ddd 1px, transparent 1px),
+                linear-gradient(to bottom, transparent 1103px, #2b2b35 1103px, #2b2b35 1123px);
+            background-size: 25px 25px, 25px 25px, 100% 1123px;
+        }
+
+        /* Decorative Frames */
+        .bg-pattern-classic {
+            border: 2px solid #555 !important;
+            padding: 70px 50px !important;
+            position: relative;
+            /* Classic frame usually doesn't have internal gaps, but we can keep base if transparent */
+        }
+
+        .bg-pattern-classic::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid #888;
+            pointer-events: none;
+        }
+
+        .bg-pattern-plant {
+            background-color: transparent;
+            background-image:
+                radial-gradient(circle at top left, #a5d6a7 0%, transparent 40%),
+                radial-gradient(circle at bottom right, #a5d6a7 0%, transparent 40%),
+                linear-gradient(to bottom, transparent 1103px, #2b2b35 1103px, #2b2b35 1123px);
+            background-size: 150px 150px, 150px 150px, 100% 1123px;
+            background-repeat: no-repeat, no-repeat, repeat-y;
+            background-position: top left, bottom right, top left;
+        }
+
+        /* Font Classes */
+        .font-basic {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-serif {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .font-hand {
+            font-family: 'Nanum Pen Script', cursive;
+        }
+
+        /* Actions */
+        .action-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 200;
+        }
+
+        /* Textarea override */
+        #mainCanvas {
+            width: 100%;
+            min-height: 800px;
+            border: none;
+            outline: none;
+            resize: none;
+            background: transparent !important;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            /* Important for line pattern */
+            color: inherit;
+            padding: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+            /* Ensure padding doesn't break width */
+        }
+
+        .paper-canvas {
+            box-sizing: border-box;
+            /* Crucial for correct sizing with padding */
+        }
+
+        #pageNumberContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container-dark #pageNumberContainer .page-number {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .page-number {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: rgba(0, 0, 0, 0.4);
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            border-bottom: 20px solid transparent;
+            /* Spacer for bottom */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="write-layout">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-glass" onclick="location.href='case_detail.html'">
+                <i class="fas fa-arrow-left"></i> 나가기
+            </button>
+            <h2 style="margin: 0;">사과문 작성 스튜디오</h2>
+            <div style="width: 100px;"></div>
+        </div>
+
+        <!-- 1. Word-Processor Toolbar -->
+        <div class="toolbar-panel">
+
+            <!-- Paper Color -->
+            <div class="tool-group">
+                <span class="tool-label">색상</span>
+                <div class="color-btn bg-color-white selected" onclick="updateColor('white', this)" title="순백색"></div>
+                <div class="color-btn bg-color-kraft" onclick="updateColor('kraft', this)" title="크라프트"></div>
+                <div class="color-btn bg-color-sky" onclick="updateColor('sky', this)" title="스카이"></div>
+                <div class="color-btn bg-color-lavender" onclick="updateColor('lavender', this)" title="라벤더"></div>
+            </div>
+
+            <div class="tool-divider"></div>
+
+            <!-- Paper Pattern -->
+            <div class="tool-group">
+                <button class="pattern-btn selected" onclick="updatePattern('none', this)" title="무지">
+                    <i class="fas fa-square"></i>
+                </button>
+                <button class="pattern-btn" onclick="updatePattern('line', this)" title="줄노트">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button class="pattern-btn" onclick="updatePattern('grid', this)" title="격자">
+                    <i class="fas fa-border-all"></i>
+                </button>
+                <button class="pattern-btn" onclick="updatePattern('classic', this)" title="클래식 테두리">
+                    <i class="far fa-square"></i> <!-- Double square icon approximation -->
+                </button>
+                <button class="pattern-btn" onclick="updatePattern('plant', this)" title="식물 테두리">
+                    <i class="fas fa-leaf"></i>
+                </button>
+            </div>
+
+            <div class="tool-divider"></div>
+
+            <!-- Font Selection -->
+            <div class="tool-group">
+                <select class="toolbar-select" id="fontSelect" onchange="updateFont(this.value)">
+                    <option value="basic">기본 고딕체</option>
+                    <option value="serif">진지한 명조체</option>
+                    <option value="hand">정성 손글씨체</option>
+                </select>
+
+                <select class="toolbar-select" id="sizeSelect" onchange="updateSize(this.value)" style="width: 80px;">
+                    <option value="12">12pt</option>
+                    <option value="14">14pt</option>
+                    <option value="16" selected>16pt</option>
+                    <option value="18">18pt</option>
+                    <option value="20">20pt</option>
+                    <option value="24">24pt</option>
+                    <option value="28">28pt</option>
+                </select>
+            </div>
+
+            <!-- Right Side Tools -->
+            <div class="tool-group" style="margin-left: auto;">
+                <input type="file" id="hiddenFile" style="display: none;"
+                    onchange="alert('파일이 첨부되었습니다: ' + this.files[0].name)">
+                <button class="tool-btn" onclick="document.getElementById('hiddenFile').click()">
+                    <i class="fas fa-upload"></i> 파일 업로드
+                </button>
+                <button class="tool-btn" style="border-color: var(--secondary); color: var(--secondary);"
+                    onclick="location.href='apology_guide.html'">
+                    <i class="fas fa-magic"></i> AI 작성 도우미
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 2. Live Canvas -->
+        <div class="editor-container">
+            <div id="paperArea" class="paper-canvas bg-color-white bg-pattern-none font-basic"
+                style="position: relative; padding-bottom: 100px;">
+                <!-- Page Numbers Overlay -->
+                <div id="pageNumberContainer"></div>
+
+                <textarea id="mainCanvas" placeholder="여기에 내용을 작성하세요...&#10;&#10;진심 어린 사과는 마음을 움직입니다."
+                    spellcheck="false"></textarea>
+
+                <div
+                    style="position: absolute; bottom: 80px; left: 0; right: 0; text-align: center; color: rgba(0,0,0,0.4); font-size: 1.1em; pointer-events: none; user-select: none;">
+                    ※ 마지막에 날짜와 이름을 꼭 적어주세요.
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Actions -->
+        <div class="action-float">
+            <button class="btn btn-primary" style="padding: 15px 30px; box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);"
+                onclick="sendApology()">
+                <i class="fas fa-paper-plane"></i> 전송하기
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden State -->
+    <input type="hidden" id="stateColor" value="white">
+    <input type="hidden" id="statePattern" value="none">
+
+    <script>
+        if (!localStorage.getItem('current_case_id')) {
+            alert("잘못된 접근입니다.");
+            location.href = 'dashboard.html';
+        }
+
+        const canvas = document.getElementById('mainCanvas');
+        const paper = document.getElementById('paperArea');
+
+        const PAGE_HEIGHT = 1123; // A4 px height approx
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedText = localStorage.getItem('saved_apology_text');
+            if (savedText) {
+                canvas.value = savedText;
+            }
+            adjustHeight();
+
+            // Set Date
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            document.getElementById('autoDate').textContent = dateStr;
+
+            // Set Name
+            const userName = localStorage.getItem('user_name') || '작성자';
+            document.getElementById('autoName').textContent = `${userName} 올림`;
+        });
+
+        canvas.addEventListener('input', adjustHeight);
+
+        function adjustHeight() {
+            // 1. Reset textarea (shrink if deleting)
+            canvas.style.height = 'auto';
+
+            // 2. Set Textarea height to fit text exactly
+            const textHeight = canvas.scrollHeight;
+            canvas.style.height = textHeight + 'px';
+
+            // 3. Calculate used vertical space (Text + Padding)
+            // 80px (Top Padding) + Text + 60px (Bottom Buffer)
+            const totalNeeded = 80 + textHeight + 60;
+
+            // 4. Calculate Page Count (Snap to A4)
+            const pageCount = Math.max(1, Math.ceil(totalNeeded / PAGE_HEIGHT));
+            const targetHeight = pageCount * PAGE_HEIGHT;
+
+            // 5. Apply Page Snap
+            paper.style.height = targetHeight + 'px';
+
+            updatePageNumbers(pageCount);
+        }
+
+        function updatePageNumbers(count) {
+            const container = document.getElementById('pageNumberContainer');
+            if (!container) return;
+            container.innerHTML = ''; // Clear existing
+
+            // Only show numbers if more than 1 page
+            if (count > 1) {
+                for (let i = 1; i <= count; i++) {
+                    const numDiv = document.createElement('div');
+                    numDiv.className = 'page-number';
+                    numDiv.innerText = `- ${i} -`;
+                    // Position at bottom of each page
+                    // Top = (PageHeight * i) - BottomMargin(e.g. 50px)
+                    numDiv.style.top = (i * PAGE_HEIGHT - 50) + 'px';
+                    container.appendChild(numDiv);
+                }
+            }
+        }
+
+        // --- Toolbar Logic ---
+
+        function updateFont(val) {
+            paper.classList.remove('font-basic', 'font-serif', 'font-hand');
+            paper.classList.add('font-' + val);
+        }
+
+        function updateSize(val) {
+            paper.style.fontSize = val + 'px';
+            // Adjust line height if line pattern is active? 
+            // For simplicity, line pattern is fixed size (30px), so ideally font size should be < 30px.
+            // A truly dynamic line height would require updating background size too.
+            // Using a safe constant line-height or inherit is better.
+        }
+
+        function updateColor(val, el) {
+            // Remove all color classes
+            paper.classList.remove('bg-color-white', 'bg-color-kraft', 'bg-color-sky', 'bg-color-lavender');
+            paper.classList.add('bg-color-' + val);
+
+            // Dark Mode Text Logic REMOVED - all new colors are light.
+            const textArea = document.getElementById('mainCanvas');
+            const footer = document.getElementById('paperFooter');
+
+            textArea.style.color = '#333';
+            footer.style.color = 'inherit'; // Follows text color exactly
+
+
+            // Visual State
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function updatePattern(val, el) {
+            // Remove all pattern classes
+            paper.classList.remove('bg-pattern-none', 'bg-pattern-line', 'bg-pattern-grid', 'bg-pattern-classic', 'bg-pattern-plant');
+            paper.classList.add('bg-pattern-' + val);
+
+            // Visual State
+            document.querySelectorAll('.pattern-btn').forEach(btn => btn.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function sendApology() {
+            if (canvas.value.length < 10) {
+                alert("내용을 10자 이상 작성해주세요.");
+                return;
+            }
+            if (confirm("작성하신 사과문을 전송하시겠습니까?")) {
+                alert("✅ 사과문이 성공적으로 전송되었습니다.");
+                localStorage.removeItem('saved_apology_text');
+                location.href = 'case_detail.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

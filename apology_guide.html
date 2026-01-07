@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 사과문 작성 스튜디오 - SafeSettlement</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Nanum+Myeongjo:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-light: rgba(74, 222, 128, 0.1);
+        }
+
+        .studio-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        @media (max-width: 1000px) {
+            .studio-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .wizard-card {
+            background: var(--bg-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .editor-card {
+            background: #fff;
+            border-radius: var(--radius-md);
+            padding: 40px;
+            color: #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .paper-input {
+            width: 100%;
+            flex: 1;
+            border: none;
+            resize: none;
+            font-family: 'Nanum Myeongjo', serif;
+            padding-top: 5px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .select-input,
+        .text-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .select-input option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* Custom Checkbox Styling */
+        .check-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .custom-check {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.2s;
+        }
+
+        .custom-check:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-check input {
+            display: none;
+        }
+
+        .check-indicator {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .custom-check input:checked+.check-indicator {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .check-indicator::after {
+            content: '✓';
+            color: #1a1a2e;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .custom-check input:checked+.check-indicator::after {
+            display: block;
+        }
+
+        .custom-check span {
+            font-size: 0.9rem;
+            color: #ddd;
+        }
+
+        .select-input option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .tone-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tone-option {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.9rem;
+        }
+
+        .tone-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tone-option.selected {
+            background: var(--primary-light);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .ref-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .ref-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            margin-right: 8px;
+            background: var(--secondary);
+            margin-right: 8px;
+        }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo" style="font-size: 1.5rem;">AI 작성 도우미</a>
+
+            <nav class="nav-links" style="margin-top: 20px;">
+                <!-- Studio Home / Wizard -->
+                <div class="nav-item active" id="menuHome" onclick="showWizard()">
+                    <i class="fas fa-layer-group"></i>
+                    <span>스튜디오 홈</span>
+                </div>
+                <div class="nav-item" id="menuDraft" onclick="showWizard()">
+                    <i class="fas fa-magic"></i>
+                    <span>AI 초안 생성</span>
+                </div>
+                <div class="nav-item" id="menuRef" onclick="showReferences()">
+                    <i class="fas fa-book-open"></i>
+                    <span>유형별 사과문 예시</span>
+                </div>
+
+                <div
+                    style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; padding-top: 10px;">
+                </div>
+
+                <div class="nav-item" onclick="confirmReturn()">
+                    <i class="fas fa-undo"></i>
+                    <span>돌아가기 (작성 취소)</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" style="overflow: hidden;">
+            <div class="studio-grid">
+
+                <!-- Left Panel Container -->
+                <div class="wizard-card">
+
+                    <!-- View 1: Wizard (Default) -->
+                    <!-- View 1: Wizard (Default) -->
+                    <div id="wizardPanel">
+                        <h3 style="margin-bottom: 15px;"><i class="fas fa-robot"></i> AI 작성 설정</h3>
+
+                        <!-- 1. Basic Info -->
+                        <div class="form-section" style="margin-bottom: 25px;">
+                            <label class="form-label">1. 기본 정보</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <span style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">사건
+                                        유형</span>
+                                    <select class="select-input" id="caseType">
+                                        <option value="assault">폭행/상해</option>
+                                        <option value="traffic">교통사고</option>
+                                        <option value="defamation">명예훼손</option>
+                                        <option value="fraud">금전문제</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span
+                                        style="font-size: 0.8rem; color: #999; display:block; margin-bottom:5px;">관계</span>
+                                    <select class="select-input" id="relationship">
+                                        <option value="acquaintance">지인</option>
+                                        <option value="stranger">초면</option>
+                                        <option value="coworker">직장동료</option>
+                                        <option value="friend">친구</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Cause (Checkbox) -->
+                        <div class="form-section" style="margin-bottom: 25px;">
+                            <label class="form-label">2. 사건 발생 원인 (중복 선택 가능)</label>
+                            <div class="check-group" id="causeGroup">
+                                <label class="custom-check">
+                                    <input type="checkbox" value="alcohol">
+                                    <div class="check-indicator"></div>
+                                    <span>술김에/취중 (판단력 저하)</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="anger">
+                                    <div class="check-indicator"></div>
+                                    <span>순간적인 분노/감정 조절 실패</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="mistake">
+                                    <div class="check-indicator"></div>
+                                    <span>오해나 착각으로 인한 실수</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="careless">
+                                    <div class="check-indicator"></div>
+                                    <span>부주의/안일한 생각</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="financial">
+                                    <div class="check-indicator"></div>
+                                    <span>경제적 어려움/생활고</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 3. Damage (Checkbox) -->
+                        <div class="form-section" style="margin-bottom: 25px;">
+                            <label class="form-label">3. 피해 내용 (중복 선택 가능)</label>
+                            <div class="check-group" id="damageGroup">
+                                <label class="custom-check">
+                                    <input type="checkbox" value="physical">
+                                    <div class="check-indicator"></div>
+                                    <span>신체적 상해/통증</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="mental">
+                                    <div class="check-indicator"></div>
+                                    <span>정신적 충격/트라우마</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="money">
+                                    <div class="check-indicator"></div>
+                                    <span>금전적 손실/차량 파손</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="honor">
+                                    <div class="check-indicator"></div>
+                                    <span>명예 실추/수치심</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 4. Recovery & Promise (Checkbox) -->
+                        <div class="form-section" style="margin-bottom: 25px;">
+                            <label class="form-label">4. 노력 및 약속</label>
+                            <div class="check-group" id="effortGroup">
+                                <label class="custom-check">
+                                    <input type="checkbox" value="comp">
+                                    <div class="check-indicator"></div>
+                                    <span>합의금/배상/치료비 지급</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="habit">
+                                    <div class="check-indicator"></div>
+                                    <span>잘못된 습관 개선(금주 등)</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="counsel">
+                                    <div class="check-indicator"></div>
+                                    <span>상담/교육 이수</span>
+                                </label>
+                                <label class="custom-check">
+                                    <input type="checkbox" value="delete">
+                                    <div class="check-indicator"></div>
+                                    <span>게시글 삭제 및 정정</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <label class="form-label">어조 (Tone)</label>
+                            <div class="tone-selector">
+                                <div class="tone-option selected" onclick="selectTone(this, 'emotional')">
+                                    <i class="fas fa-heart"></i><br>감성적/호소
+                                </div>
+                                <div class="tone-option" onclick="selectTone(this, 'formal')">
+                                    <i class="fas fa-user-tie"></i><br>정중/격식
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <button class="btn btn-primary" style="margin-top: 30px; width: 100%;"
+                            onclick="generateDraft()">
+                            <i class="fas fa-pen-fancy"></i> AI 초안 생성하기
+                        </button>
+                    </div>
+
+                    <!-- View 2: Reference Library (Hidden Default) -->
+                    <div id="referencePanel" style="display: none;">
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-book-open"></i> 유형별 사과문 예시</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                            사건 유형별로 검증된 사과문 예시를 참고하여 내 상황에 맞게 수정해보세요.
+                        </p>
+
+                        <!-- Category: Assault -->
+                        <div class="ref-category">
+                            <h4
+                                style="color: #4ade80; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                                <i class="fas fa-fist-raised"></i> 폭행/상해
+                            </h4>
+                            <div class="ref-item" onclick="applyExample('assault1')">
+                                <h5>우발적 폭행 (술자리 등)</h5>
+                                <p style="font-size: 0.8rem; color: #999;">순간의 감정을 참지 못하고...</p>
+                            </div>
+                            <div class="ref-item" onclick="applyExample('assault2')">
+                                <h5>상해 피해 발생 (전치)</h5>
+                                <p style="font-size: 0.8rem; color: #999;">치료가 필요한 상처를 입힌 점...</p>
+                            </div>
+                        </div>
+
+                        <!-- Category: Defamation -->
+                        <div class="ref-category" style="margin-top: 20px;">
+                            <h4
+                                style="color: #ff6b6b; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                                <i class="fas fa-bullhorn"></i> 모욕/명예훼손
+                            </h4>
+                            <div class="ref-item" onclick="applyExample('defam1')">
+                                <h5>온라인 댓글/게시글</h5>
+                                <p style="font-size: 0.8rem; color: #999;">익명성 뒤에 숨어 상처를...</p>
+                            </div>
+                            <div class="ref-item" onclick="applyExample('defam2')">
+                                <h5>단톡방 내 발언</h5>
+                                <p style="font-size: 0.8rem; color: #999;">여럿이 있는 공간에서 경솔하게...</p>
+                            </div>
+                        </div>
+
+                        <!-- Category: Traffic -->
+                        <div class="ref-category" style="margin-top: 20px;">
+                            <h4
+                                style="color: #f9cb28; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                                <i class="fas fa-car-crash"></i> 교통사고
+                            </h4>
+                            <div class="ref-item" onclick="applyExample('traffic1')">
+                                <h5>부주의한 접촉사고</h5>
+                                <p style="font-size: 0.8rem; color: #999;">안전거리를 미확보하여...</p>
+                            </div>
+                        </div>
+
+                        <!-- Category: Fraud/Other -->
+                        <div class="ref-category" style="margin-top: 20px;">
+                            <h4
+                                style="color: #aaa; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                                <i class="fas fa-coins"></i> 사기/기타
+                            </h4>
+                            <div class="ref-item" onclick="applyExample('fraud1')">
+                                <h5>금전 채무 불이행</h5>
+                                <p style="font-size: 0.8rem; color: #999;">약속된 날짜에 변제하지 못해...</p>
+                            </div>
+                        </div>
+
+                        <!-- Load/Return Button -->
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="showWizard()">
+                                <i class="fas fa-check"></i> 이 내용으로 편집 계속하기
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Right: Editor Area -->
+                <div class="editor-card">
+                    <div
+                        style="margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <input type="text" id="docTitle" placeholder="제목 (자동 생성됩니다)"
+                            style="width: 70%; border:none; font-size: 1.5rem; font-weight: bold; font-family: 'Nanum Myeongjo'; outline: none; color: #333;">
+                        <span style="font-size: 0.9rem; color: #999;" id="wordCount">0자</span>
+                    </div>
+
+                    <textarea class="paper-input" id="mainEditor"
+                        placeholder="왼쪽 메뉴에서 설정을 완료하고 [초안 생성하기]를 눌러주세요.&#13;&#10;AI가 상황에 맞는 최적의 사과문을 작성해드립니다."
+                        oninput="updateWordCount()"></textarea>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button class="btn btn-glass" style="border: 1px solid #ddd; color: #666;"
+                            onclick="copyToClipboard()">
+                            <i class="fas fa-copy"></i> 복사
+                        </button>
+                        <button class="btn btn-primary" onclick="applyAndReturn()"
+                            style="background: linear-gradient(135deg, #4ade80, #22c55e); box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);">
+                            <i class="fas fa-check-double"></i> 초안 완성: 작성 페이지에 적용하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        let selectedTone = 'emotional';
+
+        function selectTone(el, tone) {
+            document.querySelectorAll('.tone-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedTone = tone;
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('mainEditor').value;
+            document.getElementById('wordCount').innerText = text.length + '자';
+        }
+
+        // Sentence Mapping Data
+        const textMap = {
+            cause: {
+                alcohol: "당시 저는 술에 취해 이성적인 판단이 어려운 상태였으며,",
+                anger: "순간적으로 치밀어 오르는 감정을 주체하지 못했고,",
+                mistake: "상대방의 의도를 오해하거나 상황을 잘못 판단하여,",
+                careless: "저의 안일하고 부주의한 태도로 인해,",
+                financial: "경제적으로 궁박한 상황에서 잘못된 판단을 내렸으며,"
+            },
+            damage: {
+                physical: "씻을 수 없는 신체적 고통과 상해를",
+                mental: "평생 지우기 힘든 정신적 충격과 트라우마를",
+                money: "감당하기 힘든 금전적 손실과 재산 피해를",
+                honor: "많은 사람들 앞에서의 수치심과 명예 실추를"
+            },
+            effort: {
+                comp: "피해자분께서 납득하실 수 있는 수준의 피해 배상과 치료비 지원을 약속드리며,",
+                habit: "다시는 이런 일이 없도록 금주를 포함한 생활 습관을 철저히 개선하고,",
+                counsel: "전문적인 심리 상담과 교육을 이수하여 제 자신을 돌아보고,",
+                delete: "문제가 된 게시글을 즉시 삭제하고 정정문을 게시하여 명예 회복을 위해 노력하며,"
+            }
+        };
+
+        function getCheckedValues(groupId) {
+            const group = document.getElementById(groupId);
+            const checked = [];
+            group.querySelectorAll('input:checked').forEach(input => checked.push(input.value));
+            return checked;
+        }
+
+        function generateDraft() {
+            const btn = document.querySelector('.btn-primary');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 생성 중...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const relation = document.getElementById('relationship').value;
+                const causes = getCheckedValues('causeGroup');
+                const damages = getCheckedValues('damageGroup');
+                const efforts = getCheckedValues('effortGroup');
+
+                let draftTitle = "진심으로 사죄의 말씀을 올립니다";
+
+                // 1. Salutation
+                const salutations = {
+                    'stranger': "선생님께,\n\n일면식도 없는 저로 인해 씻을 수 없는 피해를 입으신 선생님께",
+                    'acquaintance': "안녕하십니까, OO입니다.\n\n평소 알고 지내던 사이임에도 불구하고 저의 불미스러운 행동으로 큰 실망감을 드려",
+                    'coworker': "OOO님께,\n\n함께 일하는 동료로서 모범이 되어야 할 제가, 오히려 큰 폐를 끼치게 되어",
+                    'friend': "친구야,\n\n우리가 쌓아왔던 우정을 생각하면 이런 글을 쓰는 것조차 너무나 부끄럽고 미안해"
+                };
+                let text = salutations[relation] + " 죄송하다는 말씀을 먼저 올립니다.\n\n";
+
+                // 2. Incident & Cause (Smooth Combo)
+                text += "지난 사건 당시, ";
+                if (causes.length > 0) {
+                    // Combine mapped strings
+                    const causeSentences = causes.map(c => textMap.cause[c] || "").join(" ");
+                    text += causeSentences + " 돌이킬 수 없는 잘못을 저지르고 말았습니다.";
+                } else {
+                    text += "저의 성숙하지 못한 태도와 잘못된 판단으로 인해 큰 실수를 저질렀습니다.";
+                }
+                text += " 그 어떤 변명으로도 저의 행동이 정당화될 수 없음을 뼈저리게 느끼고 깊이 후회하고 있습니다.\n\n";
+
+                // 3. Damage Acknowledgment
+                if (damages.length > 0) {
+                    text += "무엇보다 저로 인해 피해자님께서 겪으셨을 ";
+                    const damageList = damages.map(d => textMap.damage[d] || "").join(" 또한 ");
+                    text += damageList + " 생각하면, 죄책감에 고개를 들 수가 없습니다. ";
+                    text += "가해자인 제가 그 고통의 깊이를 감히 다 헤아릴 수는 없겠지만, 매 순간 가슴 깊이 통감하고 있습니다.";
+                } else {
+                    text += "저의 행동으로 인해 입으신 유무형의 피해와 마음에 남았을 상처에 대해 깊이 사죄드립니다.";
+                }
+                text += "\n\n";
+
+                // 4. Recovery & Promise
+                text += "이미 벌어진 일을 되돌릴 수는 없겠지만, 앞으로 제가 할 수 있는 모든 책임을 다하고자 합니다.\n";
+                if (efforts.length > 0) {
+                    const effortSentences = efforts.map(e => textMap.effort[e] || "").join(" ");
+                    text += "우선 " + effortSentences + " 피해자님의 회복이 최우선이 될 수 있도록 제가 할 수 있는 모든 노력을 다하겠습니다.\n";
+                } else {
+                    text += "법적인 책임은 물론, 도의적인 책임까지 끝까지 다하겠습니다.\n";
+                }
+
+                // 5. Closing
+                if (selectedTone === 'emotional') {
+                    text += "\n피해자분께서 겪으셨을 고통과 두려움을 매일 생각하며 반성하고 있습니다. 부디 제 진심 어린 사과가 조금이나마 닿기를 간절히 기도합니다.\n\n정말 죄송합니다.";
+                } else {
+                    text += "\n발생한 모든 피해에 대해 끝까지 책임을 질 것이며, 다시는 불미스러운 일이 발생하지 않도록 각별히 주의하며 살겠습니다.\n\n죄송합니다.";
+                }
+
+                document.getElementById('docTitle').value = draftTitle;
+                document.getElementById('mainEditor').value = text;
+                updateWordCount();
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        function applyRef(id) {
+            const textarea = document.getElementById('mainEditor');
+            let textToInsert = "";
+
+            if (id === 'ref1') textToInsert = "저의 한순간의 잘못된 판단으로 인해 씻을 수 없는 상처를 드린 점, 깊이 반성하고 있습니다. ";
+            if (id === 'ref2') textToInsert = "치료비 전액과 위자료를 포함하여 피해자분께서 납득하실 수 있는 수준으로 피해를 변제하겠습니다. ";
+
+            textarea.setRangeText(textToInsert, textarea.selectionStart, textarea.selectionEnd, 'end');
+            textarea.focus();
+            updateWordCount();
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("mainEditor");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("클립보드에 복사되었습니다.");
+        }
+
+        function confirmReturn() {
+            if (confirm("작성 중인 내용이 저장되지 않습니다.\n정말 스튜디오를 나가시겠습니까?")) {
+                location.href = 'apology_write.html';
+            }
+        }
+
+        // New Logic: Package Draft and Deliver
+        function applyAndReturn() {
+            const text = document.getElementById("mainEditor").value;
+            if (text.length < 10) {
+                alert("내용이 너무 짧습니다. 최소 10자 이상 작성해주세요.");
+                return;
+            }
+
+            if (confirm("완성된 초안을 사과문 작성 페이지에 적용하시겠습니까?\n(기존 작성 내용은 대치됩니다)")) {
+                // Save to localStorage 'Packet'
+                localStorage.setItem('saved_apology_text', text);
+
+                // Redirect to standalone write page
+                location.href = 'apology_write.html';
+            }
+        }
+
+        // --- Navigation Logic ---
+        function showWizard() {
+            document.getElementById('wizardPanel').style.display = 'block';
+            document.getElementById('referencePanel').style.display = 'none';
+
+            // Sidebar Active State
+            setActiveMenu('menuDraft');
+        }
+
+        function showReferences() {
+            document.getElementById('wizardPanel').style.display = 'none';
+            document.getElementById('referencePanel').style.display = 'block';
+
+            // Sidebar Active State
+            setActiveMenu('menuRef');
+        }
+
+        function setActiveMenu(id) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+
+            // "Studio Home" effectively maps to Draft wizard for now
+            if (id === 'menuDraft') {
+                const home = document.getElementById('menuHome');
+                if (home) home.classList.add('active');
+            }
+        }
+
+        // --- Reference Data & Logic ---
+        const exampleTexts = {
+            'assault1': `[폭행 - 술자리 우발]
+존경하는 피해자님께,
+안녕하십니까. 지난 X월 X일, OO에서의 불미스러운 일로 피해자님께 씻을 수 없는 상처를 입힌 홍길동입니다.
+
+먼저 어떤 변명보다, 저의 미성숙하고 폭력적인 행동으로 인해 육체적, 정신적 고통을 겪으셨을 피해자님께 머리 숙여 깊이 사죄드립니다. 술에 취해 우발적으로 저지른 행동이었다고는 하나, 이는 결코 용서받을 수 없는 저의 잘못이며, 당시 저의 모습이 너무나 부끄럽고 후회스럽습니다.
+
+사건 직후부터 지금까지, 저의 잘못된 행동이 타인에게 얼마나 큰 공포와 피해를 줄 수 있는지 뼈저리게 깨닫고 있습니다. 피해자님께서 느끼셨을 모멸감과 충격을 생각하면, 입이 열 개라도 할 말이 없습니다.
+
+앞으로 성실히 경찰 조사에 임하여 저의 죄값을 달게 받겠습니다. 또한, 피해자님의 치료와 회복을 위해 제가 할 수 있는 모든 책임을 다하겠습니다. 다시는 술로 인해 이러한 실수를 반복하지 않도록, 금주를 포함한 모든 노력을 다할 것을 약속드립니다.
+
+부디 너그러운 마음으로 저의 사과를 받아주시길 간청드리며, 다시 한번 진심으로 죄송합니다.`,
+
+            'assault2': `[상해 - 전치 발생]
+피해자님께 올립니다.
+OOO입니다. 저의 한순간의 잘못된 판단으로 인해 전치 X주의 상해를 입으시고, 병원 치료를 받으며 고통받고 계신 피해자님을 생각하면 죄책감에 잠을 이를 수가 없습니다.
+
+건강하셔야 할 신체에 상처를 입히고, 일상생활에 큰 지장을 드린 점에 대해 깊이 반성하고 있습니다. 무엇보다 저의 폭력적인 행동이 피해자님께 얼마나 큰 트라우마가 되었을지 짐작조차 하기 두렵습니다.
+
+제가 저지른 일에 대해서는 법적인 처벌을 달게 받겠습니다. 그와 별도로, 피해자님께서 부담하신 치료비 전액과 일실수입, 그리고 정신적 위자료를 포함하여 피해자님께서 납득하실 수 있는 수준으로 배상할 것을 약속드립니다.
+
+이번 일을 계기로 사람이 사람을 대하는 태도에 대해 다시 한번 깊이 성찰하고, 평생 속죄하는 마음으로 살겠습니다. 정말 죄송합니다.`,
+
+            'defam1': `[명예훼손 - 악성 댓글]
+피해자님께 진심으로 사죄드립니다.
+저는 인터넷 커뮤니티(또는 SNS)에 피해자님에 대한 허위 사실과 비방의 댓글을 게시했던 당사자입니다.
+
+익명성 뒤에 숨어, 군중심리에 휩쓸려 피해자님께 씻을 수 없는 상처를 드렸습니다. "남들도 다 하니까", "가볍게 쓴 글이니까"라는 안일한 생각이 당사자에게는 비수가 되어 꽂힐 수 있다는 것을 뒤늦게야 뼈저리게 깨달았습니다.
+
+작성한 게시글은 즉시 삭제하였으며, 커뮤니티 관리자에게 요청하여 관련 기록이 남지 않도록 조치하였습니다. 하지만 이미 퍼진 말들로 인해 피해자님께서 겪으신 수치심과 명예 실추를 되돌릴 수 없다는 사실에 마음이 무겁습니다.
+
+앞으로는 온라인상에서 타인을 존중하며, 다시는 이러한 비겁한 행동을 하지 않겠습니다. 저의 경솔한 손가락이 초래한 결과에 대해 깊이 반성하며, 피해자님께 다시 한번 머리 숙여 사과드립니다.`,
+
+            'defam2': `[모욕 - 단체 채팅방]
+OOO님께,
+지난 O월 O일, 단체 채팅방에서 제가 OOO님을 지칭하며 모욕적인 언사를 한 것에 대해 깊이 사과드립니다.
+
+많은 사람들이 있는 공개적인 공간에서, OOO님의 인격을 모독하고 명예를 훼손하는 발언을 한 것은 명백한 저의 잘못입니다. 당시 분위기에 휩쓸려 재미로 던진 말이 OOO님께 얼마나 큰 수치심을 안겨드렸을지 깊이 생각하지 못했습니다.
+
+해당 채팅방에 있던 모든 분들에게 제 발언이 잘못되었음을 정정하고 공개적으로 사과하였습니다. 하지만 이것으로 OOO님의 상처가 아물지 않으리라는 것을 잘 알고 있습니다.
+
+저의 무례함과 경솔함을 용서해 주십시오. 앞으로는 말의 무게를 무겁게 여기고, 타인을 배려하는 사람이 되도록 노력하겠습니다. 죄송합니다.`,
+
+            'traffic1': `[교통사고 - 안전운전 불이행]
+피해자님께,
+안녕하십니까. 지난 X월 X일 발생한 교통사고의 가해 차량 운전자 OOO입니다.
+
+저의 부주의와 안전거리 미확보(또는 신호 위반)로 인해 사고를 유발하고, 피해자님의 소중한 차량 파손과 신체적 고통을 초래한 점 진심으로 사과드립니다. 바쁘신 일상 와중에 저 때문에 불필요한 시간을 뺏기고, 병원 치료와 차량 수리 등 번거로움을 겪으시게 되어 너무나 죄송합니다.
+
+사고 당시 놀란 마음에 제대로 사과조차 드리지 못한 것 같아 내내 마음에 걸렸습니다. 피해자님의 빠른 쾌유를 진심으로 기원하며, 차량 수리 기간 동안 겪으실 불편함에 대해서도 송구스러운 마음뿐입니다.
+
+보험사를 통한 배상 처리와는 별개로, 인간적인 도의를 다해 사과드리고 싶어 펜을 들었습니다. 앞으로는 운전대를 잡을 때마다 피해자님을 생각하며, 다시는 이런 사고를 내지 않도록 안전 운전에 만전을 기하겠습니다. 죄송합니다.`,
+
+            'fraud1': `[사기/채무불이행 - 금전 문제]
+채권자 OOO님께,
+약속드린 날짜에 채무를 변제하지 못하고, 연락조차 제대로 닿지 않아 OOO님께 금전적 손해와 심려를 끼쳐드린 점, 깊이 사죄드립니다.
+
+믿고 돈을 빌려주신 OOO님의 신뢰를 저버린 행동에 대해 입이 열 개라도 할 말이 없습니다. "곧 갚을 수 있겠지"라는 안일한 생각으로 무리하게 자금을 융통하다가 상황이 악화되었고, 두려운 마음에 연락을 피하는 비겁한 행동까지 저질렀습니다. 이는 명백한 저의 잘못입니다.
+
+현재 저의 상황이 어렵긴 하지만, OOO님의 돈은 제가 땀 흘려 일해서라도 반드시 전액 변제하겠습니다. 구체적으로는 매월 X만원씩, X개월에 걸쳐 분할 상환하고자 하오니, 부디 한 번만 더 기회를 주시기를 간청드립니다.
+
+돈보다 중요한 신뢰를 잃은 점 깊이 통감하고 있으며, 늦어지더라도 반드시 약속을 이행하여 OOO님께 피해가 가지 않도록 최선을 다하겠습니다. 다시 한번 고개 숙여 사죄드립니다.`
+        };
+
+        function applyRef(id) {
+            // Deprecated function name in some places, unifying to applyExample
+            applyExample(id);
+        }
+
+        function applyExample(id) {
+            let text = exampleTexts[id];
+            if (!text) return;
+
+            // Strip out the title header [Category - Title] if it exists
+            // Regex matches [Anything] at the start of the string, plus following newlines
+            text = text.replace(/^\[.*?\]\s*/, '');
+
+            const textarea = document.getElementById('mainEditor');
+
+            // Overwrite existing text
+            textarea.value = text;
+            textarea.scrollTop = 0; // Scroll to top
+
+            updateWordCount();
+
+            // Visual Feedback
+            document.querySelectorAll('.ref-card').forEach(el => el.style.border = '1px solid rgba(255,255,255,0.1)');
+            document.querySelector(`[onclick="applyExample('${id}')"]`)?.closest('.ref-card')?.setAttribute('style', 'border: 1px solid var(--primary) !important');
+            const btn = document.querySelector(".btn-primary[onclick='applyAndReturn()']");
+            // Highlight the confirm button
+            btn.classList.add("btn-highlight-pulse"); // CSS animation class could be added
+            alert("선택하신 예시문이 에디터에 적용되었습니다.\n내용을 수정한 뒤, 우측 하단의 [초안 완성: 작성 페이지에 적용하기]를 눌러주세요.");
+        }
+    </script>
+</body>
+
+</html>

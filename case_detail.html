@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사건 상세 - SafeSettlement</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Noto+Serif+KR:wght@400;600&family=Nanum+Pen+Script&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes blink {
+            0% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+                border: 1px solid rgba(255, 165, 0, 0.8);
+            }
+
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 20px rgba(255, 165, 0, 0.2);
+                border: 1px solid rgba(255, 165, 0, 0.3);
+            }
+
+            100% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+                border: 1px solid rgba(255, 165, 0, 0.8);
+            }
+        }
+
+        .status-current {
+            animation: blink 2s infinite;
+            color: #FFB84D;
+            border: 1px solid #FFB84D;
+        }
+
+        .status-completed {
+            background: rgba(74, 222, 128, 0.1);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+        }
+
+        .status-pending {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar - 사건별 메뉴 -->
+        <aside class="sidebar">
+            <a href="dashboard.html" class="logo" style="cursor: pointer;">
+                <i class="fas fa-arrow-left" style="font-size: 0.9rem; margin-right: 8px;"></i>
+                SafeSettlement.
+            </a>
+
+            <!-- 사건 정보 헤더 -->
+            <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 20px;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">현재 사건</div>
+                <div style="font-weight: 600; font-size: 1.1rem;" id="sidebarCaseNumber">-</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                    <i class="fas fa-user-friends"></i>
+                    <span id="sidebarCounterparty">-</span>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <div class="nav-item" onclick="location.href='dashboard.html?page=cases'">
+                    <i class="fas fa-th-large"></i>
+                    <span>사건 목록</span>
+                </div>
+                <div class="nav-item active" data-menu="overview">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>사건 상세 현황</span>
+                </div>
+                <!-- Logical Order Start -->
+                <div class="nav-item" onclick="location.href='invite.html'">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>합의요청 보내기</span>
+                </div>
+                <div class="nav-item" data-menu="apology">
+                    <i class="fas fa-file-alt"></i>
+                    <span>사과문</span>
+                </div>
+                <div class="nav-item" data-menu="proposal">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>합의금 제안</span>
+                </div>
+
+                <div class="nav-item" data-menu="account">
+                    <i class="fas fa-university"></i>
+                    <span>계좌 정보</span>
+                </div>
+                <div class="nav-item" data-menu="agreement">
+                    <i class="fas fa-file-signature"></i>
+                    <span>합의서</span>
+                </div>
+                <!-- Communication & Support -->
+                <div class="nav-item" data-menu="chat">
+                    <i class="fas fa-comments"></i>
+                    <span>안심 채팅</span>
+                </div>
+                <div class="nav-item" data-menu="mediation">
+                    <i class="fas fa-gavel"></i>
+                    <span>변호사 상담신청</span>
+                </div>
+                <!-- Logic Order End -->
+                <div style="flex: 1;"></div>
+                <div class="nav-item" onclick="location.href='index.html'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>로그아웃</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Case Header -->
+            <div class="top-bar">
+                <div>
+                    <h2 style="margin-bottom: 5px;" id="headerCaseNumber">사건 상세</h2>
+                    <p style="color: var(--text-muted);">
+                        <span id="headerMyRole">-</span> |
+                        상대방: <span id="headerCounterparty">-</span> |
+                        <span id="headerStatus" style="color: var(--secondary);">-</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div id="contentArea">
+                <!-- Content will be loaded dynamically -->
+            </div>
+
+        </main>
+    </div>
+
+    <script src="case_detail.js"></script>
+</body>
+
+</html>

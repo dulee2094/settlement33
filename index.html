@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSettlement - 형사사건 비대면 안전 합의 플랫폼</title>
+    <meta name="description" content="피해자와 피의자 모두를 위한 안전하고 공정한 비대면 합의 플랫폼. 익명성 보장, 에스크로 안전 결제, 법률 데이터 기반 합의금 산정.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <a href="#" class="logo">SafeSettlement.</a>
+            <nav>
+                <ul>
+                    <li><a href="#features">서비스 소개</a></li>
+                    <li><a href="#process">이용 절차</a></li>
+                    <li><a href="#faq">자주 묻는 질문</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons" style="display: flex; gap: 10px;">
+                <button class="btn btn-glass" onclick="location.href='login.html'">로그인</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="glow-bg"></div>
+        <div class="glow-bg-2"></div>
+        
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>
+                        상처 없는 합의,<br>
+                        <span class="highlight">안전한 비대면</span> 시작
+                    </h1>
+                    <p>
+                        연락처 노출 없는 안전한 소통과 에스크로 결제 시스템.<br>
+                        법률 데이터 기반의 공정한 합의를 도와드립니다.
+                    </p>
+                    <div class="hero-cta">
+                        <button class="btn btn-primary">사건 조회 및 시작하기 <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></button>
+                        <button class="btn btn-glass">서비스 자세히 보기</button>
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <div class="hero-card-mockup">
+                        <div class="mockup-header">
+                            <span style="font-weight: 600;">합의 진행 현황</span>
+                            <span class="status-badge">진행중</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 3px solid var(--secondary);">
+                                <small style="color: var(--text-muted); display: block; margin-bottom: 5px;">Step 3. 조건 조율</small>
+                                <strong style="font-size: 1.1rem;">상대방이 합의안을 <span style="color: var(--secondary);">수락</span>했습니다.</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px;">
+                                <span>합의금 예치 (에스크로)</span>
+                                <span style="font-family: 'Outfit'; font-weight: 700; color: var(--text-main);">₩ 3,000,000</span>
+                            </div>
+                            <div style="height: 100px; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1);">
+                                <span style="color: var(--text-muted); font-size: 0.9rem;"><i class="fas fa-lock"></i> 안전결제 대기 중</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>왜 SafeSettlement 인가요?</h2>
+                <p>불필요한 감정 소모는 줄이고, 합의의 본질에만 집중하세요.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>철저한 2차 가해 방지</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">
+                        연락처, 주소 등 민감한 개인정보는 절대 노출되지 않습니다. 오직 플랫폼 내 안심 채팅으로만 소통하세요.
+                    </p>
+                </div>
+                
+                <div class="glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>데이터 기반 합의금 가이드</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">
+                        유사 판례와 법률 데이터를 분석하여, 피의자와 피해자 모두 납득할 수 있는 적정 합의금 범위를 보여드립니다.
+                    </p>
+                </div>
+                
+                <div class="glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h3>안전한 에스크로 & 전자서명</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">
+                        합의금이 입금되어야 서명이 진행됩니다. '먹튀' 걱정 없는 에스크로 시스템이 끝까지 책임집니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>SafeSettlement.</h3>
+                    <p>
+                        안전한 비대면 합의의 새로운 기준.<br>
+                        Contact: support@safesettlement.com
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <h4>Service</h4>
+                    <ul>
+                        <li><a href="#">서비스 소개</a></li>
+                        <li><a href="#">요금 안내</a></li>
+                        <li><a href="#">이용약관</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">고객센터</a></li>
+                        <li><a href="#">변호사 중재 신청</a></li>
+                        <li><a href="#">데이터 삭제 요청</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 50px; color: var(--text-muted); font-size: 0.8rem;">
+            &copy; 2026 SafeSettlement Inc. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

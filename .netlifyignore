@@ -1,0 +1,20 @@
+# Netlify에 업로드하지 않을 파일 목록
+# 백엔드 서버 관련 파일들
+server.js
+database.sqlite
+
+# Node.js 관련
+node_modules/
+package.json
+package-lock.json
+.npmrc
+
+# 개발 문서
+DEPLOY_GUIDE.md
+service_plan.md
+.git/
+.gitignore
+
+# 로그 파일
+*.log
+npm-debug.log*

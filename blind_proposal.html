@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블라인드 합의 제안 - SafeSettlement</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo">SafeSettlement.</a>
+            <nav class="nav-links">
+                <div class="nav-item active" onclick="location.href='dashboard.html'">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>사건 현황 (블라인드)</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>안심 채팅</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-file-signature"></i>
+                    <span>합의서 관리</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fas fa-gavel"></i>
+                    <span>변호사 중재</span>
+                </div>
+                <div style="flex: 1;"></div>
+                <div class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>로그아웃</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div>
+                    <h2 style="margin-bottom: 5px;">블라인드 합의 제안</h2>
+                    <p style="color: var(--text-muted);">감정 소모 없이 희망 금액을 조율해보세요.</p>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-glass" style="font-size: 0.85rem;" onclick="location.href='dashboard.html'">
+                        <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> 뒤로가기
+                    </button>
+                    <span class="status-badge" id="statusBadge"
+                        style="background: var(--bg-card); color: var(--text-muted);">제안 대기중</span>
+                </div>
+            </div>
+
+            <!-- Blind Proposal Section -->
+            <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+
+                <!-- Left: My Proposal -->
+                <div class="glass-card" style="height: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h3>나의 희망 금액</h3>
+                        <span
+                            style="font-size: 0.8rem; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 12px;">비공개
+                            안전 보장 <i class="fas fa-lock s"></i></span>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <p style="color: var(--text-muted); margin-bottom: 10px;">상대방에게 구체적인 금액이 노출되지 않습니다.</p>
+                        <div style="position: relative; max-width: 300px; margin: 0 auto;">
+                            <span
+                                style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted); font-weight: bold;">만원</span>
+                            <input type="number" id="myAmount" class="form-input"
+                                style="padding-right: 70px; font-size: 1.5rem; font-weight: bold; text-align: center;"
+                                placeholder="0">
+                        </div>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">* 예: 300만원 입력 시 300만 입력</p>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px;"><i class="fas fa-balance-scale"></i> AI 분석 가이드</h4>
+                        <ul
+                            style="font-size: 0.9rem; color: var(--text-muted); text-align: left; list-style: disc; padding-left: 20px;">
+                            <li>유사 판례 평균: <strong>350만원 ~ 400만원</strong></li>
+                            <li>너무 낮은 금액은 상대방의 거부감을 유발할 수 있습니다.</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%;" onclick="submitProposal()">제안 등록하기</button>
+                </div>
+
+                <!-- Right: Gap Analysis Result -->
+                <div class="glass-card"
+                    style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+
+                    <div id="waitingState">
+                        <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <h3>상대방의 제안을 기다리고 있습니다</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">양측 모두 제안을 등록하면<br>금액 차이(Gap) 범위만 알려드립니다.
+                        </p>
+                    </div>
+
+                    <div id="resultState" style="display: none; width: 100%;">
+                        <div style="margin-bottom: 30px;">
+                            <span style="font-size: 0.9rem; color: var(--secondary);">분석 완료</span>
+                            <h2 style="font-size: 2rem; margin-top: 10px;" id="gapTitle">금액 차이가 큽니다</h2>
+                        </div>
+
+                        <!-- Gauge Visual -->
+                        <div
+                            style="width: 100%; height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 30px; position: relative;">
+                            <div id="gapGauge"
+                                style="width: 80%; height: 100%; background: linear-gradient(90deg, #ff4d4d, #f9cb28); border-radius: 10px; transition: width 1s ease;">
+                            </div>
+
+                            <!-- Markers -->
+                            <div style="position: absolute; left: 20%; top: 25px; font-size: 0.7rem; color: #aaa;">|
+                                100만 이내</div>
+                            <div style="position: absolute; left: 50%; top: 25px; font-size: 0.7rem; color: #aaa;">|
+                                500만 이내</div>
+                            <div style="position: absolute; left: 80%; top: 25px; font-size: 0.7rem; color: #aaa;">|
+                                1000만 이상</div>
+                        </div>
+
+                        <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 30px;" id="gapDesc">
+                            양측의 의견 차이가 <strong>500만원 ~ 1000만원</strong> 사이입니다.<br>
+                            직접적인 대화보다는 전문가의 중재를 고려해보시는 것이 좋습니다.
+                        </p>
+
+                        <div id="actionButtons">
+                            <button class="btn btn-glass" style="margin-right: 10px;">금액 수정 제안</button>
+                            <button class="btn btn-primary"
+                                style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">변호사 중재 신청</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Proposal History Section -->
+            <div class="glass-card" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 20px;"><i class="fas fa-history"></i> 제안 히스토리</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);">
+                                <th style="padding: 15px; font-weight: 500;">회차</th>
+                                <th style="padding: 15px; font-weight: 500;">일시</th>
+                                <th style="padding: 15px; font-weight: 500;">나의 제안 (원)</th>
+                                <th style="padding: 15px; font-weight: 500;">분석 결과</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="4" style="padding: 30px; text-align: center; color: var(--text-muted);">
+                                    아직 제안 내역이 없습니다.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Proposal History State
+        let proposalHistory = [];
+        let proposalCount = 0;
+
+        // Mock function to simulate Blind Gap Logic - 5 Level System + Man-won Unit + Over-offer Check
+        function submitProposal() {
+            const rawInput = parseInt(document.getElementById('myAmount').value);
+            if (!rawInput) return alert('희망 금액을 입력해주세요.');
+
+            // Convert Man-won to Won
+            const myAmount = rawInput * 10000;
+
+            const btn = document.querySelector('.btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석중...';
+            btn.disabled = true;
+
+            // Simulate Server Delay and Victim's Hidden Amount
+            setTimeout(() => {
+                // Scenario: Victim wants 800 Man-won.
+                const victimAmount = 8000000;
+
+                // Logic Update 1: Check for Over-offer (User offers MORE than Victim wants)
+                let isOverOffer = false;
+                if (myAmount >= victimAmount) {
+                    isOverOffer = true;
+                }
+
+                const diff = Math.abs(victimAmount - myAmount);
+                const average = (victimAmount + myAmount) / 2;
+                let gapPercent = (diff / average) * 100;
+
+                // Exception for small amounts
+                if (diff <= 500000) gapPercent = 0;
+
+                // Forced Level 1 if Over-offer
+                if (isOverOffer) {
+                    gapPercent = 0; // Force to 0% gap logic
+                }
+
+                document.getElementById('waitingState').style.display = 'none';
+                document.getElementById('resultState').style.display = 'block';
+
+                const gapTitle = document.getElementById('gapTitle');
+                const gapDesc = document.getElementById('gapDesc');
+                const gapGauge = document.getElementById('gapGauge');
+
+                const statusBadge = document.getElementById('statusBadge');
+                const actionButtons = document.getElementById('actionButtons');
+
+                // Determine Level
+                let level = 0;
+                let color = '';
+                let title = '';
+                let desc = '';
+                let width = '';
+                let badgeText = '';
+
+                if (gapPercent <= 10) {
+                    // Level 1: Green Zone (Including Over-offer)
+                    level = 1;
+                    color = '#4ade80'; // Green
+
+                    if (isOverOffer) {
+                        title = "즉시 합의가 가능합니다!";
+                        desc = `제안하신 금액이 상대방의 기대치를 충족합니다.<br>지금 바로 합의를 진행하셔도 좋습니다.`;
+                    } else {
+                        title = "축하합니다! 합의 성사 직전입니다";
+                        desc = `양측의 제안 금액 차이가 <strong>10% 이내</strong>(약 ${diff.toLocaleString()}원)입니다.<br>사실상 합의가 성사된 상태이며, 아주 조금만 더 배려하면 즉시 타결됩니다.`;
+                    }
+
+                    width = '98%'; // Max full
+                    badgeText = '성사 확실';
+                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #4ade80; color: #000;">지금 바로 합의하기</button>';
+                } else if (gapPercent <= 30) {
+                    // Level 2: Blue Zone
+                    level = 2;
+                    color = '#3b82f6'; // Blue
+                    title = "긍정적 조율 단계입니다";
+                    desc = `서로의 의견 차이가 <strong>크지 않습니다.</strong><br>안심 채팅을 통해 구체적인 사정을 설명하면 충분히 간극을 좁힐 수 있습니다.`;
+                    width = '75%';
+                    badgeText = '조율 가능';
+                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;">수정 제안하기</button><button class="btn btn-primary">안심 채팅방 열기</button>';
+                } else if (gapPercent <= 60) {
+                    // Level 3: Yellow Zone
+                    level = 3;
+                    color = '#facc15'; // Yellow
+                    title = "전문가의 중재가 필요합니다";
+                    desc = `시각 차이가 다소 큽니다. 개인 간의 대화로는 감정이 상할 수 있습니다.<br><strong>변호사 중재</strong>나 <strong>AI 판례 분석</strong> 리포트를 참고하세요.`;
+                    width = '50%';
+                    badgeText = '중재 권장';
+                    actionButtons.innerHTML = '<button class="btn btn-glass">수정 제안하기</button><button class="btn btn-primary" style="background: #facc15; color: #000;">변호사 중재 신청</button>';
+                } else if (gapPercent <= 100) {
+                    // Level 4: Orange Zone
+                    level = 4;
+                    color = '#fb923c'; // Orange
+                    title = "입장 차이가 매우 큽니다";
+                    desc = `현재 상태로는 합의가 어렵습니다. 상대방은 귀하와 <strong>전혀 다른 기준</strong>을 가지고 있습니다.<br>잠시 냉각기를 가지는 것을 추천합니다.`;
+                    width = '25%';
+                    badgeText = '심각한 격차';
+                    actionButtons.innerHTML = '<button class="btn btn-glass">제안 보류하기</button>';
+                } else {
+                    // Level 5: Red Zone
+                    level = 5;
+                    color = '#ef4444'; // Red
+                    title = "합의점 도출이 불가능해 보입니다";
+                    desc = `간극이 너무 큽니다 (100% 이상 차이).<br>사실상 결렬 상태입니다. 형사 조정 절차나 정식 재판을 준비하시는 것이 효율적입니다.`;
+                    width = '10%';
+                    badgeText = '결렬 위기';
+                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #ef4444;">형사 절차 안내 보기</button>';
+                }
+
+                // Update UI Elements
+                gapTitle.textContent = title;
+                gapDesc.innerHTML = desc;
+
+                // Animate Gauge
+                gapGauge.style.width = width;
+                gapGauge.style.background = color;
+                gapGauge.style.boxShadow = `0 0 20px ${color}`;
+
+                statusBadge.textContent = badgeText;
+                statusBadge.style.color = color;
+                statusBadge.style.background = 'rgba(255,255,255,0.05)';
+                statusBadge.style.border = `1px solid ${color}`;
+
+                // Add Range Hint (Blurring Effect)
+                // Show a range like: (Target - 20%) ~ (Target + 20%)
+                const minRange = Math.floor(victimAmount * 0.8 / 10000) * 10000;
+                const maxRange = Math.ceil(victimAmount * 1.2 / 10000) * 10000;
+
+                // Check if range hint element exists, if not create one
+                let rangeElement = document.getElementById('rangeHintBox');
+                if (!rangeElement) {
+                    rangeElement = document.createElement('div');
+                    rangeElement.id = 'rangeHintBox';
+                    rangeElement.style.marginTop = '20px';
+                    rangeElement.style.padding = '15px';
+                    rangeElement.style.background = 'rgba(255,255,255,0.05)';
+                    rangeElement.style.borderRadius = '8px';
+                    // Insert before buttons
+                    document.getElementById('resultState').insertBefore(rangeElement, actionButtons);
+                }
+
+                rangeElement.innerHTML = `
+                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">상대방 제안 예상 범위</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff; filter: blur(${level >= 4 ? '5px' : '0px'}); transition: filter 0.5s;">
+                        ${minRange.toLocaleString()}원 ~ ${maxRange.toLocaleString()}원
+                    </div>
+                     ${level >= 4 ? '<div style="font-size:0.7rem; color:#ef4444; margin-top:5px;">격차가 너무 커서 범위조차 흐릿합니다.</div>' : ''}
+                `;
+
+                // Add to History
+                proposalCount++;
+                const now = new Date();
+                const timeString = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+                const historyItem = {
+                    round: proposalCount,
+                    time: timeString,
+                    amount: myAmount,
+                    result: badgeText,
+                    color: color
+                };
+
+                proposalHistory.unshift(historyItem); // Add to top
+                updateHistoryUI();
+
+                btn.innerHTML = '수정 제안하기';
+                btn.disabled = false;
+                btn.classList.add('btn-glass');
+                btn.classList.remove('btn-primary');
+            }, 1000);
+        }
+
+        function updateHistoryUI() {
+            const tbody = document.getElementById('historyTableBody');
+            if (proposalHistory.length === 0) return;
+
+            tbody.innerHTML = proposalHistory.map(item => `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 15px;">${item.round}차</td>
+                    <td style="padding: 15px; color: var(--text-muted); font-size: 0.9rem;">${item.time}</td>
+                    <td style="padding: 15px; font-weight: bold;">${item.amount.toLocaleString()}</td>
+                    <td style="padding: 15px;">
+                        <span style="font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; border: 1px solid ${item.color}; color: ${item.color}; background: rgba(255,255,255,0.05);">
+                            ${item.result}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+
+</html>
