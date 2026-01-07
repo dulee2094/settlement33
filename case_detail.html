@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>?ш굔 ?곸꽭 - SafeHappE</title>
+    <title>사건 상세 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Noto+Serif+KR:wght@400;600&family=Nanum+Pen+Script&display=swap"
@@ -53,16 +53,17 @@
 <body>
 
     <div class="dashboard-layout">
-        <!-- Sidebar - ?ш굔蹂?硫붾돱 -->
+        <!-- Sidebar - 사건별 메뉴 -->
         <aside class="sidebar">
             <a href="dashboard.html" class="logo" style="cursor: pointer;">
                 <i class="fas fa-arrow-left" style="font-size: 0.9rem; margin-right: 8px;"></i>
-                SafeHappE.
+                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #fff;">Safe<span
+                        style="background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HappE.</span></span>
             </a>
 
-            <!-- ?ш굔 ?뺣낫 ?ㅻ뜑 -->
+            <!-- 사건 정보 헤더 -->
             <div style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 20px;">
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">?꾩옱 ?ш굔</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">현재 사건</div>
                 <div style="font-weight: 600; font-size: 1.1rem;" id="sidebarCaseNumber">-</div>
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
                     <i class="fas fa-user-friends"></i>
@@ -73,48 +74,48 @@
             <nav class="nav-links">
                 <div class="nav-item" onclick="location.href='dashboard.html?page=cases'">
                     <i class="fas fa-th-large"></i>
-                    <span>?ш굔 紐⑸줉</span>
+                    <span>사건 목록</span>
                 </div>
                 <div class="nav-item active" data-menu="overview">
                     <i class="fas fa-chart-pie"></i>
-                    <span>?ш굔 ?곸꽭 ?꾪솴</span>
+                    <span>사건 상세 현황</span>
                 </div>
                 <!-- Logical Order Start -->
                 <div class="nav-item" onclick="location.href='invite.html'">
                     <i class="fas fa-paper-plane"></i>
-                    <span>?⑹쓽?붿껌 蹂대궡湲?/span>
+                    <span>합의요청 보내기</span>
                 </div>
                 <div class="nav-item" data-menu="apology">
                     <i class="fas fa-file-alt"></i>
-                    <span>?ш낵臾?/span>
+                    <span>사과문</span>
                 </div>
                 <div class="nav-item" data-menu="proposal">
                     <i class="fas fa-hand-holding-usd"></i>
-                    <span>?⑹쓽湲??쒖븞</span>
+                    <span>합의금 제안</span>
                 </div>
 
                 <div class="nav-item" data-menu="account">
                     <i class="fas fa-university"></i>
-                    <span>怨꾩쥖 ?뺣낫</span>
+                    <span>계좌 정보</span>
                 </div>
                 <div class="nav-item" data-menu="agreement">
                     <i class="fas fa-file-signature"></i>
-                    <span>?⑹쓽??/span>
+                    <span>합의서</span>
                 </div>
                 <!-- Communication & Support -->
                 <div class="nav-item" data-menu="chat">
                     <i class="fas fa-comments"></i>
-                    <span>?덉떖 梨꾪똿</span>
+                    <span>안심 채팅</span>
                 </div>
                 <div class="nav-item" data-menu="mediation">
                     <i class="fas fa-gavel"></i>
-                    <span>蹂?몄궗 ?곷떞?좎껌</span>
+                    <span>변호사 상담신청</span>
                 </div>
                 <!-- Logic Order End -->
                 <div style="flex: 1;"></div>
                 <div class="nav-item" onclick="location.href='index.html'">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>濡쒓렇?꾩썐</span>
+                    <span>로그아웃</span>
                 </div>
             </nav>
         </aside>
@@ -124,10 +125,10 @@
             <!-- Case Header -->
             <div class="top-bar">
                 <div>
-                    <h2 style="margin-bottom: 5px;" id="headerCaseNumber">?ш굔 ?곸꽭</h2>
+                    <h2 style="margin-bottom: 5px;" id="headerCaseNumber">사건 상세</h2>
                     <p style="color: var(--text-muted);">
                         <span id="headerMyRole">-</span> |
-                        ?곷?諛? <span id="headerCounterparty">-</span> |
+                        상대방 <span id="headerCounterparty">-</span> |
                         <span id="headerStatus" style="color: var(--secondary);">-</span>
                     </p>
                 </div>
