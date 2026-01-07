@@ -221,7 +221,7 @@ app.get('/api/case/search', async (req, res) => {
         const result = cases.map(c => ({
             id: c.id,
             roomTitle: c.roomTitle,
-            creatorRole: c.offenderId ? '?쇱쓽?? : '?쇳빐??,
+            creatorRole: c.offenderId ? '피의자' : '피해자',
             createdAt: c.createdAt
         }));
 
