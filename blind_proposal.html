@@ -17,33 +17,36 @@
 <body>
 
     <div class="dashboard-layout">
-        <!-- Sidebar -->
+        <!-- Sidebar - Focus Mode -->
         <aside class="sidebar">
             <a href="index.html" class="logo">
-                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #fff;">Safe<span
-                        style="background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HappE.</span></span>
+                <div class="logo-grid">
+                    <span class="logo-row-en logo-en-left">Safe</span>
+                    <span class="logo-row-en logo-en-right">HappE.</span>
+                    <span class="logo-row-kr logo-kr-left">세이프</span>
+                    <span class="logo-row-kr logo-kr-right">합의</span>
+                </div>
             </a>
+
+            <!-- Context Info -->
+            <div
+                style="padding: 20px; margin-bottom: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">현재 조율 중인 사건</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: white; margin-bottom: 5px;">2024형제11111</div>
+                <div style="font-size: 0.85rem; color: #aaa;"><i class="fas fa-user"></i> 상대방: 김철수</div>
+            </div>
+
             <nav class="nav-links">
-                <div class="nav-item" onclick="location.href='dashboard.html?page=cases'">
-                    <i class="fas fa-folder-open"></i>
-                    <span>내 사건 목록</span>
+                <div class="nav-item active"
+                    style="margin-bottom: 30px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
+                    <i class="fas fa-search-dollar"></i>
+                    <span>블라인드 제안 중</span>
                 </div>
-                <div class="nav-item">
-                    <i class="fas fa-comments"></i>
-                    <span>안심 채팅</span>
-                </div>
-                <div class="nav-item">
-                    <i class="fas fa-file-signature"></i>
-                    <span>합의서 관리</span>
-                </div>
-                <div class="nav-item">
-                    <i class="fas fa-gavel"></i>
-                    <span>변호사 중재</span>
-                </div>
-                <div style="flex: 1;"></div>
-                <div class="nav-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>로그아웃</span>
+
+                <div class="nav-item" onclick="location.href='case_detail.html'"
+                    style="cursor: pointer; opacity: 0.8; transition: opacity 0.3s;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>사건 상세 현황으로 복귀</span>
                 </div>
             </nav>
         </aside>
@@ -78,7 +81,17 @@
                     </div>
 
                     <div style="text-align: center; margin-bottom: 40px;">
-                        <p style="color: var(--text-muted); margin-bottom: 10px;">상대방에게 구체적인 금액은 노출되지 않습니다.</p>
+                        <!-- Limit Badge -->
+                        <div style="margin-bottom: 20px;">
+                            <span
+                                style="background: rgba(255, 99, 71, 0.1); border: 1px solid rgba(255, 99, 71, 0.3); color: #ff6347; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem;">
+                                <i class="fas fa-exclamation-circle"></i> 남은 제안 횟수: <strong id="leftCount">3</strong> /
+                                3회
+                            </span>
+                        </div>
+
+                        <p id="amountGuideText" style="color: var(--text-muted); margin-bottom: 10px;">상대방에게 지급할 금액을
+                            입력하세요.</p>
                         <div style="position: relative; max-width: 300px; margin: 0 auto;">
                             <span
                                 style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--text-muted); font-weight: bold;">만원</span>
@@ -86,17 +99,38 @@
                                 style="padding-right: 70px; font-size: 1.5rem; font-weight: bold; text-align: center;"
                                 placeholder="0">
                         </div>
-                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">* 예: 300만원 입력 시 300만 입력</p>
+                        <p style="font-size: 0.8rem; color: #666; margin-top: 5px; margin-bottom: 25px;">* 예: 300만원 입력 시
+                            300만 입력</p>
+
+                        <!-- Position Selector -->
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 30px;">
+                            <button id="pos-payer" class="btn position-btn active" onclick="selectPosition('payer')"
+                                style="flex: 1; max-width: 140px; padding: 12px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #fff; border-radius: 8px; font-size: 1rem; font-weight: 600; transition: all 0.3s; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                💸 드릴게요
+                            </button>
+                            <button id="pos-receiver" class="btn position-btn" onclick="selectPosition('receiver')"
+                                style="flex: 1; max-width: 140px; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #888; border-radius: 8px; font-size: 1rem; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                🤲 받을게요
+                            </button>
+                        </div>
+
+                        <!-- Duration Selector -->
+                        <div style="max-width: 350px; margin: 0 auto; text-align: left;">
+                            <label
+                                style="font-size: 0.9rem; color: var(--text-muted); display: block; margin-bottom: 8px;">제안
+                                유효 기간 <span style="font-size:0.7rem; color:#666;">(기한 내 미응답 시 자동 만료)</span></label>
+                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                <button id="btn-1" class="btn duration-btn" onclick="selectDuration(1)"
+                                    style="flex:1; padding: 10px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.3s; font-size: 0.9rem;">1일</button>
+                                <button id="btn-3" class="btn duration-btn" onclick="selectDuration(3)"
+                                    style="flex:1; padding: 10px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: all 0.3s; font-size: 0.9rem;">3일</button>
+                                <button id="btn-7" class="btn duration-btn active" onclick="selectDuration(7)"
+                                    style="flex:1; padding: 10px; background: #4ade80; color: #000; border: 1px solid #4ade80; border-radius: 8px; transition: all 0.3s; font-size: 0.9rem; font-weight: bold; box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);">1주일</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                        <h4 style="margin-bottom: 15px;"><i class="fas fa-balance-scale"></i> AI 분석 가이드</h4>
-                        <ul
-                            style="font-size: 0.9rem; color: var(--text-muted); text-align: left; list-style: disc; padding-left: 20px;">
-                            <li>비슷한 사건 평균: <strong>350만원 ~ 400만원</strong></li>
-                            <li>너무 낮은 금액은 상대방의 거부감을 유발할 수 있습니다.</li>
-                        </ul>
-                    </div>
+                    <!-- Removed AI Analysis Guide Block -->
 
                     <button class="btn btn-primary" style="width: 100%;" onclick="submitProposal()">제안 등록하기</button>
                 </div>
@@ -182,42 +216,157 @@
         // Proposal History State
         let proposalHistory = [];
         let proposalCount = 0;
+        const MAX_PROPOSALS = 3;
+
+        // Position Selection
+        let currentPosition = 'payer'; // Default: Paying
+
+        function selectPosition(type) {
+            currentPosition = type;
+            const payerBtn = document.getElementById('pos-payer');
+            const receiverBtn = document.getElementById('pos-receiver');
+            const guideText = document.getElementById('amountGuideText');
+
+            // Reset styles
+            [payerBtn, receiverBtn].forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(255, 255, 255, 0.05)';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                btn.style.color = '#888';
+                btn.style.boxShadow = 'none';
+            });
+
+            // Activate specific button
+            const targetBtn = type === 'payer' ? payerBtn : receiverBtn;
+            targetBtn.classList.add('active');
+            targetBtn.style.background = 'rgba(59, 130, 246, 0.2)';
+            targetBtn.style.borderColor = '#3b82f6';
+            targetBtn.style.color = '#fff';
+            targetBtn.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.2)';
+
+            // Update Text
+            if (type === 'payer') {
+                guideText.textContent = "상대방에게 지급할 금액을 입력하세요.";
+            } else {
+                guideText.textContent = "상대방에게 받고 싶은 금액을 입력하세요.";
+            }
+        }
+
+        // Duration Selection
+        let selectedDuration = 7; // default 1 week
+
+        function selectDuration(days) {
+            selectedDuration = days;
+            // Update UI
+            document.querySelectorAll('.duration-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'rgba(255, 255, 255, 0.05)';
+                btn.style.color = '#888';
+                btn.style.border = '1px solid rgba(255,255,255,0.1)';
+            });
+
+            const activeBtn = document.getElementById(`btn-${days}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.style.background = '#4ade80';
+                activeBtn.style.color = '#000';
+                activeBtn.style.fontWeight = 'bold';
+                activeBtn.style.border = '1px solid #4ade80';
+                activeBtn.style.boxShadow = '0 0 10px rgba(74, 222, 128, 0.3)';
+            }
+        }
 
         // Mock function to simulate Blind Gap Logic - 5 Level System + Man-won Unit + Over-offer Check
         function submitProposal() {
+            // 1. Check Limits
+            if (proposalCount >= MAX_PROPOSALS) {
+                return alert('제안 횟수(3회)를 모두 소진했습니다. 더 이상 수정 제안할 수 없습니다.');
+            }
+
             const rawInput = parseInt(document.getElementById('myAmount').value);
             if (!rawInput) return alert('희망 금액을 입력해주세요.');
+
+            // Confirm
+            const positionText = currentPosition === 'payer' ? '지급' : '수령';
+            if (!confirm(`[남은 제안 횟수: ${MAX_PROPOSALS - proposalCount - 1}회]\n\n${rawInput}만원을 '${positionText}'하는 조건으로 제안하시겠습니까?\n(유효기간: ${selectedDuration}일)\n제안 즉시 상대방에게 알림이 발송됩니다.`)) return;
+
 
             // Convert Man-won to Won
             const myAmount = rawInput * 10000;
 
             const btn = document.querySelector('.btn-primary');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석중...';
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석 및 전송중...';
             btn.disabled = true;
 
-            // Simulate Server Delay and Victim's Hidden Amount
             setTimeout(() => {
-                // Scenario: Victim wants 800 Man-won.
-                const victimAmount = 8000000;
+                // Scenario: Mock Opponent Data (Testing Mode)
+                // TODO: Replace this with real DB data in production.
+                const opponent = {
+                    role: 'receiver', // 'payer' or 'receiver'
+                    amount: 8000000   // 800 Man-won
+                };
 
-                // Logic Update 1: Check for Over-offer (User offers MORE than Victim wants)
-                let isOverOffer = false;
-                if (myAmount >= victimAmount) {
-                    isOverOffer = true;
+                // 2. Logic: Check for Role Conflict
+                if (currentPosition === opponent.role) {
+                    // ERROR: Both want to give OR Both want to receive
+                    document.getElementById('waitingState').style.display = 'none';
+                    document.getElementById('resultState').style.display = 'block';
+
+                    const gapTitle = document.getElementById('gapTitle');
+                    const gapDesc = document.getElementById('gapDesc');
+                    const gapGauge = document.getElementById('gapGauge');
+                    const statusBadge = document.getElementById('statusBadge');
+                    const actionButtons = document.getElementById('actionButtons');
+
+                    gapTitle.innerHTML = "⚠️ 입장이 충돌합니다";
+                    gapDesc.innerHTML = `양측 모두 <strong>'${currentPosition === 'payer' ? '돈을 주겠다' : '돈을 받겠다'}'</strong>고 선택했습니다.<br>서로의 의사가 엇갈립니다. 상대방과 역할을 다시 확인해주세요.`;
+
+                    gapGauge.style.width = '100%';
+                    gapGauge.style.background = '#666'; // Grey for error
+                    gapGauge.style.boxShadow = 'none';
+
+                    statusBadge.textContent = '역할 충돌';
+                    statusBadge.style.color = '#ccc';
+                    statusBadge.style.border = '1px solid #ccc';
+
+                    // Clear Range Hint if exists
+                    const rangeElement = document.getElementById('rangeHintBox');
+                    if (rangeElement) rangeElement.style.display = 'none';
+
+                    actionButtons.innerHTML = '<button class="btn btn-primary" onclick="location.reload()">다시 선택하기</button>';
+
+                    btn.innerHTML = originalBtnText;
+                    btn.disabled = false;
+                    return; // Stop processing
                 }
 
-                const diff = Math.abs(victimAmount - myAmount);
-                const average = (victimAmount + myAmount) / 2;
+                // 3. Logic: Check for Deal Success (Over-Offer / Good Deal)
+                let isDealSuccess = false;
+
+                if (currentPosition === 'payer') {
+                    // I am paying. If I offer MORE than they want, it's a deal.
+                    if (myAmount >= opponent.amount) isDealSuccess = true;
+                } else {
+                    // I am receiving. If I ask for LESS than they offer, it's a deal.
+                    // Note: In this mock, opponent is 'receiver', so we won't hit this unless we change mock data.
+                    // But if opponent was 'payer' (offering 800), and I ask for 700, indeed deal.
+                    if (myAmount <= opponent.amount) isDealSuccess = true;
+                }
+
+                const diff = Math.abs(opponent.amount - myAmount);
+                const average = (opponent.amount + myAmount) / 2;
                 let gapPercent = (diff / average) * 100;
 
                 // Exception for small amounts
                 if (diff <= 500000) gapPercent = 0;
 
-                // Forced Level 1 if Over-offer
-                if (isOverOffer) {
+                // Forced Level 1 if Deal Success (Over-offer / Under-ask)
+                if (isDealSuccess) {
                     gapPercent = 0; // Force to 0% gap logic
                 }
 
+                // Show Result
                 document.getElementById('waitingState').style.display = 'none';
                 document.getElementById('resultState').style.display = 'block';
 
@@ -225,10 +374,14 @@
                 const gapDesc = document.getElementById('gapDesc');
                 const gapGauge = document.getElementById('gapGauge');
 
+                // Reset Range Hint Display
+                let rangeElement = document.getElementById('rangeHintBox');
+                if (rangeElement) rangeElement.style.display = 'block';
+
                 const statusBadge = document.getElementById('statusBadge');
                 const actionButtons = document.getElementById('actionButtons');
 
-                // Determine Level
+                // Determine Level (Re-using existing vars)
                 let level = 0;
                 let color = '';
                 let title = '';
@@ -241,17 +394,50 @@
                     level = 1;
                     color = '#4ade80'; // Green
 
-                    if (isOverOffer) {
-                        title = "즉시 합의가 가능합니다!";
-                        desc = `제안하신 금액이 상대방의 기대치를 충족합니다.<br>지금 바로 합의를 진행하세요 좋습니다.`;
-                    } else {
-                        title = "축하합니다! 합의 성사 직전입니다";
-                        desc = `양측의 제안 금액 차이가 <strong>10% 이내</strong>(약 ${diff.toLocaleString()}원)입니다.<br>사실상 합의가 성사된 상태이며, 아주 조금만 배려하면 즉시 타결됩니다.`;
+                    // Calculate Average (Final Settlement Amount)
+                    const finalAmount = Math.round((myAmount + opponent.amount) / 2 / 10000) * 10000;
+
+                    // Blind Proposal Content
+                    title = "축하합니다! 의견이 거의 일치합니다";
+                    desc = `양측의 제안 금액 차이가 <strong>10% 이내</strong>입니다.<br>구체적인 금액을 확인하기 전에, <strong>두 제안의 평균값</strong>으로 합의를 확정하시겠습니까?`;
+
+                    if (isDealSuccess) {
+                        desc = `제안하신 조건이 상대방의 기대치를 충분히 충족합니다.<br><strong>두 제안의 평균값</strong>으로 합의를 확정하시겠습니까?`;
                     }
 
                     width = '98%'; // Max full
                     badgeText = '성사 확실';
-                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #4ade80; color: #000;">지금 바로 합의하기</button>';
+
+                    // Special Action for Blind Consent
+                    // We render a special "Consent View" instead of the standard Result View initially
+                    // However, to keep it simple within this structure, we use the ActionButton to trigger the reveal.
+
+                    // Hide the Gauge and Range Hint initially for this specific case to maintain "Blindness"
+                    gapGauge.style.display = 'none';
+                    if (rangeElement) rangeElement.style.display = 'none';
+
+                    // Add a special customized visual for "Locked Agreement"
+                    let hiddenBox = document.getElementById('hiddenAgreementBox');
+                    if (!hiddenBox) {
+                        hiddenBox = document.createElement('div');
+                        hiddenBox.id = 'hiddenAgreementBox';
+                        hiddenBox.style.margin = '20px 0';
+                        hiddenBox.style.padding = '30px';
+                        hiddenBox.style.border = '2px dashed #4ade80';
+                        hiddenBox.style.borderRadius = '12px';
+                        hiddenBox.style.backgroundColor = 'rgba(74, 222, 128, 0.05)';
+                        hiddenBox.innerHTML = `
+                            <div style="font-size: 3rem; margin-bottom: 15px;">🤝</div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: #4ade80; margin-bottom: 5px;">히든 합의 제안</div>
+                            <div style="font-size: 0.9rem; color: #aaa;">평균값 규칙 적용</div>
+                        `;
+                        // Insert after title/desc
+                        document.getElementById('resultState').insertBefore(hiddenBox, actionButtons);
+                    }
+                    hiddenBox.style.display = 'block';
+
+                    actionButtons.innerHTML = `<button class="btn btn-primary" onclick="confirmSettlement(${finalAmount}, ${myAmount}, ${opponent.amount})" style="background: #4ade80; color: #000; font-weight:bold;">평균값으로 합의 동의 및 확정</button>`;
+
                 } else if (gapPercent <= 30) {
                     // Level 2: Blue Zone
                     level = 2;
@@ -260,16 +446,16 @@
                     desc = `서로의 의견 차이가 <strong>크지 않습니다.</strong><br>안심 채팅을 통해 구체적인 사정을 설명하면 충분히 간격을 좁힐 수 있습니다.`;
                     width = '75%';
                     badgeText = '조율 가능';
-                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;">수정 제안하기</button><button class="btn btn-primary">안심 채팅방 열기</button>';
+                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;" onclick="resetForNewProposal()">수정 제안하기</button><button class="btn btn-primary">안심 채팅방 열기</button>';
                 } else if (gapPercent <= 60) {
                     // Level 3: Yellow Zone
                     level = 3;
                     color = '#facc15'; // Yellow
-                    title = "전문가의 중재가 필요합니다";
-                    desc = `생각 차이가 다소 큽니다. 개인 간의 대화보다는 감정을 상할 수 있습니다.<br><strong>변호사 중재</strong>나 <strong>AI 판례 분석</strong> 리포트를 참고하세요.`;
+                    title = "희망 금액의 차이가 큽니다";
+                    desc = `상대방과는 생각의 차이가 존재합니다.<br>조금 더 신중하게 고민해보시거나, 시간을 두고 <strong>수정 제안</strong>을 해보시기 바랍니다.`;
                     width = '50%';
-                    badgeText = '중재 권장';
-                    actionButtons.innerHTML = '<button class="btn btn-glass">수정 제안하기</button><button class="btn btn-primary" style="background: #facc15; color: #000;">변호사 중재 신청</button>';
+                    badgeText = '차이 발생';
+                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #facc15; color: #000;" onclick="resetForNewProposal()">수정 제안하기</button>';
                 } else if (gapPercent <= 100) {
                     // Level 4: Orange Zone
                     level = 4;
@@ -277,13 +463,13 @@
                     title = "입장 차이가 매우 큽니다";
                     desc = `현재 상태로는 합의가 어렵습니다. 상대방은 그와는 <strong>전혀 다른 기준</strong>을 가지고 있습니다.<br>잠시 냉각기를 가지는 것을 추천합니다.`;
                     width = '25%';
-                    badgeText = '심각한 격차';
-                    actionButtons.innerHTML = '<button class="btn btn-glass">제안 보류하기</button>';
+                    badgeText = '큰 격차';
+                    actionButtons.innerHTML = '<button class="btn btn-glass" onclick="resetForNewProposal()">제안 보류하기</button><button class="btn btn-primary" style="margin-left: 10px;" onclick="resetForNewProposal()">다시 제안하기</button>';
                 } else {
                     // Level 5: Red Zone
                     level = 5;
                     color = '#ef4444'; // Red
-                    title = "합의가 도출이 불가능해 보입니다";
+                    title = "합의가 도출이 어려워 보입니다";
                     desc = `간격이 너무 큽니다 (100% 이상 차이).<br>사실상 결렬 상태입니다. 형사 조정 절차나 정식 재판을 준비하시는 것이 효율적입니다.`;
                     width = '10%';
                     badgeText = '결렬 위기';
@@ -291,7 +477,7 @@
                 }
 
                 // Update UI Elements
-                gapTitle.textContent = title;
+                gapTitle.innerHTML = title; // Use innerHTML for HTML content
                 gapDesc.innerHTML = desc;
 
                 // Animate Gauge
@@ -304,25 +490,23 @@
                 statusBadge.style.background = 'rgba(255,255,255,0.05)';
                 statusBadge.style.border = `1px solid ${color}`;
 
-                // Add Range Hint (Blurring Effect)
-                // Show a range like: (Target - 20%) ~ (Target + 20%)
-                const minRange = Math.floor(victimAmount * 0.8 / 10000) * 10000;
-                const maxRange = Math.ceil(victimAmount * 1.2 / 10000) * 10000;
+                // Add Range Hint (Blurring Effect) - Only shown if NOT Valid Error
+                const minRange = Math.floor(opponent.amount * 0.8 / 10000) * 10000;
+                const maxRange = Math.ceil(opponent.amount * 1.2 / 10000) * 10000;
 
-                // Check if range hint element exists, if not create one
-                let rangeElement = document.getElementById('rangeHintBox');
-                if (!rangeElement) {
-                    rangeElement = document.createElement('div');
-                    rangeElement.id = 'rangeHintBox';
-                    rangeElement.style.marginTop = '20px';
-                    rangeElement.style.padding = '15px';
-                    rangeElement.style.background = 'rgba(255,255,255,0.05)';
-                    rangeElement.style.borderRadius = '8px';
-                    // Insert before buttons
-                    document.getElementById('resultState').insertBefore(rangeElement, actionButtons);
+                let rangeElementInner = document.getElementById('rangeHintBox');
+                if (!rangeElementInner) {
+                    rangeElementInner = document.createElement('div');
+                    rangeElementInner.id = 'rangeHintBox';
+                    rangeElementInner.style.marginTop = '20px';
+                    rangeElementInner.style.padding = '15px';
+                    rangeElementInner.style.background = 'rgba(255,255,255,0.05)';
+                    rangeElementInner.style.borderRadius = '8px';
+                    document.getElementById('resultState').insertBefore(rangeElementInner, actionButtons);
                 }
+                rangeElementInner.style.display = 'block';
 
-                rangeElement.innerHTML = `
+                rangeElementInner.innerHTML = `
                     <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">상대방 제안 예상 범위</div>
                     <div style="font-size: 1.2rem; font-weight: bold; color: #fff; filter: blur(${level >= 4 ? '5px' : '0px'}); transition: filter 0.5s;">
                         ${minRange.toLocaleString()}원 ~ ${maxRange.toLocaleString()}원
@@ -343,14 +527,64 @@
                     color: color
                 };
 
-                proposalHistory.unshift(historyItem); // Add to top
+                proposalHistory.unshift(historyItem);
                 updateHistoryUI();
+                updateCountUI();
 
-                btn.innerHTML = '수정 제안하기';
-                btn.disabled = false;
-                btn.classList.add('btn-glass');
-                btn.classList.remove('btn-primary');
-            }, 1000);
+                btn.innerHTML = originalBtnText; // Reset button text for next time if allowed
+
+                if (proposalCount >= MAX_PROPOSALS) {
+                    btn.textContent = '제안 횟수 초과';
+                    btn.disabled = true;
+                } else {
+                    btn.disabled = false;
+                }
+
+            }, 1000); // Slightly realistic delay
+        }
+
+        // Reveal Function for Level 1 Success
+        function confirmSettlement(finalAmount, myAmount, opponentAmount) {
+            // Remove the hidden box
+            const hiddenBox = document.getElementById('hiddenAgreementBox');
+            if (hiddenBox) hiddenBox.style.display = 'none';
+
+            // Update Title & Desc with REAL numbers
+            const gapTitle = document.getElementById('gapTitle');
+            const gapDesc = document.getElementById('gapDesc');
+
+            gapTitle.innerHTML = `<span style="color:#4ade80">최종 합의금 ${finalAmount.toLocaleString()}원</span>`;
+            gapDesc.innerHTML = `
+                축하합니다! 합의가 확정되었습니다.<br>
+                <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.9rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="color:#aaa;">나의 제안</span>
+                        <span>${myAmount.toLocaleString()}원</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">
+                        <span style="color:#aaa;">상대방 제안</span>
+                        <span>${opponentAmount.toLocaleString()}원</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; color:#4ade80; margin-top:5px;">
+                        <span>최종 결정 (평균)</span>
+                        <span>${finalAmount.toLocaleString()}원</span>
+                    </div>
+                </div>
+            `;
+
+            // Change Action Buttons to Next Step
+            // Change Action Buttons to Next Step
+            const actionButtons = document.getElementById('actionButtons');
+            actionButtons.innerHTML = `<button class="btn btn-primary" onclick="goToAccountPage()">합의금 지급/수령으로 이동하기 <i class="fas fa-arrow-right"></i></button>`;
+
+            // Trigger Confetti or Sound effect here if available
+        }
+
+        function resetForNewProposal() {
+            if (proposalCount >= MAX_PROPOSALS) return alert("제안 횟수를 모두 소진했습니다.");
+            // Optional: Reset view to let them try again if they want to modify
+            // For this flow, we might just keep the result and let them change input on the left
+            location.reload(); // Simple reload for demo
         }
 
         function updateHistoryUI() {
@@ -370,6 +604,22 @@
                 </tr>
             `).join('');
         }
+
+        function updateCountUI() {
+            // document.getElementById('currentCount').textContent = proposalCount; // Removed: Element not found
+            const leftCountEl = document.getElementById('leftCount');
+            if (leftCountEl) leftCountEl.textContent = MAX_PROPOSALS - proposalCount;
+        }
+
+        // Navigation Helper
+        function goToAccountPage() {
+            // Set the active tab for case_detail.js to pick up
+            localStorage.setItem('active_tab_on_load', 'account');
+            location.href = 'case_detail.html';
+        }
+
+        // Initialize
+        updateCountUI();
     </script>
 </body>
 

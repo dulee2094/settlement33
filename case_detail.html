@@ -48,6 +48,7 @@
             opacity: 0.7;
         }
     </style>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -56,11 +57,11 @@
         <!-- Sidebar - 사건별 메뉴 -->
         <aside class="sidebar">
             <a href="dashboard.html" class="logo" style="cursor: pointer;">
-                <i class="fas fa-arrow-left" style="font-size: 0.9rem; margin-right: 8px;"></i>
-                <span style="font-family: 'Outfit', sans-serif; font-weight: 800; color: #fff;">Safe<span
-                        style="background: linear-gradient(135deg, #4ade80, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">HappE.</span></span>
-                <div style="font-size: 0.9rem; margin-top: -5px; padding-left: 20px;">
-                    <span class="logo-sub-kr">세이프 <span class="highlight">합의</span></span>
+                <div class="logo-grid">
+                    <span class="logo-row-en logo-en-left">Safe</span>
+                    <span class="logo-row-en logo-en-right">HappE.</span>
+                    <span class="logo-row-kr logo-kr-left">세이프</span>
+                    <span class="logo-row-kr logo-kr-right">합의</span>
                 </div>
             </a>
 
@@ -99,7 +100,7 @@
 
                 <div class="nav-item" data-menu="account">
                     <i class="fas fa-university"></i>
-                    <span>계좌 정보</span>
+                    <span>합의금 지급/수령</span>
                 </div>
                 <div class="nav-item" data-menu="agreement">
                     <i class="fas fa-file-signature"></i>

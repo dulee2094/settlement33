@@ -141,56 +141,89 @@ header .container {
     align-items: center;
 }
 
+/* Logo - Strict Alignment System */
 .logo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #fff;
     display: inline-flex;
     flex-direction: column;
+    /* Fallback */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.logo-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    /* Allow natural width, but maybe align via justify? */
+    /* To align H and 합 strictly, we need the split point to be the anchor. 
+       Best way: Two equal width columns meeting in center? No 'Safe' != 'HappE'.
+       Text-align approach:
+    */
+    grid-template-columns: 1fr 1fr;
+    /* Equal width halves if wrapper is centered? */
+    /* Let's try flexible columns but aligned to center seam. */
+    align-items: baseline;
+    column-gap: 0;
+}
+
+.logo-row-en {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    /* Removed display: contents */
+}
+
+/* Row 1 Cells */
+.logo-en-left {
+    color: #fff;
+    text-align: right;
+    grid-column: 1;
+    grid-row: 1;
+    display: block;
+}
+
+.logo-en-right {
+    background: var(--gradient-logo);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: left;
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+}
+
+.logo-row-kr {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
     line-height: 1.2;
 }
 
-.logo span.en {
-    font-family: 'Outfit', sans-serif;
-}
-
-.logo span.accent {
-    background: var(--gradient-logo);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Korean Logo Utilities */
-.logo-kr {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.05em;
-    display: inline-block;
-}
-
-.logo-kr .highlight {
-    background: var(--gradient-logo);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Small subtitle version of Korean logo */
-.logo-sub-kr {
-    font-size: 0.6em;
-    font-weight: 700;
+/* Row 2 Cells */
+.logo-kr-left {
     color: var(--text-muted);
-    letter-spacing: -0.05em;
-    margin-top: -2px;
+    /* Gray */
+    text-align: right;
+    grid-column: 1;
+    grid-row: 2;
+    padding-right: 0px;
+    display: block;
+    /* Adjust proximity to seam */
+    /* To visually pull '세이프' bit left if needed? No, right align pulls it to seam. */
 }
 
-.logo-sub-kr .highlight {
-    color: #fff;
-    /* or keep gradient/muted? Let's use gradient or white for sub */
-    background: none;
-    -webkit-text-fill-color: initial;
-    color: var(--secondary);
-    /* Slight tint for "HappE" part in sub text */
+.logo-kr-right {
+    background: var(--gradient-logo);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: left;
+    grid-column: 2;
+    grid-row: 2;
+    padding-left: 0px;
+    display: block;
 }
 
 nav ul {
@@ -872,4 +905,26 @@ footer {
 
 .modal-close:hover {
     color: #333;
+}
+
+@keyframes swing {
+    20% {
+        transform: rotate(15deg);
+    }
+
+    40% {
+        transform: rotate(-10deg);
+    }
+
+    60% {
+        transform: rotate(5deg);
+    }
+
+    80% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
 }

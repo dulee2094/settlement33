@@ -38,14 +38,82 @@ const Case = sequelize.define('Case', {
     connectionStatus: { type: DataTypes.ENUM('none', 'invited', 'pending', 'connected'), defaultValue: 'none' },
     summary: { type: DataTypes.TEXT }, // Added brief case description
     roomTitle: { type: DataTypes.STRING }, // New: Private Room Title
-    roomPassword: { type: DataTypes.STRING } // New: Room Password
+    roomPassword: { type: DataTypes.STRING }, // New: Room Password
+    apologyContent: { type: DataTypes.TEXT }, // New: Apology Letter Content
+    apologyStatus: { type: DataTypes.ENUM('none', 'sent', 'read'), defaultValue: 'none' } // New: Apology Status
 });
 
 const Proposal = sequelize.define('Proposal', {
     caseId: { type: DataTypes.INTEGER, allowNull: false },
     proposerId: { type: DataTypes.INTEGER, allowNull: false },
     amount: { type: DataTypes.INTEGER, allowNull: false },
-    message: { type: DataTypes.TEXT }
+    message: { type: DataTypes.TEXT },
+    duration: { type: DataTypes.INTEGER } // 1, 3, 7 days
+});
+
+// ... (Routes) ...
+
+// 6. Proposal System
+// Get Proposal Status (Blind)
+app.get('/api/case/proposal', async (req, res) => {
+    const { userId, caseId } = req.query;
+    try {
+        // Get my proposals
+        const myProposals = await Proposal.findAll({
+            where: { caseId, proposerId: userId },
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Check if opponent has proposed (Blind)
+        const opponentProposals = await Proposal.findAll({
+            where: {
+                caseId,
+                proposerId: { [Sequelize.Op.ne]: userId } // Not me
+            }
+        });
+
+        res.json({
+            success: true,
+            myProposalCount: myProposals.length,
+            myLastProposal: myProposals.length > 0 ? myProposals[0] : null,
+            opponentProposalCount: opponentProposals.length,
+            hasOpponentProposed: opponentProposals.length > 0
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Submit Proposal
+app.post('/api/case/proposal', async (req, res) => {
+    const { userId, caseId, amount, duration } = req.body;
+    try {
+        // Check Limit (Max 3)
+        const count = await Proposal.count({ where: { caseId, proposerId: userId } });
+        if (count >= 3) {
+            return res.json({ success: false, error: '제안 횟수(3회)를 모두 소진했습니다.' });
+        }
+
+        await Proposal.create({
+            caseId,
+            proposerId: userId,
+            amount,
+            duration
+        });
+
+        // Update case status to negotiating if not already
+        const c = await Case.findByPk(caseId);
+        if (c && c.status === 'connected') {
+            c.status = 'negotiating';
+            await c.save();
+        }
+
+        res.json({ success: true, leftCount: 2 - count });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
 });
 
 // Routes
@@ -200,7 +268,6 @@ app.post('/api/case/create-room', async (req, res) => {
 // 4.7 Search Rooms
 app.get('/api/case/search', async (req, res) => {
     const { query } = req.query;
-    const { Op } = require('sequelize');
 
     try {
         const cases = await Case.findAll({
@@ -321,6 +388,8 @@ app.get('/api/case/status', async (req, res) => {
         return {
             caseId: caseData.id,
             caseNumber: caseData.caseNumber,
+            roomTitle: caseData.roomTitle, // Added
+            summary: caseData.summary, // Added
             myRole: isOffender ? 'offender' : 'victim',
             connectionStatus: caseData.connectionStatus || 'none',
             counterpartyName: counterpartyName || (isOffender ? '피해자 (가입 대기 중)' : '피의자 (가입 대기 중)'),

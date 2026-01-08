@@ -236,7 +236,18 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.borderLeft = '4px solid ' + getStatusColor(caseItem.connectionStatus);
 
         card.onclick = () => {
-            openCaseDetail(caseItem.caseId, caseItem.caseNumber, caseItem.myRole, caseItem.connectionStatus, caseItem.counterpartyName, caseItem.registrationDate);
+            openCaseDetail(
+                caseItem.caseId,
+                caseItem.caseNumber,
+                caseItem.myRole,
+                caseItem.connectionStatus,
+                caseItem.counterpartyName,
+                caseItem.registrationDate,
+                caseItem.roomTitle,   // New
+                caseItem.summary,      // New
+                caseItem.apologyStatus, // New
+                caseItem.apologyContent // New
+            );
         };
 
         card.onmouseenter = () => {
@@ -252,12 +263,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const roleIcon = caseItem.myRole === 'offender' ? 'fa-user-tie' : 'fa-user-shield';
         const roleText = caseItem.myRole === 'offender' ? '피의자' : '피해자';
 
+        // Display Logic: 1. RoomTitle, 2. Summary, 3. CaseNumber
+        let displayTitle = caseItem.roomTitle || caseItem.summary || caseItem.caseNumber;
+        let subTitle = '';
+
+        if (caseItem.roomTitle) {
+            subTitle = `<span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 8px;">Ref: ${caseItem.caseNumber}</span>`;
+        } else if (displayTitle !== caseItem.caseNumber) {
+            subTitle = `<span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 8px;">${caseItem.caseNumber}</span>`;
+        }
+
+        // Truncate if too long
+        if (displayTitle.length > 25) displayTitle = displayTitle.substring(0, 25) + '...';
+
+
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
                 <div>
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                         <i class="fas ${roleIcon}" style="color: var(--text-muted);"></i>
-                        <h3 style="font-size: 1.1rem; margin: 0;">${caseItem.caseNumber}</h3>
+                        <h3 style="font-size: 1.1rem; margin: 0;">${displayTitle} ${subTitle}</h3>
                     </div>
                     <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">내 역할: ${roleText}</p>
                 </div>
@@ -317,13 +342,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<span class="status-badge" style="background: ${bgColor}; color: ${textColor};">${text}</span>`;
     }
 
-    window.openCaseDetail = (caseId, caseNumber, myRole, status, counterpartyName, registrationDate) => {
+    window.openCaseDetail = (caseId, caseNumber, myRole, status, counterpartyName, registrationDate, roomTitle, summary, apologyStatus, apologyContent) => {
         localStorage.setItem('current_case_id', caseId);
         localStorage.setItem('current_case_number', caseNumber);
         localStorage.setItem('current_case_role', myRole);
         localStorage.setItem('current_case_status', status);
         localStorage.setItem('current_counterparty', counterpartyName);
         localStorage.setItem('current_case_date', registrationDate || '2024.01.01');
+        // Save Title and Summary
+        localStorage.setItem('current_case_title', roomTitle || '');
+        localStorage.setItem('current_case_summary', summary || '');
+        // Save Apology Info
+        localStorage.setItem('current_apology_status', apologyStatus || 'none');
+        localStorage.setItem('current_apology_content', apologyContent || '');
 
         window.location.href = 'case_detail.html';
     };
