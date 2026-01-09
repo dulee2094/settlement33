@@ -324,8 +324,13 @@ app.post('/api/case/join-room', async (req, res) => {
     try {
         const caseData = await Case.findByPk(caseId);
 
-        if (!caseData) return res.json({ success: false, error: '議댁옱?섏? ?딅뒗 諛⑹엯?덈떎.' });
-        if (caseData.roomPassword !== password) return res.json({ success: false, error: '鍮꾨?踰덊샇媛 ?쇱튂?섏? ?딆뒿?덈떎.' });
+        if (!caseData) return res.json({ success: false, error: '존재하지 않는 방입니다.' });
+        if (caseData.roomPassword !== password) return res.json({ success: false, error: '비밀번호가 일치하지 않습니다.' });
+
+        // Prevent Self-Join
+        if (caseData.offenderId == userId || caseData.victimId == userId) {
+            return res.json({ success: false, error: '본인이 개설하거나 이미 참여한 방입니다.' });
+        }
 
         // Determine Role
         let myRole = '';
@@ -336,7 +341,7 @@ app.post('/api/case/join-room', async (req, res) => {
             caseData.offenderId = userId;
             myRole = 'offender';
         } else {
-            return res.json({ success: false, error: '?대? ?몄썝??媛??李?諛⑹엯?덈떎.' });
+            return res.json({ success: false, error: '이미 정원이 가득 찬 방입니다.' });
         }
 
         caseData.connectionStatus = 'connected';
@@ -393,7 +398,9 @@ app.get('/api/case/status', async (req, res) => {
     // Process each case
     const caseList = await Promise.all(cases.map(async (caseData) => {
         let counterpartyName = null;
-        const isOffender = (caseData.offenderId == userId);
+        // Strict integer comparison for role determination
+        const currentUserId = parseInt(userId, 10);
+        const isOffender = (caseData.offenderId === currentUserId);
         const counterpartyId = isOffender ? caseData.victimId : caseData.offenderId;
 
         if (counterpartyId) {
