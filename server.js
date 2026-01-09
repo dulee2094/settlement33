@@ -1,7 +1,7 @@
 ﻿const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Op } = require('sequelize');
 const path = require('path');
 
 const app = express();
@@ -270,26 +270,44 @@ app.get('/api/case/search', async (req, res) => {
     const { query } = req.query;
 
     try {
+        const whereClause = {
+            // Only show rooms that are not full (pending connection)
+            [Op.or]: [
+                { offenderId: null },
+                { victimId: null }
+            ]
+        };
+
+        // If query exists, filter by title
+        if (query) {
+            whereClause.roomTitle = {
+                [Op.like]: `%${query}%`
+            };
+        }
+
         const cases = await Case.findAll({
-            where: {
-                roomTitle: {
-                    [Op.like]: `%${query}%`
-                },
-                // Only show rooms that are not full
-                [Op.or]: [
-                    { offenderId: null },
-                    { victimId: null }
-                ]
-            },
+            where: whereClause,
+            order: [['createdAt', 'DESC']],
             limit: 20
         });
 
-        // Map to safe public info
-        const result = cases.map(c => ({
-            id: c.id,
-            roomTitle: c.roomTitle,
-            creatorRole: c.offenderId ? '피의자' : '피해자',
-            createdAt: c.createdAt
+        // Map to safe public info AND fetch creator name
+        const result = await Promise.all(cases.map(async (c) => {
+            let creatorName = '알 수 없음';
+            const creatorId = c.offenderId || c.victimId;
+
+            if (creatorId) {
+                const user = await User.findByPk(creatorId);
+                if (user) creatorName = user.name;
+            }
+
+            return {
+                id: c.id,
+                roomTitle: c.roomTitle,
+                creatorRole: c.offenderId ? '피의자' : '피해자',
+                creatorName: creatorName,
+                createdAt: c.createdAt
+            };
         }));
 
         res.json({ success: true, rooms: result });

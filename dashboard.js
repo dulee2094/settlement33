@@ -821,7 +821,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openJoinRoomModal = function () {
         closeChoiceModal();
         document.getElementById('joinRoomModal').style.display = 'flex';
-        document.getElementById('roomListArea').innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">검색어를 입력하고 찾기를 눌러주세요.</div>';
+        // Immediately load recent rooms
+        document.getElementById('roomSearchInput').value = '';
+        searchRooms();
     };
     window.closeJoinRoomModal = function () {
         document.getElementById('joinRoomModal').style.display = 'none';
@@ -829,17 +831,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     window.searchRooms = async function () {
         const query = document.getElementById('roomSearchInput').value;
-        if (!query) return;
-
         const listArea = document.getElementById('roomListArea');
-        listArea.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 검색중...</div>';
+
+        // Show loading state
+        listArea.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 방 목록을 불러오는 중...</div>';
 
         try {
-            const res = await fetch(`${API_BASE}/case/search?query=${encodeURIComponent(query)}`);
+            // Pass empty query to get all/recent rooms
+            const res = await fetch(`${API_BASE}/case/search?query=${encodeURIComponent(query || '')}`);
             const data = await res.json();
 
             if (data.success && data.rooms.length > 0) {
                 listArea.innerHTML = '';
+
+                // Add a small header if showing all rooms
+                if (!query) {
+                    const header = document.createElement('div');
+                    header.style.padding = '0 5px 10px 5px';
+                    header.style.fontSize = '0.9rem';
+                    header.style.color = 'var(--text-muted)';
+                    header.innerHTML = '<i class="fas fa-list"></i> 최근 개설된 방';
+                    listArea.appendChild(header);
+                }
+
                 data.rooms.forEach(room => {
                     const div = document.createElement('div');
                     div.className = 'glass-card';
@@ -847,20 +861,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     div.style.cursor = 'pointer';
                     div.style.marginBottom = '10px';
                     div.style.border = '1px solid rgba(255,255,255,0.1)';
+                    div.style.transition = '0.2s';
+                    div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.08)';
+                    div.onmouseout = () => div.style.background = '';
+
                     div.innerHTML = `
-                        <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">${room.roomTitle}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-muted);">
-                            방장: ${room.creatorRole} | 개설: ${new Date(room.createdAt).toLocaleDateString()}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="font-weight: bold; font-size: 1.1rem; color: #fff;">${room.roomTitle}</div>
+                            <span class="status-badge" style="background: rgba(74, 158, 255, 0.2); color: #4A9EFF; font-size: 0.75rem;">참여 가능</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted);">
+                            <span style="display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-user-circle"></i> ${room.creatorName} (${room.creatorRole})
+                            </span>
+                            <span style="width: 1px; height: 10px; background: rgba(255,255,255,0.2);"></span>
+                            <span>${new Date(room.createdAt).toLocaleDateString()}</span>
                         </div>
                     `;
                     div.onclick = () => tryJoinRoom(room.id, room.roomTitle);
                     listArea.appendChild(div);
                 });
             } else {
-                listArea.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">검색 결과가 없습니다.</div>';
+                listArea.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">개설된 방이 없거나 검색 결과가 없습니다.</div>';
             }
         } catch (err) {
-            listArea.innerHTML = '<div style="text-align: center; padding: 20px; color: #ff6b6b;">오류가 발생했습니다.</div>';
+            console.error(err);
+            listArea.innerHTML = '<div style="text-align: center; padding: 20px; color: #ff6b6b;">목록을 불러오지 못했습니다.</div>';
         }
     };
 
