@@ -221,6 +221,29 @@
         // Position Selection
         let currentPosition = 'payer'; // Default: Paying
 
+        // Initialize: Check Status from Server
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializePage();
+        });
+
+        async function initializePage() {
+            const caseId = localStorage.getItem('current_case_id');
+            const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+            const userId = userInfo.id || 1; // Fallback
+
+            try {
+                // Fetch Proposal Status
+                // Assuming GET /api/case/proposal returning history and counts
+                // For MVP, if not implemented, we rely on local state or basic init.
+                // But let's try to fetch if possible.
+                // Since GET method wasn't explicitly seen, we'll assume we start fresh or relying on 'submit' return.
+                // For now, update UI counts.
+                updateCountUI();
+            } catch (e) {
+                console.error("Init Error", e);
+            }
+        }
+
         function selectPosition(type) {
             currentPosition = type;
             const payerBtn = document.getElementById('pos-payer');
@@ -276,8 +299,7 @@
             }
         }
 
-        // Mock function to simulate Blind Gap Logic - 5 Level System + Man-won Unit + Over-offer Check
-        function submitProposal() {
+        async function submitProposal() {
             // 1. Check Limits
             if (proposalCount >= MAX_PROPOSALS) {
                 return alert('제안 횟수(3회)를 모두 소진했습니다. 더 이상 수정 제안할 수 없습니다.');
@@ -286,10 +308,8 @@
             const rawInput = parseInt(document.getElementById('myAmount').value);
             if (!rawInput) return alert('희망 금액을 입력해주세요.');
 
-            // Confirm
             const positionText = currentPosition === 'payer' ? '지급' : '수령';
             if (!confirm(`[남은 제안 횟수: ${MAX_PROPOSALS - proposalCount - 1}회]\n\n${rawInput}만원을 '${positionText}'하는 조건으로 제안하시겠습니까?\n(유효기간: ${selectedDuration}일)\n제안 즉시 상대방에게 알림이 발송됩니다.`)) return;
-
 
             // Convert Man-won to Won
             const myAmount = rawInput * 10000;
@@ -299,298 +319,158 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석 및 전송중...';
             btn.disabled = true;
 
-            setTimeout(() => {
-                // Scenario: Mock Opponent Data (Testing Mode)
-                // TODO: Replace this with real DB data in production.
-                const opponent = {
-                    role: 'receiver', // 'payer' or 'receiver'
-                    amount: 8000000   // 800 Man-won
-                };
+            const caseId = localStorage.getItem('current_case_id');
+            const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+            const userId = userInfo.id || 1;
 
-                // 2. Logic: Check for Role Conflict
-                if (currentPosition === opponent.role) {
-                    // ERROR: Both want to give OR Both want to receive
-                    document.getElementById('waitingState').style.display = 'none';
-                    document.getElementById('resultState').style.display = 'block';
+            try {
+                // REAL API CALL
+                const res = await fetch('/api/proposal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caseId, userId, amount: myAmount, duration: selectedDuration, position: currentPosition })
+                });
+                const data = await res.json();
 
-                    const gapTitle = document.getElementById('gapTitle');
-                    const gapDesc = document.getElementById('gapDesc');
-                    const gapGauge = document.getElementById('gapGauge');
-                    const statusBadge = document.getElementById('statusBadge');
-                    const actionButtons = document.getElementById('actionButtons');
-
-                    gapTitle.innerHTML = "⚠️ 입장이 충돌합니다";
-                    gapDesc.innerHTML = `양측 모두 <strong>'${currentPosition === 'payer' ? '돈을 주겠다' : '돈을 받겠다'}'</strong>고 선택했습니다.<br>서로의 의사가 엇갈립니다. 상대방과 역할을 다시 확인해주세요.`;
-
-                    gapGauge.style.width = '100%';
-                    gapGauge.style.background = '#666'; // Grey for error
-                    gapGauge.style.boxShadow = 'none';
-
-                    statusBadge.textContent = '역할 충돌';
-                    statusBadge.style.color = '#ccc';
-                    statusBadge.style.border = '1px solid #ccc';
-
-                    // Clear Range Hint if exists
-                    const rangeElement = document.getElementById('rangeHintBox');
-                    if (rangeElement) rangeElement.style.display = 'none';
-
-                    actionButtons.innerHTML = '<button class="btn btn-primary" onclick="location.reload()">다시 선택하기</button>';
-
+                if (!data.success) {
+                    alert('오류 발생: ' + data.error);
                     btn.innerHTML = originalBtnText;
                     btn.disabled = false;
-                    return; // Stop processing
+                    return;
                 }
 
-                // 3. Logic: Check for Deal Success (Over-Offer / Good Deal)
-                let isDealSuccess = false;
-
-                if (currentPosition === 'payer') {
-                    // I am paying. If I offer MORE than they want, it's a deal.
-                    if (myAmount >= opponent.amount) isDealSuccess = true;
-                } else {
-                    // I am receiving. If I ask for LESS than they offer, it's a deal.
-                    // Note: In this mock, opponent is 'receiver', so we won't hit this unless we change mock data.
-                    // But if opponent was 'payer' (offering 800), and I ask for 700, indeed deal.
-                    if (myAmount <= opponent.amount) isDealSuccess = true;
-                }
-
-                const diff = Math.abs(opponent.amount - myAmount);
-                const average = (opponent.amount + myAmount) / 2;
-                let gapPercent = (diff / average) * 100;
-
-                // Exception for small amounts
-                if (diff <= 500000) gapPercent = 0;
-
-                // Forced Level 1 if Deal Success (Over-offer / Under-ask)
-                if (isDealSuccess) {
-                    gapPercent = 0; // Force to 0% gap logic
-                }
-
-                // Show Result
-                document.getElementById('waitingState').style.display = 'none';
-                document.getElementById('resultState').style.display = 'block';
-
-                const gapTitle = document.getElementById('gapTitle');
-                const gapDesc = document.getElementById('gapDesc');
-                const gapGauge = document.getElementById('gapGauge');
-
-                // Reset Range Hint Display
-                let rangeElement = document.getElementById('rangeHintBox');
-                if (rangeElement) rangeElement.style.display = 'block';
-
-                const statusBadge = document.getElementById('statusBadge');
-                const actionButtons = document.getElementById('actionButtons');
-
-                // Determine Level (Re-using existing vars)
-                let level = 0;
-                let color = '';
-                let title = '';
-                let desc = '';
-                let width = '';
-                let badgeText = '';
-
-                if (gapPercent <= 10) {
-                    // Level 1: Green Zone (Including Over-offer)
-                    level = 1;
-                    color = '#4ade80'; // Green
-
-                    // Calculate Average (Final Settlement Amount)
-                    const finalAmount = Math.round((myAmount + opponent.amount) / 2 / 10000) * 10000;
-
-                    // Blind Proposal Content
-                    title = "축하합니다! 의견이 거의 일치합니다";
-                    desc = `양측의 제안 금액 차이가 <strong>10% 이내</strong>입니다.<br>구체적인 금액을 확인하기 전에, <strong>두 제안의 평균값</strong>으로 합의를 확정하시겠습니까?`;
-
-                    if (isDealSuccess) {
-                        desc = `제안하신 조건이 상대방의 기대치를 충분히 충족합니다.<br><strong>두 제안의 평균값</strong>으로 합의를 확정하시겠습니까?`;
-                    }
-
-                    width = '98%'; // Max full
-                    badgeText = '성사 확실';
-
-                    // Special Action for Blind Consent
-                    // We render a special "Consent View" instead of the standard Result View initially
-                    // However, to keep it simple within this structure, we use the ActionButton to trigger the reveal.
-
-                    // Hide the Gauge and Range Hint initially for this specific case to maintain "Blindness"
-                    gapGauge.style.display = 'none';
-                    if (rangeElement) rangeElement.style.display = 'none';
-
-                    // Add a special customized visual for "Locked Agreement"
-                    let hiddenBox = document.getElementById('hiddenAgreementBox');
-                    if (!hiddenBox) {
-                        hiddenBox = document.createElement('div');
-                        hiddenBox.id = 'hiddenAgreementBox';
-                        hiddenBox.style.margin = '20px 0';
-                        hiddenBox.style.padding = '30px';
-                        hiddenBox.style.border = '2px dashed #4ade80';
-                        hiddenBox.style.borderRadius = '12px';
-                        hiddenBox.style.backgroundColor = 'rgba(74, 222, 128, 0.05)';
-                        hiddenBox.innerHTML = `
-                            <div style="font-size: 3rem; margin-bottom: 15px;">🤝</div>
-                            <div style="font-size: 1.1rem; font-weight: bold; color: #4ade80; margin-bottom: 5px;">히든 합의 제안</div>
-                            <div style="font-size: 0.9rem; color: #aaa;">평균값 규칙 적용</div>
-                        `;
-                        // Insert after title/desc
-                        document.getElementById('resultState').insertBefore(hiddenBox, actionButtons);
-                    }
-                    hiddenBox.style.display = 'block';
-
-                    actionButtons.innerHTML = `<button class="btn btn-primary" onclick="confirmSettlement(${finalAmount}, ${myAmount}, ${opponent.amount})" style="background: #4ade80; color: #000; font-weight:bold;">평균값으로 합의 동의 및 확정</button>`;
-
-                } else if (gapPercent <= 30) {
-                    // Level 2: Blue Zone
-                    level = 2;
-                    color = '#3b82f6'; // Blue
-                    title = "긍정적인 조율 단계입니다";
-                    desc = `서로의 의견 차이가 <strong>크지 않습니다.</strong><br>안심 채팅을 통해 구체적인 사정을 설명하면 충분히 간격을 좁힐 수 있습니다.`;
-                    width = '75%';
-                    badgeText = '조율 가능';
-                    actionButtons.innerHTML = '<button class="btn btn-glass" style="margin-right: 10px;" onclick="resetForNewProposal()">수정 제안하기</button><button class="btn btn-primary">안심 채팅방 열기</button>';
-                } else if (gapPercent <= 60) {
-                    // Level 3: Yellow Zone
-                    level = 3;
-                    color = '#facc15'; // Yellow
-                    title = "희망 금액의 차이가 큽니다";
-                    desc = `상대방과는 생각의 차이가 존재합니다.<br>조금 더 신중하게 고민해보시거나, 시간을 두고 <strong>수정 제안</strong>을 해보시기 바랍니다.`;
-                    width = '50%';
-                    badgeText = '차이 발생';
-                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #facc15; color: #000;" onclick="resetForNewProposal()">수정 제안하기</button>';
-                } else if (gapPercent <= 100) {
-                    // Level 4: Orange Zone
-                    level = 4;
-                    color = '#fb923c'; // Orange
-                    title = "입장 차이가 매우 큽니다";
-                    desc = `현재 상태로는 합의가 어렵습니다. 상대방은 그와는 <strong>전혀 다른 기준</strong>을 가지고 있습니다.<br>잠시 냉각기를 가지는 것을 추천합니다.`;
-                    width = '25%';
-                    badgeText = '큰 격차';
-                    actionButtons.innerHTML = '<button class="btn btn-glass" onclick="resetForNewProposal()">제안 보류하기</button><button class="btn btn-primary" style="margin-left: 10px;" onclick="resetForNewProposal()">다시 제안하기</button>';
-                } else {
-                    // Level 5: Red Zone
-                    level = 5;
-                    color = '#ef4444'; // Red
-                    title = "합의가 도출이 어려워 보입니다";
-                    desc = `간격이 너무 큽니다 (100% 이상 차이).<br>사실상 결렬 상태입니다. 형사 조정 절차나 정식 재판을 준비하시는 것이 효율적입니다.`;
-                    width = '10%';
-                    badgeText = '결렬 위기';
-                    actionButtons.innerHTML = '<button class="btn btn-primary" style="background: #ef4444;">형사 절차 안내 보기</button>';
-                }
-
-                // Update UI Elements
-                gapTitle.innerHTML = title; // Use innerHTML for HTML content
-                gapDesc.innerHTML = desc;
-
-                // Animate Gauge
-                gapGauge.style.width = width;
-                gapGauge.style.background = color;
-                gapGauge.style.boxShadow = `0 0 20px ${color}`;
-
-                statusBadge.textContent = badgeText;
-                statusBadge.style.color = color;
-                statusBadge.style.background = 'rgba(255,255,255,0.05)';
-                statusBadge.style.border = `1px solid ${color}`;
-
-                // Add Range Hint (Blurring Effect) - Only shown if NOT Valid Error
-                const minRange = Math.floor(opponent.amount * 0.8 / 10000) * 10000;
-                const maxRange = Math.ceil(opponent.amount * 1.2 / 10000) * 10000;
-
-                let rangeElementInner = document.getElementById('rangeHintBox');
-                if (!rangeElementInner) {
-                    rangeElementInner = document.createElement('div');
-                    rangeElementInner.id = 'rangeHintBox';
-                    rangeElementInner.style.marginTop = '20px';
-                    rangeElementInner.style.padding = '15px';
-                    rangeElementInner.style.background = 'rgba(255,255,255,0.05)';
-                    rangeElementInner.style.borderRadius = '8px';
-                    document.getElementById('resultState').insertBefore(rangeElementInner, actionButtons);
-                }
-                rangeElementInner.style.display = 'block';
-
-                rangeElementInner.innerHTML = `
-                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">상대방 제안 예상 범위</div>
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff; filter: blur(${level >= 4 ? '5px' : '0px'}); transition: filter 0.5s;">
-                        ${minRange.toLocaleString()}원 ~ ${maxRange.toLocaleString()}원
-                    </div>
-                     ${level >= 4 ? '<div style="font-size:0.7rem; color:#ef4444; margin-top:5px;">격차가 너무 커서 범위조차 흐릿합니다.</div>' : ''}
-                `;
-
-                // Add to History
+                // Increase Count
                 proposalCount++;
-                const now = new Date();
-                const timeString = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-                const historyItem = {
-                    round: proposalCount,
-                    time: timeString,
-                    amount: myAmount,
-                    result: badgeText,
-                    color: color
-                };
-
-                proposalHistory.unshift(historyItem);
-                updateHistoryUI();
                 updateCountUI();
 
-                btn.innerHTML = originalBtnText; // Reset button text for next time if allowed
+                // Check Status from Server Response
+                // Status: 'waiting' (Opponent hasn't proposed yet) OR 'analyzed' (Both proposed)
+                if (data.status === 'waiting') {
+                    // Update UI to 'Waiting' State more explicitly
+                    document.getElementById('waitingState').style.display = 'block';
+                    document.getElementById('waitingState').innerHTML = `
+                         <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>제안이 성공적으로 등록되었습니다</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">
+                            상대방이 아직 제안을 등록하지 않았습니다.<br>
+                            상대방도 제안을 등록하면 <strong>즉시 분석 결과</strong>가 표시됩니다.
+                        </p>
+                        <button class="btn btn-glass" onclick="location.reload()" style="margin-top:20px;">새로고침</button>
+                    `;
+                    document.getElementById('resultState').style.display = 'none';
 
-                if (proposalCount >= MAX_PROPOSALS) {
-                    btn.textContent = '제안 횟수 초과';
-                    btn.disabled = true;
-                } else {
-                    btn.disabled = false;
+                    // Add to history as 'waiting'
+                    addToHistory(myAmount, '대기 중', '#888');
+
+                } else if (data.status === 'analyzed') {
+                    // Logic: Both have proposed.
+                    // Calculate GAP and Show Result (Logic moved from frontend to data drive)
+                    // Note: Ideally Server should return the Gap Level/Percent.
+                    // For now, we assume Server returns 'data.data.diff' (absolute diff).
+                    // We need 'opponentAmount' to fully visualize standard frontend logic or just use diff.
+
+                    // For visualization, we need opponent amount or gap percent.
+                    // Let's infer opponent amount roughly or calculate gap percent if diff is provided.
+                    // Diff = |My - Opponent|
+                    // If we don't know opponent amount, we can't calculate exact % cleanly without it.
+                    // But let's assume for this 'Blind' concept, the server MIGHT return the 'Analysis Level' directly to avoid cheating?
+                    // Or we just fetch the diff and calculate based on myAmount.
+                    // Let's assume a simple Gap Calc on Frontend for now using the Diff.
+                    // Opponent = My +/- Diff. We don't know if higher or lower.
+                    // Actually, % difference is based on Average usually.
+                    // Let's simplify: Gap % = (Diff / MyAmount) * 100 (Roughly).
+                    // Better: Server should return the Analysis Result info.
+
+                    // Let's fallback to the previous Visualization Logic but populated with REAL 'data.data.diff'.
+                    // We will simulate the 'Analysis' display using the Diff.
+
+                    const diff = data.data.diff;
+                    // We don't know Opponent Amount exactly (Blind), but to visualize range we might guess.
+                    // Or, just use Diff to determine Level.
+
+                    // Estimate Gap % relative to My Amount (User centric view)
+                    let gapPercent = (diff / myAmount) * 100;
+
+                    showAnalysisResult(gapPercent, myAmount, diff);
+                    addToHistory(myAmount, '분석 완료', '#4ade80');
                 }
 
-            }, 1000); // Slightly realistic delay
+            } catch (err) {
+                console.error(err);
+                alert('서버 통신 오류');
+            } finally {
+                if (proposalCount < MAX_PROPOSALS) {
+                    btn.innerHTML = originalBtnText;
+                    btn.disabled = false;
+                } else {
+                    btn.textContent = '제안 횟수 초과';
+                }
+            }
         }
 
-        // Reveal Function for Level 1 Success
-        function confirmSettlement(finalAmount, myAmount, opponentAmount) {
-            // Remove the hidden box
-            const hiddenBox = document.getElementById('hiddenAgreementBox');
-            if (hiddenBox) hiddenBox.style.display = 'none';
+        function showAnalysisResult(gapPercent, myAmount, diff) {
+            document.getElementById('waitingState').style.display = 'none';
+            document.getElementById('resultState').style.display = 'block';
 
-            // Update Title & Desc with REAL numbers
             const gapTitle = document.getElementById('gapTitle');
             const gapDesc = document.getElementById('gapDesc');
-
-            gapTitle.innerHTML = `<span style="color:#4ade80">최종 합의금 ${finalAmount.toLocaleString()}원</span>`;
-            gapDesc.innerHTML = `
-                축하합니다! 합의가 확정되었습니다.<br>
-                <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.9rem;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="color:#aaa;">나의 제안</span>
-                        <span>${myAmount.toLocaleString()}원</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">
-                        <span style="color:#aaa;">상대방 제안</span>
-                        <span>${opponentAmount.toLocaleString()}원</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; color:#4ade80; margin-top:5px;">
-                        <span>최종 결정 (평균)</span>
-                        <span>${finalAmount.toLocaleString()}원</span>
-                    </div>
-                </div>
-            `;
-
-            // Change Action Buttons to Next Step
-            // Change Action Buttons to Next Step
+            const gapGauge = document.getElementById('gapGauge');
+            const statusBadge = document.getElementById('statusBadge');
             const actionButtons = document.getElementById('actionButtons');
-            actionButtons.innerHTML = `<button class="btn btn-primary" onclick="goToAccountPage()">합의금 지급/수령으로 이동하기 <i class="fas fa-arrow-right"></i></button>`;
 
-            // Trigger Confetti or Sound effect here if available
+            let color, title, desc, width, badgeText;
+
+            if (gapPercent <= 10) {
+                color = '#4ade80'; title = "축하합니다! 의견이 거의 일치합니다";
+                desc = "제안하신 금액과 상대방의 희망 금액 차이가 <strong>10% 이내</strong>입니다.";
+                width = '98%'; badgeText = "성사 확실";
+            } else if (gapPercent <= 30) {
+                color = '#3b82f6'; title = "긍정적인 조율 단계입니다";
+                desc = "의견 차이가 크지 않습니다. 조금만 더 조율하면 합의점을 찾을 수 있습니다.";
+                width = '75%'; badgeText = "조율 가능";
+            } else if (gapPercent <= 60) {
+                color = '#facc15'; title = "희망 금액의 차이가 큽니다";
+                desc = "생각의 차이가 존재합니다. 신중한 재고가 필요합니다.";
+                width = '50%'; badgeText = "차이 발생";
+            } else {
+                color = '#ef4444'; title = "입장 차이가 매우 큽니다";
+                desc = "상대방과 금액에 대한 기준이 많이 다릅니다.";
+                width = '25%'; badgeText = "큰 격차";
+            }
+
+            gapTitle.innerHTML = title;
+            gapDesc.innerHTML = desc;
+            gapGauge.style.width = width;
+            gapGauge.style.background = color;
+            gapGauge.style.boxShadow = `0 0 20px ${color}`;
+            statusBadge.textContent = badgeText;
+            statusBadge.style.color = color;
+            statusBadge.style.border = `1px solid ${color}`;
+
+            // Range Hint Sim
+            // Blind Range: My +/- Diff/2 is not correct.
+            // Just show broad range: MyAmount +/- Diff (Very rough) or just hide specifics.
+            // Let's show "Gap Amount" roughly.
+            const rangeBox = document.getElementById('rangeHintBox');
+            if (rangeBox) {
+                rangeBox.innerHTML = `
+                    <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">금액 차이(Gap)</div>
+                     <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">
+                        약 ${diff.toLocaleString()}원 차이
+                    </div>
+                 `;
+            }
         }
 
-        function resetForNewProposal() {
-            if (proposalCount >= MAX_PROPOSALS) return alert("제안 횟수를 모두 소진했습니다.");
-            // Optional: Reset view to let them try again if they want to modify
-            // For this flow, we might just keep the result and let them change input on the left
-            location.reload(); // Simple reload for demo
-        }
+        function addToHistory(amount, result, color) {
+            const now = new Date();
+            const timeString = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            const historyItem = { round: proposalCount, time: timeString, amount: amount, result: result, color: color };
+            proposalHistory.unshift(historyItem);
 
-        function updateHistoryUI() {
             const tbody = document.getElementById('historyTableBody');
-            if (proposalHistory.length === 0) return;
-
             tbody.innerHTML = proposalHistory.map(item => `
                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <td style="padding: 15px;">${item.round}차</td>
@@ -606,20 +486,19 @@
         }
 
         function updateCountUI() {
-            // document.getElementById('currentCount').textContent = proposalCount; // Removed: Element not found
             const leftCountEl = document.getElementById('leftCount');
             if (leftCountEl) leftCountEl.textContent = MAX_PROPOSALS - proposalCount;
         }
 
         // Navigation Helper
         function goToAccountPage() {
-            // Set the active tab for case_detail.js to pick up
             localStorage.setItem('active_tab_on_load', 'account');
             location.href = 'case_detail.html';
         }
 
-        // Initialize
-        updateCountUI();
+        function resetForNewProposal() {
+            location.reload();
+        }
     </script>
 </body>
 

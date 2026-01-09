@@ -56,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (caseTitle) elHeaderCase.setAttribute('title', `사건번호: ${caseNumber}`);
         }
         if (elHeaderRole) elHeaderRole.textContent = getRoleText(myRole);
-        if (elHeaderCounter) elHeaderCounter.textContent = counterparty || '정보 없음';
+        if (elHeaderCounter) elHeaderCounter.textContent = counterparty;
         if (elHeaderStatus) elHeaderStatus.textContent = getStatusText(status);
 
         if (elSidebarCase) elSidebarCase.textContent = displayTitle;
-        if (elSidebarCounter) elSidebarCounter.textContent = counterparty || '정보 없음';
+        if (elSidebarCounter) elSidebarCounter.textContent = counterparty;
     }
 
     function getRoleText(role) {
@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'account':
                 contentArea.innerHTML = getAccountInfoHTML();
+                setTimeout(() => { if (window.initializeSignaturePad) window.initializeSignaturePad(); }, 100);
                 break;
             default:
                 contentArea.innerHTML = getOverviewHTML();
@@ -159,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const myRole = localStorage.getItem('current_case_role') || 'offender';
         const status = localStorage.getItem('current_case_status') || 'pending';
         const counterparty = localStorage.getItem('current_counterparty') || '상대방';
-        const date = localStorage.getItem('current_case_date') || '2024.01.01';
+        const date = localStorage.getItem('current_case_date') || new Date().toLocaleDateString();
 
         // Helper for Progress Status
         const isConnected = ['connected', 'negotiating', 'completed'].includes(status);
@@ -575,9 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     <!-- Messages Area -->
                     <div class="chat-messages" id="chatArea" style="flex: 1; overflow-y: auto; padding: 20px;">
-                        <div class="system-msg">2024년 1월 3일 대화가 시작되었습니다.</div>
-                        <div class="system-msg">서로를 배려하며 대화해주세요.</div>
-                        <div class="message received">안녕하세요. 대화 요청 수락해주셔서 감사합니다.</div>
+                        ${loadChatMessagesHTML(caseId)}
                     </div>
 
                     <!-- Input Area -->
@@ -633,38 +632,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         } else {
-            return `
-                <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
-                    <h3 style="margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> 도착한 사과문</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 30px;">피의자로부터 도착한 사과문입니다.</p>
+            // Victim View Logic
+            const apologyStatus = localStorage.getItem('current_apology_status') || 'none';
+            const apologyContent = localStorage.getItem('current_apology_content') || '';
+            const apologyDate = localStorage.getItem('current_apology_date') || new Date().toLocaleDateString();
 
-                    <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8;">
-                        <p>정말 죄송합니다.<br><br>
-                        순간의 잘못된 판단으로 선생님께 큰 피해를 입힌 점 깊이 반성하고 있습니다. 
-                        입이 열 개라도 드릴 말씀이 없지만, 이렇게 글로남아 사죄의 말씀을 올립니다.
-                        <br><br>
-                        앞으로 다시는 이런 일이 없도록 주의하고 또 주의하겠습니다.
-                        부디 너그러운 마음으로 용서를 주시기를 간청 드립니다.
-                        <br><br>
-                        죄송합니다.
+            if (apologyStatus === 'sent' || apologyStatus === 'read') {
+                return `
+                    <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+                        <h3 style="margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> 도착한 사과문</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 30px;">피의자로부터 도착한 사과문입니다.</p>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8; white-space: pre-wrap;">${apologyContent}</div>
+                        
+                        <div style="display: flex; justify-content: flex-end;">
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">${apologyDate} 수신됨</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="glass-card" style="max-width: 800px; margin: 0 auto; text-align: center; padding: 60px 40px;">
+                        <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
+                            <i class="far fa-envelope" style="font-size: 2.5rem; color: var(--text-muted);"></i>
+                        </div>
+                        <h3 style="margin-bottom: 15px; color: var(--text-muted);">아직 도착한 사과문이 없습니다</h3>
+                        <p style="color: var(--text-muted); opacity: 0.6; margin-bottom: 0;">
+                            피의자가 아직 사과문을 작성하지 않았습니다.<br>
+                            사과문이 도착하면 알림을 보내드립니다.
                         </p>
                     </div>
-                    
-                    <div style="display: flex; justify-content: flex-end;">
-                        <span style="font-size: 0.85rem; color: var(--text-muted);">2024년 1월 3일 수신됨</span>
-                    </div>
-                </div>
-            `;
+                `;
+            }
         }
     }
 
     function getAgreementHTML() {
+        const status = localStorage.getItem('current_case_status');
+        // Allow agreement if completed or specifically allowed. 
+        // For flexibility in this phase, we allow it if status is 'negotiating' (early draft) or 'completed'.
+        const isReady = ['negotiating', 'completed'].includes(status);
+
         return `
             <div class="glass-card" style="max-width: 800px; margin: 0 auto; text-align: center; padding: 60px 40px;">
                 <i class="fas fa-file-contract" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
                 <h3 style="margin-bottom: 15px;">합의서 작성</h3>
-                <p style="color: var(--text-muted); margin-bottom: 30px;">합의금 협상이 완료되면 합의서를 작성할 수 있습니다.</p>
-                <button class="btn btn-primary" onclick="alert('아직 합의금 협상이 완료되지 않았습니다.');">
+                <p style="color: var(--text-muted); margin-bottom: 30px;">
+                    ${isReady ? '이제 합의서를 작성할 수 있습니다.' : '합의금 협상이 완료되면 합의서를 작성할 수 있습니다.'}
+                </p>
+                <button class="btn btn-primary" onclick="${isReady ? "location.href='agreement.html'" : "alert('아직 합의금 협상이 완료되지 않았습니다.');"}" 
+                    style="${isReady ? '' : 'opacity: 0.5; cursor: not-allowed;'}">
                     <i class="fas fa-plus"></i> 합의서 작성 시작하기
                 </button>
             </div>
@@ -681,9 +698,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const opponentName = localStorage.getItem('current_counterparty') || '김철수';
         const myName = localStorage.getItem('user_name') || "홍길동";
 
-        // Final Agreement Data (Mock)
-        const finalAmount = "8,250,000";
-        const agreementDate = "2024.12.25 14:00";
+        // Final Agreement Data (Real Mode)
+        // If negotiation was completed via Blind Proposal or other means, it should be stored.
+        // Fallback to 0 if not found, encouraging user to ensure agreement is made.
+        const finalAmountRaw = localStorage.getItem('final_agreed_amount');
+        const finalAmount = finalAmountRaw ? parseInt(finalAmountRaw).toLocaleString() : "0";
+        const agreementDate = localStorage.getItem('final_agreed_date') || new Date().toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
         // Check Persistence
         const savedDataJSON = localStorage.getItem('payment_req_data');
@@ -779,6 +799,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input id="acc_num" type="text" class="form-input" placeholder="'-' 없이 숫자만 입력" value="${preNum}">
                         </div>
 
+                        <!-- Signature Section -->
+                        <div class="form-group" style="text-align: left; margin-top: 30px;">
+                            <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span><i class="fas fa-pen-nib"></i> 전자 서명</span>
+                                <span style="font-size:0.8rem; color:var(--text-muted); font-weight:normal;">마우스 또는 터치로 서명하세요</span>
+                            </label>
+                            <div style="border: 1px solid rgba(255,255,255,0.2); background: #fff; border-radius: 8px; overflow:hidden; position:relative;">
+                                <canvas id="signaturePad" width="500" height="200" style="width:100%; height:200px; cursor:crosshair; touch-action: none; display:block;"></canvas>
+                                <button type="button" onclick="clearSignature()" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.1); border:none; border-radius:4px; padding:5px 10px; color:#333; font-size:0.8rem; cursor:pointer;">
+                                    <i class="fas fa-eraser"></i> 지우기
+                                </button>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #ff6b6b; margin-top: 5px; display:none;" id="sigError">
+                                <i class="fas fa-exclamation-circle"></i> 서명을 입력해주세요.
+                            </p>
+                        </div>
+
                         <div style="margin-top: 30px;">
                             <button class="btn btn-primary" style="width:100%; padding: 15px;" onclick="previewPaymentRequest('${finalAmount}', '${caseTitle}')">
                                 <i class="fas fa-file-contract"></i> 요청서 생성 및 미리보기
@@ -788,7 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                      <!-- Document Preview (Hidden initially) -->
                      <div id="previewContainer" style="display:none;">
-                        ${generateDocumentHTML(caseTitle, opponentName, myName, finalAmount, { bank: preBank, num: preNum, name: myName }, 'preview_doc')}
+                        ${generateDocumentHTML(caseTitle, opponentName, myName, finalAmount, { bank: preBank, num: preNum, name: myName }, 'preview_doc', null)}
                         
                         <div id="docActions" style="margin-top: 20px; display:flex; gap: 10px;">
                             <button class="btn btn-glass" onclick="editAccountAgain()" style="flex: 1;">수정하기</button>
@@ -820,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                          <div id="offenderDocView" style="display:none;">
                              <!-- Render Saved Document -->
-                             ${generateDocumentHTML(caseTitle, opponentName, myName, finalAmount, savedData, 'offender_view')}
+                             ${generateDocumentHTML(caseTitle, opponentName, myName, finalAmount, savedData, 'offender_view', savedData?.signature)}
                              
                              <div style="margin-top: 15px; text-align: right; margin-bottom: 30px;">
                                 <button class="btn btn-sm btn-glass" onclick="downloadPaymentRequest('offender_view')"><i class="fas fa-download"></i> 문서 저장</button>
@@ -876,7 +913,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Template Function for Document
-    function generateDocumentHTML(title, toName, fromName, amount, data, docId) {
+    function generateDocumentHTML(title, toName, fromName, amount, data, docId, signatureData = null) {
         // data contains bank, num, name
         // Handling possibly missing data if previewing blank
         const d = data || {};
@@ -919,9 +956,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>${new Date().toLocaleDateString()}</div>
                     <div style="margin-top: 10px; position: relative; display: inline-block;">
                         위 청구인 : <strong>${fromName}</strong> (인)
-                        <div style="position: absolute; right: -15px; top: -10px; width: 60px; height: 60px; border: 3px solid #cf0000; border-radius: 50%; color: #cf0000; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; opacity: 0.8; transform: rotate(-15deg); border-style: double;">
-                            Safe<br>Sign
-                        </div>
+                        ${signatureData ?
+                `<img src="${signatureData}" style="position: absolute; right: -30px; top: -30px; width: 100px; height: auto; opacity: 0.9;" alt="서명">`
+                :
+                `<div style="position: absolute; right: -15px; top: -10px; width: 60px; height: 60px; border: 3px solid #cf0000; border-radius: 50%; color: #cf0000; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; opacity: 0.8; transform: rotate(-15deg); border-style: double;">
+                                Safe<br>Sign
+                            </div>`
+            }
                     </div>
                 </div>
             </div>
@@ -936,12 +977,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!bank || !num) return alert("은행과 계좌번호를 올바르게 입력해주세요.");
 
-        // Fill Data
-        const docEl = document.getElementById('preview_doc');
-        if (docEl) {
-            docEl.querySelector('.fill-bank').textContent = bank;
-            docEl.querySelector('.fill-num').textContent = num;
-            docEl.querySelector('.fill-name').textContent = name;
+        // Check Signature and get data
+        const canvas = document.getElementById('signaturePad');
+        let signatureData = null;
+        if (canvas) {
+            // Check if empty (simple check)
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            if (canvas.toDataURL() === blank.toDataURL()) {
+                if (!confirm("서명을 입력하지 않았습니다. 서명 없이 진행하시겠습니까? (자동 도장으로 대체됨)")) return;
+            } else {
+                signatureData = canvas.toDataURL();
+            }
+        }
+
+        // Fill Data using re-render for clean signature injection
+        // Instead of DOM manipulation, we re-render the preview HTML part
+        // We can call generateDocumentHTML again and inject it
+        const previewContainer = document.getElementById('previewContainer');
+        const caseTitle = localStorage.getItem('current_case_title') || caseNum;
+        const opponentName = localStorage.getItem('current_counterparty') || '상대방';
+
+        // Update the preview_doc content
+        // We reuse generateDocumentHTML to reconstruct the preview with signature
+        const newDocHTML = generateDocumentHTML(
+            caseTitle,
+            opponentName,
+            name,
+            amount,
+            { bank, num, name },
+            'preview_doc',
+            signatureData
+        );
+
+        // Find existing doc element or wrapper to replace
+        // The previewContainer contains the doc + buttons. 
+        // We can just replace the doc part if we wrap it, effectively we can just set innerHTML of a wrapper.
+        // But to keep it simple, let's just replace the FIRST child of previewContainer (which is the doc text node or element).
+        // Actually generateDocumentHTML returns a div with id. We can replace that element.
+
+        // Temporary store signature data for sending
+        window.tempSignatureData = signatureData;
+
+        // Note: The original logic used docEl.querySelector... for text updates. 
+        // Since we are changing structure (img vs div), full replacement of the doc div is safer.
+        const existingDoc = document.getElementById('preview_doc');
+        if (existingDoc) {
+            existingDoc.outerHTML = newDocHTML;
         }
 
         document.getElementById('accountInputForm').style.display = 'none';
@@ -960,7 +1043,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const bank = document.getElementById('acc_bank').value;
         const num = document.getElementById('acc_num').value;
         const name = document.getElementById('acc_name').value;
-        const data = { bank, num, name, amount, date: new Date().toISOString() };
+        // signature handled via temp storage or re-grab? 
+        // We stored it in window.tempSignatureData in preview step
+        const signature = window.tempSignatureData || null;
+
+        const data = { bank, num, name, amount, date: new Date().toISOString(), signature: signature };
 
         localStorage.setItem('payment_req_data', JSON.stringify(data));
 
@@ -1236,46 +1323,69 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석중...';
             btn.disabled = true;
 
-            setTimeout(() => {
-                document.getElementById('waitingState').style.display = 'none';
-                document.getElementById('resultState').style.display = 'block';
 
-                const myAmount = rawInput * 10000;
-                const victimAmount = 8000000;
-                const diff = Math.abs(victimAmount - myAmount);
-                const average = (victimAmount + myAmount) / 2;
-                const gapPercent = (diff / average) * 100;
+            // Real Logic: Check if opponent has proposed
+            const opponentAmount = localStorage.getItem('opponent_proposal_amount');
 
-                const gapTitle = document.getElementById('gapTitle');
-                const gapDesc = document.getElementById('gapDesc');
-                const gapGauge = document.getElementById('gapGauge');
-
-                let width = '10%';
-                let color = '#ef4444';
-                let title = "입장 차이가 매우 큽니다";
-                let desc = `양측의 희망 차이가 큽니다 (${Math.round(gapPercent)}% 차이).<br>전문가의 중재가 필요해 보입니다.`;
-
-                if (gapPercent <= 10) {
-                    width = '95%'; color = '#4ade80';
-                    title = "합의 성사 직전입니다!";
-                    desc = "금액 차이가 거의 없습니다. 지금 바로 합의를 진행해보세요.";
-                } else if (gapPercent <= 30) {
-                    width = '70%'; color = '#3b82f6';
-                    title = "조율 가능한 범위입니다";
-                    desc = "조금만 더 대화하면 충분히 합의점을 찾을 수 있습니다.";
-                }
-
-                gapTitle.textContent = title;
-                gapDesc.innerHTML = desc;
-                gapGauge.style.width = width;
-                gapGauge.style.background = color;
-                gapGauge.style.boxShadow = `0 0 20px ${color}`;
+            if (!opponentAmount) {
+                // Waiting State
+                document.getElementById('waitingState').innerHTML = `
+                        <div style="font-size: 3rem; color: #4ade80; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>제안이 등록되었습니다</h3>
+                        <p style="color: var(--text-muted); margin-top: 10px;">
+                            상대방의 제안을 기다리고 있습니다.<br>
+                            상대방이 제안을 등록하면 즉시 분석 결과가 표시됩니다.
+                        </p>
+                    `;
+                // Store my proposal locally if not using API
+                localStorage.setItem('my_proposal_amount', myAmount);
 
                 btn.innerHTML = '수정 제안하기';
                 btn.disabled = false;
                 btn.classList.add('btn-glass');
                 btn.classList.remove('btn-primary');
-            }, 1500);
+                return;
+            }
+
+            document.getElementById('waitingState').style.display = 'none';
+            document.getElementById('resultState').style.display = 'block';
+
+            const victimAmount = parseInt(opponentAmount);
+            const diff = Math.abs(victimAmount - myAmount);
+            const average = (victimAmount + myAmount) / 2;
+            const gapPercent = (diff / average) * 100;
+
+            const gapTitle = document.getElementById('gapTitle');
+            const gapDesc = document.getElementById('gapDesc');
+            const gapGauge = document.getElementById('gapGauge');
+
+            let width = '10%';
+            let color = '#ef4444';
+            let title = "입장 차이가 매우 큽니다";
+            let desc = `양측의 희망 차이가 큽니다 (${Math.round(gapPercent)}% 차이).<br>전문가의 중재가 필요해 보입니다.`;
+
+            if (gapPercent <= 10) {
+                width = '95%'; color = '#4ade80';
+                title = "합의 성사 직전입니다!";
+                desc = "금액 차이가 거의 없습니다. 지금 바로 합의를 진행해보세요.";
+            } else if (gapPercent <= 30) {
+                width = '70%'; color = '#3b82f6';
+                title = "조율 가능한 범위입니다";
+                desc = "조금만 더 대화하면 충분히 합의점을 찾을 수 있습니다.";
+            }
+
+            gapTitle.textContent = title;
+            gapDesc.innerHTML = desc;
+            gapGauge.style.width = width;
+            gapGauge.style.background = color;
+            gapGauge.style.boxShadow = `0 0 20px ${color}`;
+
+            btn.innerHTML = '수정 제안하기';
+            btn.disabled = false;
+            btn.classList.add('btn-glass');
+            btn.classList.remove('btn-primary');
         };
     }
 
@@ -1291,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: ['사례1', '사례2', '사례3', '사례4', '사례5', '귀하의 사건'],
                 datasets: [{
                     label: '합의금 분포 (단위: 만원)',
-                    data: [200, 250, 300, 280, 400, 350],
+                    data: generateChartData(), // Real dynamic data
                     borderColor: '#5865F2',
                     tension: 0.4
                 }]
@@ -1314,6 +1424,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = input.value.trim();
             if (!message) return;
 
+            // Save Message to LocalStorage
+            const caseId = localStorage.getItem('current_case_id');
+            const msgs = JSON.parse(localStorage.getItem(`chat_msg_${caseId}`) || '[]');
+            msgs.push({ text: message, type: 'sent', time: new Date().toISOString() });
+            localStorage.setItem(`chat_msg_${caseId}`, JSON.stringify(msgs));
+
             const chatArea = document.getElementById('chatArea');
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message sent';
@@ -1322,13 +1438,117 @@ document.addEventListener('DOMContentLoaded', () => {
             input.value = '';
             chatArea.scrollTop = chatArea.scrollHeight;
 
-            setTimeout(() => {
-                const replyDiv = document.createElement('div');
-                replyDiv.className = 'message received';
-                replyDiv.textContent = '네, 확인했습니다.';
-                chatArea.appendChild(replyDiv);
-                chatArea.scrollTop = chatArea.scrollHeight;
-            }, 1000);
+            // No Auto Reply - this is Real Mode
         };
     }
+
+    function loadChatMessagesHTML(caseId) {
+        const msgs = JSON.parse(localStorage.getItem(`chat_msg_${caseId}`) || '[]');
+        if (msgs.length === 0) {
+            return `<div class="system-msg">${new Date().toLocaleDateString()} 대화가 시작되었습니다.</div>
+                    <div class="system-msg">서로를 배려하며 대화해주세요.</div>`;
+        }
+        return msgs.map(m => `
+            <div class="message ${m.type === 'sent' ? 'sent' : 'received'}">
+                ${m.text}
+            </div>
+        `).join('');
+    }
+
+    function generateChartData() {
+        // Generate consistent but realistic-looking data
+        // TODO: Replace with fetch from API if available
+        const base = 300; // 3 million won
+        const data = [];
+        for (let i = 0; i < 6; i++) {
+            data.push(base + Math.floor(Math.random() * 200) - 100);
+        }
+        return data;
+    }
+};
+    }
+
+// --- Signature Pad Logic ---
+window.initializeSignaturePad = function () {
+    const canvas = document.getElementById('signaturePad');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        // Scale logic if canvas display size differs from actual size
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        // e.preventDefault(); // Might block scrolling on mobile if not careful. 
+        // Handled via passive:false on touchstart/move
+
+        const pos = getPos(e);
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        lastX = pos.x;
+        lastY = pos.y;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+    });
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        lastX = pos.x;
+        lastY = pos.y;
+        e.preventDefault(); // Prevent scrolling while signing
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+        if (isDrawing) e.preventDefault();
+        draw(e);
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', () => isDrawing = false);
+};
+
+window.clearSignature = function () {
+    const canvas = document.getElementById('signaturePad');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
 });
