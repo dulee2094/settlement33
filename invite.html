@@ -4,106 +4,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>합의 요청 - SafeHappE</title>
+    <title>합의 초대장 만들기 - SafeHappE</title>
     <link rel="stylesheet" href="style.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .copy-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .generated-text {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+            height: 150px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 
 <body>
 
     <div class="auth-container">
-        <div class="auth-box glass-card" style="max-width: 800px; text-align: left;">
+        <div class="auth-box glass-card" style="max-width: 900px; text-align: left;">
             <a href="dashboard.html"
                 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
                 <i class="fas fa-arrow-left"></i> 대시보드로 돌아가기
             </a>
 
-            <h2 style="margin-bottom: 10px;">합의 요청 보내기</h2>
+            <h2 style="margin-bottom: 10px;">초대 메시지 생성하기</h2>
             <p style="color: var(--text-muted); margin-bottom: 30px;">
-                상대방에게 플랫폼 접속 링크를 담은 알림 메시지를 발송합니다.<br>
-                <span style="color: var(--secondary);">* 귀하의 연락처는 절대 노출되지 않으며, 'SafeHappE' 이름으로 발송됩니다.</span>
+                상대방에게 보낼 정중하고 전문적인 초대 문구를 자동으로 만들어드립니다.<br>
+                <span style="color: var(--secondary);">* 생성된 문구를 복사하여 문자나 카카오톡으로 직접 발송하세요.</span>
             </p>
 
             <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; gap: 40px;">
                 <!-- Left: Input Form -->
                 <div>
                     <div class="form-group">
-                        <label class="form-label">사건 번호 또는 사건 명칭 (변경 가능)</label>
-                        <input type="text" class="form-input" id="caseInfoInput" value="2024형제12345">
-                        <small style="color: var(--text-muted); font-size: 0.8rem;">* 아직 사건 번호가 없다면 사건 명칭을
-                            입력하세요.</small>
+                        <label class="form-label">나의 이름 (선택)</label>
+                        <input type="text" class="form-input" id="senderName" placeholder="실명을 입력하면 신뢰도가 높아집니다">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">상대방 휴대폰 번호</label>
-                        <input type="tel" class="form-input" placeholder="010-0000-0000" id="victimPhone">
-                        <small style="color: var(--text-muted); font-size: 0.8rem;">* '-' 없이 입력하셔도 됩니다.</small>
+                        <label class="form-label">사건명 (선택)</label>
+                        <input type="text" class="form-input" id="caseNameInput" placeholder="예: 주차 시비 건, 층간 소음 건">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">보내는 사람 (표시될 이름)</label>
-                        <input type="text" class="form-input" id="senderName" placeholder="실명 또는 닉네임 입력">
+                        <label class="form-label">전달 메시지</label>
+                        <textarea class="form-input" id="customMessage" rows="4" style="resize: none;">직접 뵙고 말씀드리기 조심스러워, 비대면 합의 중재 플랫폼 'SafeHappE'를 알게 되어, 이곳에 비공개 합의방을 개설했습니다.
+이곳에서 안전하게 대화를 나누고 싶습니다.</textarea>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">추가 메시지 (선택)</label>
-                        <textarea class="form-input" id="customMessage" rows="3" placeholder="전달하고 싶은 말씀을 짧게 적어주세요."
-                            style="resize: none;"></textarea>
+                        <label class="form-label">합의방 이름 (검색용, 필수)</label>
+                        <input type="text" class="form-input" id="roomNameInput" placeholder="예: 2024형제12345" required>
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">* 개설하신 방 제목을 정확히 입력해주세요.</small>
                     </div>
 
-                    <div class="form-check" style="margin-bottom: 20px;">
-                        <input type="checkbox" id="privacyCheck">
-                        <label for="privacyCheck">입력한 번호는 오직 합의 요청 발송 목적으로만 사용됨에 동의합니다.</label>
+                    <div class="form-group">
+                        <label class="form-label">입장 비밀번호 (필수)</label>
+                        <input type="text" class="form-input" id="roomPwInput" placeholder="설정한 비밀번호 4자리" required>
                     </div>
 
-                    <button class="btn btn-primary" style="width: 100%;" id="sendInviteBtn" onclick="sendInvite()">
-                        <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> 합의 요청 보내기
-                    </button>
+                    <!-- Generated Area -->
+                    <div class="copy-box">
+                        <label class="form-label" style="color: var(--secondary); margin-bottom: 10px; display: block;">
+                            <i class="fas fa-magic"></i> 생성된 초대 메시지
+                        </label>
+                        <textarea id="finalMessageArea" class="generated-text" readonly></textarea>
+
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="copyMessage()" style="flex: 1;">
+                                <i class="fas fa-copy"></i> 문구 복사
+                            </button>
+                            <button class="btn btn-glass" onclick="sendSms()" style="flex: 1;">
+                                <i class="fas fa-comment-dots"></i> 문자 실행
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Right: Preview -->
-                <div
-                    style="background: hsla(0,0%,100%,0.95); border-radius: 20px; padding: 20px; color: #333; height: fit-content; border: 4px solid #333;">
+                <!-- Right: Preview Guide -->
+                <div style="padding-top: 10px;">
                     <div
-                        style="text-align: center; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-                        미리보기 (수신자 화면)
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        style="background: hsla(0,0%,100%,0.95); border-radius: 20px; padding: 25px; color: #333; border: 1px solid #ddd; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
                         <div
-                            style="width: 40px; height: 40px; background: #fee500; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                            <i class="fas fa-comment" style="color: #3b1e1e;"></i>
+                            style="text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; color: #000;">
+                            💡 이렇게 발송됩니다
                         </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; font-size: 0.9rem;">SafeHappE (알림톡)</div>
+
+                        <!-- Mockup Message Bubble -->
+                        <div style="display: flex; gap: 12px;">
                             <div
-                                style="background: #fff; padding: 12px; border-radius: 0 12px 12px 12px; margin-top: 5px; font-size: 0.9rem; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                                [형사사건 비대면 합의 안내]<br><br>
-                                <span id="previewNameArea"></span>귀하의 사건(<span id="previewCaseInfo">2024형제12345</span>)과
-                                관련하여 비대면 합의 절차가 접수되었습니다.<br><br>
-                                <div id="previewMessageArea"
-                                    style="background: #f1f1f1; padding: 8px; border-radius: 4px; font-size: 0.85rem; color: #555; margin-bottom: 10px; display: none;">
-                                </div>
-                                본 플랫폼을 통해 직접적인 대면 없이, 감정 소모를 최소화하며 안전하게 합의를 진행할 수 있습니다.<br><br>
-                                합의 AI가 제안하는 합리적인 절차에 따라 원만한 해결을 도와드립니다.<br><br>
-                                ▶ 바로 접속하기:<br>
-                                <span style="color: blue; text-decoration: underline;">https://safehappe.com</span><br>
-                                (네이버 검색: "세이프합의")
-                                <hr style="margin: 15px 0; border: none; border-top: 1px dashed #ddd;">
+                                style="width: 45px; height: 45px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <i class="fas fa-user" style="color: #fff; font-size: 1.5rem;"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; margin-bottom: 4px; color: #444;">나 (발신자)</div>
                                 <div
-                                    style="font-size: 0.8rem; color: #666; background: #fafafa; padding: 10px; border-radius: 8px;">
-                                    <strong>SafeHappE는?</strong><br>
-                                    안전하고 체계적인 비대면 합의 중재 플랫폼입니다.
-                                    감정 소모 없이 공정한 보상을 논의하고, 피해 회복에 집중하실 수 있도록 돕겠습니다.
+                                    style="background: #e9e9eb; padding: 15px; border-radius: 0 18px 18px 18px; font-size: 0.95rem; line-height: 1.5; color: #000; position: relative;">
+                                    <span id="previewText"></span>
                                 </div>
+                                <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">오후 2:30 읽음</div>
                             </div>
                         </div>
+
+                        <div
+                            style="margin-top: 30px; background: #f0f7ff; padding: 15px; border-radius: 12px; border: 1px solid #cce5ff;">
+                            <h4 style="color: #004085; margin-bottom: 8px; font-size: 0.95rem;"><i
+                                    class="fas fa-check-circle"></i> Tip</h4>
+                            <p style="font-size: 0.85rem; color: #004085; line-height: 1.5;">
+                                · <strong>카카오톡</strong>이나 <strong>문자</strong> 앱에 붙여넣어 전송하세요.<br>
+                                · 상대방이 링크를 누르면 웹사이트로 연결되며, 별도 앱 설치 없이 대화를 시작할 수 있습니다.<br>
+                                · 내 번호가 아닌 <strong>SafeHappE 링크</strong>로 먼저 접근하므로 심리적 장벽이 낮습니다.
+                            </p>
+                        </div>
                     </div>
-                    <p style="font-size: 0.75rem; color: #666; text-align: center;">
-                        * 실제로는 카카오톡 알림톡 또는 LMS로 발송됩니다.
-                    </p>
                 </div>
             </div>
 
@@ -111,89 +146,94 @@
     </div>
 
     <script>
-        // Update Preview Real-time
-        document.getElementById('senderName').addEventListener('input', updatePreview);
-        document.getElementById('customMessage').addEventListener('input', updatePreview);
-        document.getElementById('caseInfoInput').addEventListener('input', updatePreview);
+        // Init
+        document.addEventListener('DOMContentLoaded', updateMessage);
 
-        function updatePreview() {
-            const name = document.getElementById('senderName').value;
-            const msg = document.getElementById('customMessage').value;
-            const caseInfo = document.getElementById('caseInfoInput').value;
+        const inputs = ['roomNameInput', 'roomPwInput', 'senderName', 'caseNameInput', 'customMessage'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateMessage);
+        });
 
-            const nameArea = document.getElementById('previewNameArea');
-            const msgArea = document.getElementById('previewMessageArea');
-            const caseInfoArea = document.getElementById('previewCaseInfo');
+        function updateMessage() {
+            const roomName = document.getElementById('roomNameInput').value.trim() || "[방 이름]";
+            const roomPw = document.getElementById('roomPwInput').value.trim() || "[비밀번호]";
+            const name = document.getElementById('senderName').value.trim();
+            const caseName = document.getElementById('caseNameInput').value.trim();
+            const custom = document.getElementById('customMessage').value.trim();
 
-            if (name) {
-                nameArea.innerHTML = `<strong>${name}</strong>님으로부터 `;
-            } else {
-                nameArea.innerHTML = '';
+            // Build Message
+            let text = "";
+
+            text += `[비대면 합의 요청]\n`;
+
+            let greeting = "안녕하세요";
+            if (name) greeting += `, ${name}입니다.`;
+            else greeting += `.`;
+
+            if (caseName) greeting += `\n'${caseName}' 관련하여 연락 드립니다.`;
+            else greeting += `\n사건 관련하여 연락 드립니다.`;
+
+            text += `${greeting}\n\n`;
+
+            if (custom) {
+                text += `${custom}\n\n`;
             }
 
-            if (msg) {
-                msgArea.style.display = 'block';
-                msgArea.innerText = `"${msg}"`;
-            } else {
-                msgArea.style.display = 'none';
-            }
+            text += `[입장 방법 안내]\n`;
+            text += `1. 아래 링크로 접속하세요.\n`;
+            text += `2. '합의 방 찾기' 메뉴를 클릭하세요.\n`;
+            text += `3. 방 이름 검색: "${roomName}"\n`;
+            text += `4. 비밀번호 입력: "${roomPw}"\n\n`;
 
-            if (caseInfo) {
-                caseInfoArea.innerText = caseInfo;
+            text += `▶ 사이트 접속: https://safehappe.com\n\n`;
+
+            text += `----------------\n`;
+            text += `[SafeHappE란?]\n`;
+            text += `연락처 노출 없이 안전하게 소통하고, 법적 효력이 있는 전자 합의서까지 작성할 수 있는 온라인 합의 중재 플랫폼입니다.`;
+
+            // Update UI
+            document.getElementById('finalMessageArea').value = text;
+
+            // For Preview (Convert newlines to <br>)
+            // Highlight critical info like room name/pw using regex or manual replace for preview effect if desired, 
+            // but simple replace is enough for now.
+            document.getElementById('previewText').innerHTML = text.replace(/\n/g, '<br>');
+        }
+
+        function copyMessage() {
+            const textArea = document.getElementById('finalMessageArea');
+            textArea.select();
+            document.execCommand('copy'); // Fallback
+
+            // Modern API
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(textArea.value).then(() => {
+                    alert('메시지가 복사되었습니다.\n카카오톡이나 문자에 붙여넣어 전송하세요.');
+                }).catch(() => {
+                    alert('복사되었습니다.');
+                });
             } else {
-                caseInfoArea.innerText = "사건 정보 없음";
+                alert('복사되었습니다.');
             }
         }
 
-        async function sendInvite() {
-            const phone = document.getElementById('victimPhone').value;
-            const senderName = document.getElementById('senderName').value;
-            const customMessage = document.getElementById('customMessage').value;
-            const caseInfo = document.getElementById('caseInfoInput').value;
-            const privacy = document.getElementById('privacyCheck').checked;
+        function sendSms() {
+            const text = document.getElementById('finalMessageArea').value;
+            // encodeURIComponent handles special chars
+            const body = encodeURIComponent(text);
 
-            if (phone.length < 10) {
-                alert('유효한 휴대폰 번호를 입력해주세요.');
-                return;
+            // 'sms:' scheme opens the default SMS app
+            // Note: iOS uses '&body=', Android uses '?body=' usually. 
+            // A generic approach usually tries '?body='
+            let ua = navigator.userAgent.toLowerCase();
+            let url = `sms:?body=${body}`;
+
+            if (ua.indexOf("iphone") > -1 || ua.indexOf("ipad") > -1) {
+                url = `sms:&body=${body}`;
             }
-            if (!privacy) {
-                alert('개인정보 사용 동의가 필요합니다.');
-                return;
-            }
 
-            const btn = document.getElementById('sendInviteBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 발송중...';
-            btn.disabled = true;
-
-            try {
-                // Modified to use API_BASE if handled in main script, but since this is standalone script, assuming localhost or /api
-                // Best practice: use relative path for deployment
-                const res = await fetch('/api/case/invite', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        caseNumber: caseInfo, // Using the user edited info
-                        victimPhone: phone,
-                        senderName: senderName || '익명',
-                        customMessage: customMessage
-                    })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    alert('요청이 안전하게 발송되었습니다.\n(서버 콘솔에서 발송 내용을 확인하세요)');
-                    location.href = 'dashboard.html';
-                } else {
-                    alert('발송 실패: ' + (data.error || '알 수 없는 오류'));
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 8px;"></i> 합의 요청 보내기';
-                }
-            } catch (err) {
-                console.error(err);
-                alert('서버 연결 오류입니다.');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 8px;"></i> 익명 요청 보내기';
-            }
+            window.location.href = url;
         }
     </script>
 </body>
