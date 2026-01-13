@@ -428,12 +428,15 @@ app.get('/api/case/status', async (req, res) => {
     const { userId } = req.query;
     if (!userId) return res.json({ found: false, cases: [] });
 
-    // Find ALL cases where user is offender OR victim
+    const uid = parseInt(userId, 10);
+    if (isNaN(uid)) return res.json({ found: false, cases: [] });
+
+    // Find ALL cases where user is explicitly offender OR victim
     const cases = await Case.findAll({
         where: {
             [Op.or]: [
-                { offenderId: userId },
-                { victimId: userId }
+                { offenderId: uid },
+                { victimId: uid }
             ]
         }
     });
