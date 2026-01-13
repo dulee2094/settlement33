@@ -267,16 +267,29 @@ app.post('/api/case/create-room', async (req, res) => {
 
 // 4.7 Search Rooms
 app.get('/api/case/search', async (req, res) => {
-    const { query } = req.query;
+    const { query, userId } = req.query;
 
     try {
         const whereClause = {
-            // Only show rooms that are not full (pending connection)
+            // Only show rooms that are not full
             [Op.or]: [
                 { offenderId: null },
                 { victimId: null }
             ]
         };
+
+        // Exclude my own rooms
+        if (userId) {
+            const uid = parseInt(userId);
+            whereClause[Op.and] = [
+                {
+                    offenderId: { [Op.or]: [{ [Op.ne]: uid }, null] }
+                },
+                {
+                    victimId: { [Op.or]: [{ [Op.ne]: uid }, null] }
+                }
+            ];
+        }
 
         // If query exists, filter by title
         if (query) {
@@ -285,11 +298,19 @@ app.get('/api/case/search', async (req, res) => {
             };
         }
 
-        const cases = await Case.findAll({
+        let cases = await Case.findAll({
             where: whereClause,
             order: [['createdAt', 'DESC']],
             limit: 20
         });
+
+        // Double-check: Explicitly filter out my own rooms (Safety Net)
+        if (userId) {
+            const uid = parseInt(userId, 10);
+            if (!isNaN(uid)) {
+                cases = cases.filter(c => c.offenderId !== uid && c.victimId !== uid);
+            }
+        }
 
         // Map to safe public info AND fetch creator name
         const result = await Promise.all(cases.map(async (c) => {
@@ -306,6 +327,7 @@ app.get('/api/case/search', async (req, res) => {
                 roomTitle: c.roomTitle,
                 creatorRole: c.offenderId ? '피의자' : '피해자',
                 creatorName: creatorName,
+                creatorId: creatorId, // Restore creatorId for client validation
                 createdAt: c.createdAt
             };
         }));
@@ -385,10 +407,12 @@ app.get('/api/case/status', async (req, res) => {
 
     // Find ALL cases where user is offender OR victim
     const cases = await Case.findAll({
-        where: sequelize.or(
-            { offenderId: userId },
-            { victimId: userId }
-        )
+        where: {
+            [Op.or]: [
+                { offenderId: userId },
+                { victimId: userId }
+            ]
+        }
     });
 
     if (!cases || cases.length === 0) {

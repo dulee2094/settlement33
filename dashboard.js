@@ -836,9 +836,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show loading state
         listArea.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> 방 목록을 불러오는 중...</div>';
 
+        const userId = localStorage.getItem('user_id');
+
         try {
             // Pass empty query to get all/recent rooms
-            const res = await fetch(`${API_BASE}/case/search?query=${encodeURIComponent(query || '')}`);
+            const res = await fetch(`${API_BASE}/case/search?query=${encodeURIComponent(query || '')}&userId=${userId}`);
             const data = await res.json();
 
             if (data.success && data.rooms.length > 0) {
@@ -855,6 +857,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 data.rooms.forEach(room => {
+                    // Safety: Skip my own rooms locally
+                    if (room.creatorId && room.creatorId == userId) return;
+
                     const div = document.createElement('div');
                     div.className = 'glass-card';
                     div.style.padding = '15px';

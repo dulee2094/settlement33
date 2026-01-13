@@ -1465,90 +1465,88 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return data;
     }
-};
-    }
 
-// --- Signature Pad Logic ---
-window.initializeSignaturePad = function () {
-    const canvas = document.getElementById('signaturePad');
-    if (!canvas) return;
+    // --- Signature Pad Logic ---
+    window.initializeSignaturePad = function () {
+        const canvas = document.getElementById('signaturePad');
+        if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
 
-    function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        // Scale logic if canvas display size differs from actual size
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Scale logic if canvas display size differs from actual size
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
 
-        let clientX = e.clientX;
-        let clientY = e.clientY;
+            let clientX = e.clientX;
+            let clientY = e.clientY;
 
-        if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
         }
 
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
-    }
+        function draw(e) {
+            if (!isDrawing) return;
+            // e.preventDefault(); // Might block scrolling on mobile if not careful. 
+            // Handled via passive:false on touchstart/move
 
-    function draw(e) {
-        if (!isDrawing) return;
-        // e.preventDefault(); // Might block scrolling on mobile if not careful. 
-        // Handled via passive:false on touchstart/move
+            const pos = getPos(e);
 
-        const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = 'round';
-        ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
 
-        lastX = pos.x;
-        lastY = pos.y;
-    }
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        });
 
-    canvas.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        const pos = getPos(e);
-        lastX = pos.x;
-        lastY = pos.y;
-    });
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseout', () => isDrawing = false);
 
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mouseout', () => isDrawing = false);
+        // Touch support
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            e.preventDefault(); // Prevent scrolling while signing
+        }, { passive: false });
 
-    // Touch support
-    canvas.addEventListener('touchstart', (e) => {
-        isDrawing = true;
-        const pos = getPos(e);
-        lastX = pos.x;
-        lastY = pos.y;
-        e.preventDefault(); // Prevent scrolling while signing
-    }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDrawing) e.preventDefault();
+            draw(e);
+        }, { passive: false });
 
-    canvas.addEventListener('touchmove', (e) => {
-        if (isDrawing) e.preventDefault();
-        draw(e);
-    }, { passive: false });
+        canvas.addEventListener('touchend', () => isDrawing = false);
+    };
 
-    canvas.addEventListener('touchend', () => isDrawing = false);
-};
-
-window.clearSignature = function () {
-    const canvas = document.getElementById('signaturePad');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-};
+    window.clearSignature = function () {
+        const canvas = document.getElementById('signaturePad');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
 });
