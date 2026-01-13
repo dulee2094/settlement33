@@ -39,6 +39,7 @@ const Case = sequelize.define('Case', {
     summary: { type: DataTypes.TEXT }, // Added brief case description
     roomTitle: { type: DataTypes.STRING }, // New: Private Room Title
     roomPassword: { type: DataTypes.STRING }, // New: Room Password
+    creatorId: { type: DataTypes.INTEGER }, // New: Explicit Creator Tracking
     apologyContent: { type: DataTypes.TEXT }, // New: Apology Letter Content
     apologyStatus: { type: DataTypes.ENUM('none', 'sent', 'read'), defaultValue: 'none' } // New: Apology Status
 });
@@ -238,8 +239,10 @@ app.post('/api/case/accept', async (req, res) => {
 // --- NEW: Private Room Features ---
 
 // 4.6 Create Private Room
+// 4.6 Create Private Room
 app.post('/api/case/create-room', async (req, res) => {
     const { userId, role, roomTitle, roomPassword, summary } = req.body;
+    const uid = parseInt(userId, 10);
 
     // Generate a unique case number (internal)
     const caseNumber = 'ROOM-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -250,12 +253,13 @@ app.post('/api/case/create-room', async (req, res) => {
             roomTitle, // New Field
             roomPassword, // New Field
             summary,
+            creatorId: uid, // Explicitly save creator
             status: 'pending',
             connectionStatus: 'pending'
         };
 
-        if (role === 'offender') newCase.offenderId = userId;
-        else if (role === 'victim') newCase.victimId = userId;
+        if (role === 'offender') newCase.offenderId = uid;
+        else if (role === 'victim') newCase.victimId = uid;
 
         const caseData = await Case.create(newCase);
         res.json({ success: true, caseId: caseData.id });
@@ -278,10 +282,13 @@ app.get('/api/case/search', async (req, res) => {
             ]
         };
 
-        // Exclude my own rooms
+        // Exclude my own rooms via creatorId if possible, or roles
         if (userId) {
             const uid = parseInt(userId);
             whereClause[Op.and] = [
+                {
+                    creatorId: { [Op.or]: [{ [Op.ne]: uid }, null] } // Check creatorId first
+                },
                 {
                     offenderId: { [Op.or]: [{ [Op.ne]: uid }, null] }
                 },
@@ -304,30 +311,46 @@ app.get('/api/case/search', async (req, res) => {
             limit: 20
         });
 
-        // Double-check: Explicitly filter out my own rooms (Safety Net)
+        // Double-check filtering
         if (userId) {
             const uid = parseInt(userId, 10);
             if (!isNaN(uid)) {
-                cases = cases.filter(c => c.offenderId !== uid && c.victimId !== uid);
+                cases = cases.filter(c =>
+                    c.creatorId !== uid &&
+                    c.offenderId !== uid &&
+                    c.victimId !== uid
+                );
             }
         }
 
-        // Map to safe public info AND fetch creator name
+        // Map to safe public info
         const result = await Promise.all(cases.map(async (c) => {
             let creatorName = '알 수 없음';
-            const creatorId = c.offenderId || c.victimId;
+            // Prefer creatorId, fallback to role inference
+            const creatorId = c.creatorId || c.offenderId || c.victimId;
 
             if (creatorId) {
                 const user = await User.findByPk(creatorId);
                 if (user) creatorName = user.name;
             }
 
+            // Determine creator role for display
+            let creatorRole = '미정';
+            if (c.creatorId) {
+                // If creatorId matches offenderId -> offender
+                if (c.creatorId === c.offenderId) creatorRole = '피의자';
+                else if (c.creatorId === c.victimId) creatorRole = '피해자';
+            } else {
+                // Fallback inference
+                creatorRole = c.offenderId ? '피의자' : '피해자';
+            }
+
             return {
                 id: c.id,
                 roomTitle: c.roomTitle,
-                creatorRole: c.offenderId ? '피의자' : '피해자',
+                creatorRole: creatorRole,
                 creatorName: creatorName,
-                creatorId: creatorId, // Restore creatorId for client validation
+                creatorId: creatorId,
                 createdAt: c.createdAt
             };
         }));

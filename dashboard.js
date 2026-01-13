@@ -877,7 +877,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted);">
                             <span style="display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-user-circle"></i> ${room.creatorName} (${room.creatorRole})
+                                <span style="color: var(--secondary); font-weight: 600; font-size: 0.8rem; border: 1px solid var(--secondary); padding: 1px 6px; border-radius: 4px;">개설자</span>
+                                <span style="color: #fff;">${room.creatorName}</span>
+                                <span style="color: var(--text-muted);">(${room.creatorRole})</span>
                             </span>
                             <span style="width: 1px; height: 10px; background: rgba(255,255,255,0.2);"></span>
                             <span>${new Date(room.createdAt).toLocaleDateString()}</span>
