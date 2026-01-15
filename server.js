@@ -52,6 +52,24 @@ const Proposal = sequelize.define('Proposal', {
     duration: { type: DataTypes.INTEGER } // 1, 3, 7 days
 });
 
+const Message = sequelize.define('Message', {
+    caseId: { type: DataTypes.INTEGER, allowNull: false },
+    senderId: { type: DataTypes.INTEGER, allowNull: false }, // User ID
+    content: { type: DataTypes.TEXT, allowNull: false },
+    type: { type: DataTypes.STRING, defaultValue: 'text' } // text, image, system
+});
+
+const PaymentReq = sequelize.define('PaymentReq', {
+    caseId: { type: DataTypes.INTEGER, allowNull: false },
+    requesterId: { type: DataTypes.INTEGER, allowNull: false },
+    bank: { type: DataTypes.STRING },
+    accountNumber: { type: DataTypes.STRING },
+    accountHolder: { type: DataTypes.STRING },
+    amount: { type: DataTypes.INTEGER }, // Final amount
+    signature: { type: DataTypes.TEXT }, // Base64
+    status: { type: DataTypes.STRING, defaultValue: 'sent' } // sent, confirmed
+});
+
 // ... (Routes) ...
 
 // 6. Proposal System
@@ -423,6 +441,80 @@ app.post('/api/proposal', async (req, res) => {
     res.json({ success: true, status: gapStatus, data: gapData });
 });
 
+// 5.5 Chat System (Real)
+app.get('/api/case/chat', async (req, res) => {
+    const { caseId } = req.query;
+    try {
+        const messages = await Message.findAll({
+            where: { caseId },
+            order: [['createdAt', 'ASC']]
+        });
+
+        // Enrich with sender info if needed, but for now ID is enough or client knows
+        // Let's return formatted
+        const result = messages.map(m => ({
+            id: m.id,
+            senderId: m.senderId,
+            text: m.content,
+            type: m.type, // 'text' or 'sent'/'received' will be determined by client comparing ID
+            createdAt: m.createdAt
+        }));
+
+        res.json({ success: true, messages: result });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/case/chat', async (req, res) => {
+    const { caseId, senderId, content } = req.body;
+    try {
+        await Message.create({ caseId, senderId, content });
+        res.json({ success: true });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// 5.6 Payment Request System (Real)
+app.post('/api/case/payment-request', async (req, res) => {
+    const { caseId, requesterId, bank, accountNumber, accountHolder, amount, signature } = req.body;
+    try {
+        // Upsert (One request per case mostly, or just create new)
+        // Let's replace previous if exists for this user/case or just create
+        // Simple: Create new, client fetches latest
+        await PaymentReq.create({
+            caseId, requesterId, bank, accountNumber, accountHolder, amount, signature
+        });
+        res.json({ success: true });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/case/payment-request', async (req, res) => {
+    const { caseId } = req.query;
+    try {
+        const reqs = await PaymentReq.findAll({
+            where: { caseId },
+            order: [['createdAt', 'DESC']],
+            limit: 1
+        });
+
+        if (reqs.length > 0) {
+            res.json({ success: true, data: reqs[0] });
+        } else {
+            res.json({ success: true, data: null });
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // 6. Get Case Status (Match Info) - Returns ALL cases for user
 app.get('/api/case/status', async (req, res) => {
     const { userId } = req.query;
@@ -476,6 +568,81 @@ app.get('/api/case/status', async (req, res) => {
         found: true,
         cases: caseList
     });
+});
+
+// --- 8. Document Box (Digital Vault) ---
+
+// Model
+const Document = sequelize.define('Document', {
+    caseId: { type: DataTypes.INTEGER, allowNull: false },
+    uploaderId: { type: DataTypes.INTEGER, allowNull: false },
+    category: { type: DataTypes.STRING, allowNull: false }, // apology, settlement, evidence, etc.
+    fileName: { type: DataTypes.STRING, allowNull: false },
+    fileType: { type: DataTypes.STRING }, // mime type
+    fileData: { type: DataTypes.TEXT, allowNull: false } // Base64 storage for MVP
+});
+
+// Endpoint 8.1: Upload Document
+app.post('/api/case/document', async (req, res) => {
+    const { caseId, uploaderId, category, fileName, fileType, fileData } = req.body;
+    try {
+        await Document.create({
+            caseId, uploaderId, category, fileName, fileType, fileData
+        });
+        res.json({ success: true });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Endpoint 8.2: List Documents (Metadata only)
+app.get('/api/case/:caseId/documents', async (req, res) => {
+    const { caseId } = req.params;
+    try {
+        const docs = await Document.findAll({
+            where: { caseId },
+            attributes: ['id', 'category', 'fileName', 'fileType', 'createdAt', 'uploaderId'], // Exclude heavy fileData
+            order: [['createdAt', 'DESC']]
+        });
+
+        // Enrich with uploader name
+        const result = await Promise.all(docs.map(async (d) => {
+            const user = await User.findByPk(d.uploaderId);
+            return {
+                id: d.id,
+                category: d.category,
+                fileName: d.fileName,
+                fileType: d.fileType,
+                createdAt: d.createdAt,
+                uploaderName: user ? user.name : '알 수 없음',
+                isMine: false // To be handled by client using userId comparison
+            };
+        }));
+
+        res.json({ success: true, documents: result });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Endpoint 8.3: Download Document
+app.get('/api/document/:docId', async (req, res) => {
+    try {
+        const doc = await Document.findByPk(req.params.docId);
+        if (!doc) return res.status(404).send('File not found');
+
+        res.json({
+            success: true,
+            fileName: doc.fileName,
+            fileType: doc.fileType,
+            fileData: doc.fileData
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
 });
 
 // --- 7. Lawyer Consultation System (New) ---

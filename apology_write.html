@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Noto+Serif+KR:wght@400;700&family=Nanum+Pen+Script&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         /* Standalone Page Styles */
         body {
@@ -526,15 +527,59 @@
             el.classList.add('selected');
         }
 
-        function sendApology() {
+        async function sendApology() {
             if (canvas.value.length < 10) {
                 alert("내용을 10자 이상 작성해주세요.");
                 return;
             }
-            if (confirm("작성하신 사과문을 전송하시겠습니까?")) {
-                alert("📝 사과문이 성공적으로 전송되었습니다.");
-                localStorage.removeItem('saved_apology_text');
-                location.href = 'case_detail.html';
+
+            if (!confirm("작성하신 사과문을 전송하시겠습니까?\n전송된 사과문은 서류 공유함에 자동 저장됩니다.")) return;
+
+            const btn = document.querySelector('.action-float .btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송 및 저장 중...';
+            btn.disabled = true;
+
+            try {
+                // 1. Capture as Image
+                const canvasEl = await html2canvas(document.getElementById('paperArea'), { scale: 2 });
+                const fileData = canvasEl.toDataURL('image/png');
+
+                // 2. Upload to Document Box
+                const caseId = localStorage.getItem('current_case_id');
+                const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+                const userId = userInfo.id || 0;
+
+                const res = await fetch('/api/case/document', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        caseId,
+                        uploaderId: userId,
+                        category: 'apology',
+                        fileName: '사과문_' + new Date().toLocaleDateString().replace(/\./g, '') + '.png',
+                        fileType: 'image/png',
+                        fileData: fileData
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    alert("✅ 사과문이 성공적으로 전송되고 공유함에 저장되었습니다.");
+                    // Save text for local edit capability if needed (optional)
+                    localStorage.setItem('current_apology_status', 'sent');
+                    localStorage.setItem('current_apology_date', new Date().toLocaleDateString());
+                    location.href = 'case_detail.html';
+                } else {
+                    alert("전송 실패: " + data.error);
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert("오류가 발생했습니다.");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> 전송하기';
+                btn.disabled = false;
             }
         }
     </script>

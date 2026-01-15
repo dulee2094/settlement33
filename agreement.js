@@ -65,13 +65,13 @@ confirmBtn.addEventListener('click', () => {
     // In real app, we would check pixels or save dataURL
 
     // Visual feedback
-    confirmBtn.textContent = '?쒕챸 ?꾨즺';
+    confirmBtn.textContent = '서명 완료';
     confirmBtn.classList.remove('btn-primary');
     confirmBtn.classList.add('btn-glass');
     confirmBtn.disabled = true;
 
     // Update Document
-    document.getElementById('sign-place-1').textContent = '?띻만??(?쒕챸?꾨즺)';
+    document.getElementById('sign-place-1').textContent = '홍길동(서명완료)';
     document.getElementById('sign-place-1').style.color = 'black';
     document.getElementById('sign-place-1').style.fontWeight = 'bold';
 
@@ -80,10 +80,10 @@ confirmBtn.addEventListener('click', () => {
     paymentCard.style.pointerEvents = 'auto';
 
     // Update Step Indicator
-    stepIndicator[0].textContent = '1. ?꾨즺';
+    stepIndicator[0].textContent = '1. 완료';
     stepIndicator[2].classList.add('active'); // Highlight Payment Step
 
-    alert('?꾩옄 ?쒕챸???꾨즺?섏뿀?듬땲?? ?ㅼ쓬 ?④퀎??寃곗젣瑜?吏꾪뻾?댁＜?몄슂.');
+    alert('전자 서명이 완료되었습니다. 다음 단계인 결제를 진행해주세요.');
 });
 
 // Payment Logic
@@ -98,13 +98,53 @@ methods.forEach(method => {
 });
 
 payBtn.addEventListener('click', () => {
-    if (confirm('?먯뒪?щ줈 怨꾩쥖濡?3,500,000???낃툑???붿껌?섏떆寃좎뒿?덇퉴?')) {
-        payBtn.textContent = '?낃툑 ?뺤씤 ?붿껌以?..';
+    if (confirm('에스크로 계좌로 3,500,000원을 입금요청하시겠습니까?')) {
+        payBtn.textContent = '입금 확인 요청중...';
         payBtn.disabled = true;
 
         // Simulate API call
-        setTimeout(() => {
-            // New Flow: Open PDF Modal directly after payment for demo
+        setTimeout(async () => {
+            // New Flow: Auto-save Agreement to Document Box using mocked PDF or Image
+            // Since we can't easily capture the PDF modal content (it's hidden or complex), 
+            // we will upload a text confirmation or placeholder.
+
+            try {
+                // Wait for UI to update (spinner or generic confirmation)
+                // Use html2canvas to capture the agreement paper
+                const docEl = document.querySelector('.paper-doc'); // Using specific class for the document paper
+                if (docEl && typeof html2canvas !== 'undefined') {
+                    // Slight delay to ensure rendering
+                    await new Promise(r => setTimeout(r, 100));
+
+                    const canvas = await html2canvas(docEl, { scale: 2 });
+                    const fileData = canvas.toDataURL('image/png');
+
+                    const caseId = localStorage.getItem('current_case_id');
+                    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+                    const userId = userInfo.id || 0;
+
+                    await fetch('/api/case/document', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            caseId,
+                            uploaderId: userId,
+                            category: 'agreement',
+                            fileName: '최종합의서_' + new Date().toLocaleDateString().replace(/\./g, '') + '_signed.png',
+                            fileType: 'image/png',
+                            fileData: fileData
+                        })
+                    });
+
+                    alert("✅ 최종 합의서(서명본)가 안전하게 저장되었습니다.\n서류 공유함에서 확인 가능합니다.");
+                }
+
+            } catch (e) {
+                console.error("Auto-save agreement failed", e);
+            }
+
+
+            // Open PDF Modal directly after payment for demo
             const modal = document.getElementById('pdfModal');
             modal.style.display = 'flex';
 

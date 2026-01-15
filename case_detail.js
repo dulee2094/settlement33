@@ -140,12 +140,19 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'agreement':
                 contentArea.innerHTML = getAgreementHTML();
                 break;
+            case 'documents':
+                contentArea.innerHTML = getDocumentsHTML();
+                loadDocuments();
+                break;
             case 'mediation':
                 contentArea.innerHTML = getMediationHTML();
                 break;
             case 'account':
                 contentArea.innerHTML = getAccountInfoHTML();
-                setTimeout(() => { if (window.initializeSignaturePad) window.initializeSignaturePad(); }, 100);
+                setTimeout(() => {
+                    if (window.initializeSignaturePad) window.initializeSignaturePad();
+                    if (window.loadPaymentRequestStatus) window.loadPaymentRequestStatus(); // Load Real Data
+                }, 100);
                 break;
             default:
                 contentArea.innerHTML = getOverviewHTML();
@@ -1036,23 +1043,156 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('previewContainer').style.display = 'none';
     };
 
-    window.sendPaymentRequest = function (amount) {
+    window.sendPaymentRequest = async function (amount) {
         if (!confirm("작성된 요청서를 상대방에게 발송하시겠습니까?\n발송 후에는 내용 수정이 어렵습니다.")) return;
 
-        // Save Data
         const bank = document.getElementById('acc_bank').value;
         const num = document.getElementById('acc_num').value;
         const name = document.getElementById('acc_name').value;
-        // signature handled via temp storage or re-grab? 
-        // We stored it in window.tempSignatureData in preview step
         const signature = window.tempSignatureData || null;
 
-        const data = { bank, num, name, amount, date: new Date().toISOString(), signature: signature };
+        const caseId = localStorage.getItem('current_case_id');
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const requesterId = userInfo.id || 0;
 
-        localStorage.setItem('payment_req_data', JSON.stringify(data));
+        try {
+            const res = await fetch('/api/case/payment-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    caseId, requesterId, bank, accountNumber: num, accountHolder: name, amount: parseInt(amount.replace(/,/g, '')), signature
+                })
+            });
+            const data = await res.json();
 
-        alert("📨 [발송 완료]\n상대방에게 합의금 지급 요청서가 전달되었습니다.\n입금이 확인되면 알림을 드립니다.");
-        location.reload();
+            if (data.success) {
+                // 2. Auto-save Image to Document Box
+                try {
+                    // Ensure element is visible/rendered for capture
+                    // It is visible in preview step
+                    const docEl = document.getElementById('preview_doc');
+                    if (docEl && typeof html2canvas !== 'undefined') {
+                        const canvas = await html2canvas(docEl, { scale: 2 });
+                        const fileData = canvas.toDataURL('image/png');
+
+                        await fetch('/api/case/document', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                caseId,
+                                uploaderId: requesterId,
+                                category: 'request',
+                                fileName: '지급요청서_' + name + '.png',
+                                fileType: 'image/png',
+                                fileData
+                            })
+                        });
+                    }
+                } catch (err) {
+                    console.error("Auto-save doc failed", err);
+                }
+
+                alert("📨 [발송 완료]\n상대방에게 합의금 지급 요청서가 전달되었습니다.\n(서류 공유함에도 자동 저장되었습니다)");
+                // Reload status
+                if (window.loadPaymentRequestStatus) window.loadPaymentRequestStatus();
+            } else {
+                alert("발송 실패: " + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("서버 통신 오류");
+        }
+    };
+
+    // New: Load Payment Status Real-time
+    window.loadPaymentRequestStatus = async () => {
+        const caseId = localStorage.getItem('current_case_id');
+        const myRole = localStorage.getItem('current_case_role');
+        const isVictim = myRole === 'victim';
+
+        try {
+            const res = await fetch(`/api/case/payment-request?caseId=${caseId}`);
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                const reqData = data.data; // { bank, accountNumber, accountHolder, amount, signature }
+                const formattedData = {
+                    bank: reqData.bank,
+                    num: reqData.accountNumber,
+                    name: reqData.accountHolder,
+                    amount: reqData.amount,
+                    signature: reqData.signature,
+                    date: reqData.createdAt
+                };
+
+                // Update Logic based on Roles
+                if (isVictim) {
+                    // Sent View
+                    document.getElementById('step2_action').style.display = 'block';
+                    document.getElementById('accountInputForm').innerHTML = `
+                        <div style="background:rgba(74, 222, 128, 0.1); color:#4ade80; padding:20px; border-radius:12px; margin-bottom:20px; text-align:center;">
+                            <i class="fas fa-check-circle" style="font-size:2rem; margin-bottom:10px;"></i><br>
+                            <strong>지급 요청서 발송 완료</strong><br>
+                            <span style="font-size:0.9rem; opacity:0.8;">${new Date(reqData.createdAt).toLocaleString()}</span>
+                        </div>
+                        <button class="btn btn-glass" onclick="viewReceivedDocument()" style="width:100%;">
+                             <i class="fas fa-search"></i> 내가 보낸 요청서 보기
+                        </button>
+                         <!-- Re-use viewer for self -->
+                        <div id="offenderDocView" style="display:none; margin-top:20px;">
+                             ${generateDocumentHTML(
+                        localStorage.getItem('current_case_title'),
+                        localStorage.getItem('current_counterparty'),
+                        reqData.accountHolder,
+                        reqData.amount.toLocaleString(),
+                        formattedData,
+                        'my_sent_doc',
+                        reqData.signature
+                    )}
+                        </div>
+                    `;
+                    document.getElementById('step1_verification').style.display = 'none';
+
+                } else {
+                    // Offender: Received View
+                    document.getElementById('step1_verification').style.display = 'none';
+                    document.getElementById('step2_action').style.display = 'block';
+
+                    // Replace content with "Received" card
+                    const step2 = document.getElementById('step2_action');
+                    step2.innerHTML = `
+                         <h3 style="margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> 합의금 지급 요청서 도착</h3>
+                        
+                        <div id="offenderCover" style="background: rgba(255,255,255,0.05); padding: 30px; text-align: center; border-radius: 12px; margin-bottom: 30px;">
+                            <i class="fas fa-file-contract" style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"></i>
+                            <h4 style="margin-bottom: 10px;">피해자로부터 공식 요청서가 도착했습니다</h4>
+                            <button class="btn btn-glass" onclick="viewReceivedDocument()" style="margin-top: 20px; border-color: #4ade80; color: #4ade80;">
+                                <i class="fas fa-search"></i> 요청서 열람 및 계좌 확인
+                            </button>
+                        </div>
+
+                         <div id="offenderDocView" style="display:none;">
+                             ${generateDocumentHTML(
+                        localStorage.getItem('current_case_title'),
+                        localStorage.getItem('current_counterparty'),
+                        reqData.accountHolder,
+                        reqData.amount.toLocaleString(),
+                        formattedData,
+                        'offender_view',
+                        reqData.signature
+                    )}
+                             <p style="text-align:center; margin-top:20px;">
+                                 <button class="btn btn-primary" onclick="alert('입금 완료 기능은 준비중입니다.')">
+                                     <i class="fas fa-check"></i> 입금 완료 알림 보내기
+                                 </button>
+                             </p>
+                        </div>
+                    `;
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     window.viewReceivedDocument = function () {
@@ -1314,80 +1454,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function initializeProposal() {
-        window.submitProposal = function () {
-            const rawInput = parseInt(document.getElementById('myAmount').value);
-            if (!rawInput) return alert('희망 금액을 입력해주세요.');
+    // Legacy Demo Logic Removed
 
-            const btn = document.getElementById('btnSubmitProposal');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석중...';
-            btn.disabled = true;
-
-
-            // Real Logic: Check if opponent has proposed
-            const opponentAmount = localStorage.getItem('opponent_proposal_amount');
-
-            if (!opponentAmount) {
-                // Waiting State
-                document.getElementById('waitingState').innerHTML = `
-                        <div style="font-size: 3rem; color: #4ade80; margin-bottom: 20px;">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <h3>제안이 등록되었습니다</h3>
-                        <p style="color: var(--text-muted); margin-top: 10px;">
-                            상대방의 제안을 기다리고 있습니다.<br>
-                            상대방이 제안을 등록하면 즉시 분석 결과가 표시됩니다.
-                        </p>
-                    `;
-                // Store my proposal locally if not using API
-                localStorage.setItem('my_proposal_amount', myAmount);
-
-                btn.innerHTML = '수정 제안하기';
-                btn.disabled = false;
-                btn.classList.add('btn-glass');
-                btn.classList.remove('btn-primary');
-                return;
-            }
-
-            document.getElementById('waitingState').style.display = 'none';
-            document.getElementById('resultState').style.display = 'block';
-
-            const victimAmount = parseInt(opponentAmount);
-            const diff = Math.abs(victimAmount - myAmount);
-            const average = (victimAmount + myAmount) / 2;
-            const gapPercent = (diff / average) * 100;
-
-            const gapTitle = document.getElementById('gapTitle');
-            const gapDesc = document.getElementById('gapDesc');
-            const gapGauge = document.getElementById('gapGauge');
-
-            let width = '10%';
-            let color = '#ef4444';
-            let title = "입장 차이가 매우 큽니다";
-            let desc = `양측의 희망 차이가 큽니다 (${Math.round(gapPercent)}% 차이).<br>전문가의 중재가 필요해 보입니다.`;
-
-            if (gapPercent <= 10) {
-                width = '95%'; color = '#4ade80';
-                title = "합의 성사 직전입니다!";
-                desc = "금액 차이가 거의 없습니다. 지금 바로 합의를 진행해보세요.";
-            } else if (gapPercent <= 30) {
-                width = '70%'; color = '#3b82f6';
-                title = "조율 가능한 범위입니다";
-                desc = "조금만 더 대화하면 충분히 합의점을 찾을 수 있습니다.";
-            }
-
-            gapTitle.textContent = title;
-            gapDesc.innerHTML = desc;
-            gapGauge.style.width = width;
-            gapGauge.style.background = color;
-            gapGauge.style.boxShadow = `0 0 20px ${color}`;
-
-            btn.innerHTML = '수정 제안하기';
-            btn.disabled = false;
-            btn.classList.add('btn-glass');
-            btn.classList.remove('btn-primary');
-        };
-    }
 
     function initializeChart() {
         const ctx = document.getElementById('analysisChart');
@@ -1419,41 +1487,67 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeChat() {
-        window.sendChatMessage = function () {
+        if (window.chatInterval) clearInterval(window.chatInterval);
+
+        const caseId = localStorage.getItem('current_case_id');
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const myId = userInfo.id || 0;
+
+        // Poll every 3 seconds
+        loadChatMessages(caseId, myId);
+        window.chatInterval = setInterval(() => loadChatMessages(caseId, myId), 3000);
+
+        window.sendChatMessage = async function () {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             if (!message) return;
 
-            // Save Message to LocalStorage
-            const caseId = localStorage.getItem('current_case_id');
-            const msgs = JSON.parse(localStorage.getItem(`chat_msg_${caseId}`) || '[]');
-            msgs.push({ text: message, type: 'sent', time: new Date().toISOString() });
-            localStorage.setItem(`chat_msg_${caseId}`, JSON.stringify(msgs));
+            try {
+                await fetch('/api/case/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caseId, senderId: myId, content: message })
+                });
 
-            const chatArea = document.getElementById('chatArea');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'message sent';
-            msgDiv.textContent = message;
-            chatArea.appendChild(msgDiv);
-            input.value = '';
-            chatArea.scrollTop = chatArea.scrollHeight;
-
-            // No Auto Reply - this is Real Mode
+                input.value = '';
+                loadChatMessages(caseId, myId);
+            } catch (e) { console.error(e); }
         };
     }
 
-    function loadChatMessagesHTML(caseId) {
-        const msgs = JSON.parse(localStorage.getItem(`chat_msg_${caseId}`) || '[]');
-        if (msgs.length === 0) {
-            return `<div class="system-msg">${new Date().toLocaleDateString()} 대화가 시작되었습니다.</div>
-                    <div class="system-msg">서로를 배려하며 대화해주세요.</div>`;
+    async function loadChatMessages(caseId, myId) {
+        const chatArea = document.getElementById('chatArea');
+        if (!chatArea) return;
+
+        try {
+            const res = await fetch(`/api/case/chat?caseId=${caseId}`);
+            const data = await res.json();
+
+            if (data.success) {
+                const currentScroll = chatArea.scrollTop;
+                const isNearBottom = chatArea.scrollHeight - chatArea.clientHeight <= chatArea.scrollTop + 100;
+
+                const html = data.messages.map(m => {
+                    const isMine = (m.senderId == myId);
+                    return `
+                        <div class="message ${isMine ? 'sent' : 'received'}">
+                            ${m.text}
+                        </div>
+                    `;
+                }).join('');
+
+                if (chatArea.innerHTML !== html) {
+                    chatArea.innerHTML = html;
+                    if (isNearBottom) chatArea.scrollTop = chatArea.scrollHeight;
+                }
+            }
+        } catch (e) {
+            console.error(e);
         }
-        return msgs.map(m => `
-            <div class="message ${m.type === 'sent' ? 'sent' : 'received'}">
-                ${m.text}
-            </div>
-        `).join('');
     }
+
+    // Legacy function removed
+    function loadChatMessagesHTML(caseId) { return ''; }
 
     function generateChartData() {
         // Generate consistent but realistic-looking data
@@ -1549,4 +1643,210 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
+
+    // --- Document Box Logic ---
+
+    function getDocumentsHTML() {
+        return `
+            <div class="glass-card" style="max-width: 900px; margin: 0 auto; min-height: 600px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <div>
+                        <h3 style="margin-bottom: 5px;"><i class="fas fa-folder-open"></i> 서류 공유함</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            합의 관련 문서를 안전하게 공유하고 보관하세요.<br>
+                            업로드된 문서는 양측 모두 열람 가능합니다.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="docCategorySelect" class="form-input" style="width: 150px; background: rgba(255,255,255,0.1);">
+                            <option value="evidence">증거 자료</option>
+                            <option value="apology">사과문 (파일)</option>
+                            <option value="agreement">합의서 (초안)</option>
+                            <option value="request">합의금 요청서</option>
+                            <option value="other">기타</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="triggerFileUpload()">
+                            <i class="fas fa-cloud-upload-alt"></i> 파일 업로드
+                        </button>
+                        <input type="file" id="docFileInput" style="display: none;" onchange="uploadDocumentAction(this)">
+                    </div>
+                </div>
+
+                <!-- Document List Header -->
+                <div style="display: grid; grid-template-columns: 1fr 2fr 1.5fr 1fr 1fr; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px 8px 0 0; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
+                    <div>분류</div>
+                    <div>파일명</div>
+                    <div>업로더</div>
+                    <div>등록일</div>
+                    <div style="text-align: center;">다운로드</div>
+                </div>
+
+                <!-- Document List Body -->
+                <div id="documentList" style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
+                    <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                        <div class="spinner-border" role="status"></div>
+                        <p style="margin-top: 10px;">문서 목록을 불러오는 중...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    window.triggerFileUpload = () => {
+        document.getElementById('docFileInput').click();
+    };
+
+    window.loadDocuments = async () => {
+        const caseId = localStorage.getItem('current_case_id');
+        if (!caseId) return;
+
+        try {
+            const res = await fetch(`/api/case/${caseId}/documents`);
+            const data = await res.json();
+            const listEl = document.getElementById('documentList');
+
+            if (data.success) {
+                if (data.documents.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="padding: 60px; text-align: center; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 8px;">
+                            <i class="far fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p>공유된 문서가 없습니다.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = data.documents.map(doc => {
+                    const icon = getFileIcon(doc.fileName);
+                    const categoryMap = {
+                        'evidence': '<span class="badge" style="background:rgba(239, 68, 68, 0.1); color:#fca5a5;">증거</span>',
+                        'apology': '<span class="badge" style="background:rgba(59, 130, 246, 0.1); color:#93c5fd;">사과문</span>',
+                        'agreement': '<span class="badge" style="background:rgba(16, 185, 129, 0.1); color:#6ee7b7;">합의서</span>',
+                        'request': '<span class="badge" style="background:rgba(245, 158, 11, 0.1); color:#fcd34d;">요청서</span>',
+                        'other': '<span class="badge" style="background:rgba(255, 255, 255, 0.1); color:#cbd5e1;">기타</span>'
+                    };
+
+                    return `
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 1.5fr 1fr 1fr; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 6px; align-items: center; font-size: 0.95rem; transition: background 0.2s; cursor: pointer;" class="doc-item">
+                            <div>${categoryMap[doc.category] || doc.category}</div>
+                            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${icon}
+                                <span>${doc.fileName}</span>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: 0.9rem;">${doc.uploaderName}</div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem;">${new Date(doc.createdAt).toLocaleDateString()}</div>
+                            <div style="text-align: center;">
+                                <button class="btn btn-sm btn-glass" onclick="downloadDocumentAction('${doc.id}')" title="다운로드">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('documentList').innerHTML = '<p style="text-align:center; color:red;">목록을 불러오는데 실패했습니다.</p>';
+        }
+    };
+
+    function getFileIcon(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        if (['pdf'].includes(ext)) return '<i class="fas fa-file-pdf" style="color: #ef4444;"></i>';
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return '<i class="fas fa-file-image" style="color: #3b82f6;"></i>';
+        if (['doc', 'docx'].includes(ext)) return '<i class="fas fa-file-word" style="color: #2563eb;"></i>';
+        return '<i class="fas fa-file" style="color: var(--text-muted);"></i>';
+    }
+
+    window.uploadDocumentAction = async (input) => {
+        if (!input.files || input.files.length === 0) return;
+
+        const file = input.files[0];
+        const category = document.getElementById('docCategorySelect').value;
+        const caseId = localStorage.getItem('current_case_id');
+
+        // User Info Mock
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const userId = userInfo.id || 1; // Fallback
+
+        // Check size (Max 5MB for MVP Base64)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('파일 크기는 5MB 이하여야 합니다.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const fileData = e.target.result; // Base64 string
+
+            if (!confirm(`'${file.name}' 파일을 업로드하시겠습니까?`)) {
+                input.value = ''; // Reset
+                return;
+            }
+
+            try {
+                // Show loading state
+                const btn = document.querySelector('button[onclick="triggerFileUpload()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 업로드 중...';
+                btn.disabled = true;
+
+                const res = await fetch('/api/case/document', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        caseId,
+                        uploaderId: userId,
+                        category,
+                        fileName: file.name,
+                        fileType: file.type,
+                        fileData
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    // Success
+                    await loadDocuments(); // Refresh list
+                    input.value = ''; // Reset input
+                    alert('업로드가 완료되었습니다.');
+                } else {
+                    alert('업로드 실패: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('업로드 중 오류가 발생했습니다.');
+            } finally {
+                // Reset button
+                const btn = document.querySelector('button[onclick="triggerFileUpload()"]');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.downloadDocumentAction = async (docId) => {
+        try {
+            const res = await fetch(`/api/document/${docId}`);
+            if (!res.ok) throw new Error('Download failed');
+
+            const data = await res.json();
+            if (data.success) {
+                // Create link
+                const link = document.createElement('a');
+                link.href = data.fileData; // Base64
+                link.download = data.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('다운로드 실패');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('파일을 다운로드할 수 없습니다.');
+        }
+    };
+
 });
