@@ -9,7 +9,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '/'))); // Serve frontend files
 
 // Database Setup (SQLite for simplicity)
@@ -41,7 +42,9 @@ const Case = sequelize.define('Case', {
     roomPassword: { type: DataTypes.STRING }, // New: Room Password
     creatorId: { type: DataTypes.INTEGER }, // New: Explicit Creator Tracking
     apologyContent: { type: DataTypes.TEXT }, // New: Apology Letter Content
-    apologyStatus: { type: DataTypes.ENUM('none', 'sent', 'read'), defaultValue: 'none' } // New: Apology Status
+    apologyStatus: { type: DataTypes.ENUM('none', 'sent', 'read'), defaultValue: 'none' }, // New: Apology Status
+    proposalExtendOffender: { type: DataTypes.BOOLEAN, defaultValue: false },
+    proposalExtendVictim: { type: DataTypes.BOOLEAN, defaultValue: false }
 });
 
 const Proposal = sequelize.define('Proposal', {
@@ -91,12 +94,32 @@ app.get('/api/case/proposal', async (req, res) => {
             }
         });
 
+        // Check Case Extension Status
+        const c = await Case.findByPk(caseId);
+        const isExtended = c && c.proposalExtendOffender && c.proposalExtendVictim;
+        // Check if I agreed
+        const myUid = parseInt(userId);
+        let iAgreed = false;
+        let oppAgreed = false;
+        if (c) {
+            if (c.offenderId === myUid) {
+                iAgreed = c.proposalExtendOffender;
+                oppAgreed = c.proposalExtendVictim;
+            } else if (c.victimId === myUid) {
+                iAgreed = c.proposalExtendVictim;
+                oppAgreed = c.proposalExtendOffender;
+            }
+        }
+
         res.json({
             success: true,
             myProposalCount: myProposals.length,
             myLastProposal: myProposals.length > 0 ? myProposals[0] : null,
             opponentProposalCount: opponentProposals.length,
-            hasOpponentProposed: opponentProposals.length > 0
+            hasOpponentProposed: opponentProposals.length > 0,
+            isExtended,
+            iAgreed,
+            oppAgreed
         });
     } catch (e) {
         console.error(e);
@@ -108,10 +131,17 @@ app.get('/api/case/proposal', async (req, res) => {
 app.post('/api/case/proposal', async (req, res) => {
     const { userId, caseId, amount, duration } = req.body;
     try {
-        // Check Limit (Max 3)
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        // Check Extension Logic
+        const isExtended = c.proposalExtendOffender && c.proposalExtendVictim;
+        const limit = isExtended ? 8 : 5; // Base 5, Extended 8 (+3)
+
+        // Check Limit
         const count = await Proposal.count({ where: { caseId, proposerId: userId } });
-        if (count >= 3) {
-            return res.json({ success: false, error: '제안 횟수(3회)를 모두 소진했습니다.' });
+        if (count >= limit) {
+            return res.json({ success: false, error: `제안 횟수(${limit}회)를 모두 소진했습니다.` });
         }
 
         await Proposal.create({
@@ -122,13 +152,38 @@ app.post('/api/case/proposal', async (req, res) => {
         });
 
         // Update case status to negotiating if not already
-        const c = await Case.findByPk(caseId);
-        if (c && c.status === 'connected') {
+        if (c.status === 'connected') {
             c.status = 'negotiating';
             await c.save();
         }
 
-        res.json({ success: true, leftCount: 2 - count });
+        res.json({ success: true, leftCount: limit - count - 1 });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Extension Request
+app.post('/api/case/proposal/extend', async (req, res) => {
+    const { caseId, userId } = req.body;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        const uid = parseInt(userId);
+
+        if (c.offenderId === uid) {
+            c.proposalExtendOffender = true;
+        } else if (c.victimId === uid) {
+            c.proposalExtendVictim = true;
+        } else {
+            return res.json({ success: false, error: 'Not a participant' });
+        }
+        await c.save();
+
+        const isExtended = c.proposalExtendOffender && c.proposalExtendVictim;
+        res.json({ success: true, isExtended });
     } catch (e) {
         console.error(e);
         res.status(500).json({ success: false, error: e.message });
@@ -579,7 +634,7 @@ const Document = sequelize.define('Document', {
     category: { type: DataTypes.STRING, allowNull: false }, // apology, settlement, evidence, etc.
     fileName: { type: DataTypes.STRING, allowNull: false },
     fileType: { type: DataTypes.STRING }, // mime type
-    fileData: { type: DataTypes.TEXT, allowNull: false } // Base64 storage for MVP
+    fileData: { type: DataTypes.TEXT('long'), allowNull: false } // Base64 storage for MVP
 });
 
 // Endpoint 8.1: Upload Document

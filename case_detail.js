@@ -1091,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const canvas = await html2canvas(docEl, { scale: 2 });
                         const fileData = canvas.toDataURL('image/png');
 
-                        await fetch('/api/case/document', {
+                        const docRes = await fetch('/api/case/document', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1103,9 +1103,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 fileData
                             })
                         });
+
+                        if (!docRes.ok) {
+                            throw new Error("Document API Failed");
+                        }
                     }
                 } catch (err) {
                     console.error("Auto-save doc failed", err);
+                    alert("⚠️ 주의: 지급 요청서는 발송되었으나, '서류 공유함' 자동 저장은 실패했습니다.\n(직접 캡처하여 업로드해주세요)");
                 }
 
                 alert("📨 [발송 완료]\n상대방에게 합의금 지급 요청서가 전달되었습니다.\n(서류 공유함에도 자동 저장되었습니다)");

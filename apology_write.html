@@ -562,6 +562,11 @@
                     })
                 });
 
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`Server Error: ${res.status} ${res.statusText} - ${text.substring(0, 100)}`);
+                }
+
                 const data = await res.json();
 
                 if (data.success) {
@@ -576,7 +581,7 @@
 
             } catch (e) {
                 console.error(e);
-                alert("오류가 발생했습니다.");
+                alert("오류가 발생했습니다: " + e.message);
             } finally {
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> 전송하기';
                 btn.disabled = false;
