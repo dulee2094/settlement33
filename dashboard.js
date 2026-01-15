@@ -41,6 +41,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeMenu() {
+        // Store initial user ID to detect session changes
+        const initialUserId = localStorage.getItem('user_id');
+
+        // Check for session changes periodically and on focus
+        function checkSessionIntegrity() {
+            const currentUserId = localStorage.getItem('user_id');
+            if (currentUserId !== initialUserId) {
+                alert('로그인 정보가 변경되었습니다. 페이지를 새로고침합니다.');
+                window.location.reload();
+            }
+        }
+
+        // Check every 2 seconds
+        setInterval(checkSessionIntegrity, 2000);
+        // Check when returning to tab
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') checkSessionIntegrity();
+        });
+
         const menuItems = document.querySelectorAll('.nav-item[data-page]');
 
         menuItems.forEach(item => {
@@ -120,6 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeCasesPage() {
         fetchAllCases();
+        // Auto-refresh every 3 seconds to check for new connections/status changes
+        if (window.casePollInterval) clearInterval(window.casePollInterval);
+        window.casePollInterval = setInterval(fetchAllCases, 3000);
     }
 
     async function fetchAllCases() {
@@ -858,7 +880,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 data.rooms.forEach(room => {
                     // Safety: Skip my own rooms locally
-                    if (room.creatorId && room.creatorId == userId) return;
+                    // Ensure userId is compared as string or number consistently
+                    if (room.creatorId && (String(room.creatorId) === String(userId))) return;
 
                     const div = document.createElement('div');
                     div.className = 'glass-card';

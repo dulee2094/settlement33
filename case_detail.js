@@ -10,6 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize menu
     initializeMenu();
 
+    // Session Integrity Check
+    const initialUserId = JSON.parse(localStorage.getItem('user_info') || '{}').id;
+    setInterval(() => {
+        const currentUserInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        if (currentUserInfo.id !== initialUserId) {
+            alert('로그인 정보가 변경되었습니다. 최신 정보로 갱신합니다.');
+            window.location.reload();
+        }
+    }, 2000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            const currentUserInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+            if (currentUserInfo.id !== initialUserId) window.location.reload();
+        }
+    });
+
     // Load default content or restored tab
     const savedTab = localStorage.getItem('active_tab_on_load');
     if (savedTab && window.activateMenu) {
