@@ -45,7 +45,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
         localStorage.removeItem('show_draft_applied_msg');
     }
+
+    // 6. Start Polling for Apology Status
+    startApologyPolling();
 });
+
+function startApologyPolling() {
+    const caseId = localStorage.getItem('current_case_id');
+    if (!caseId) return;
+
+    // Check every 3 seconds
+    setInterval(() => {
+        fetch(`/api/case/apology?caseId=${caseId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const currentStatus = localStorage.getItem('current_apology_status');
+
+                    // If status changed from 'none' to 'sent' (or anything else)
+                    if (data.status !== 'none' && data.status !== currentStatus) {
+                        localStorage.setItem('current_apology_status', data.status);
+                        localStorage.setItem('current_apology_content', data.content);
+                        if (data.date) {
+                            const d = new Date(data.date);
+                            localStorage.setItem('current_apology_date', d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        }
+
+                        // Check active tab
+                        const activeItem = document.querySelector('.nav-item.active');
+                        const activeMenu = activeItem ? activeItem.dataset.menu : '';
+
+                        if (activeMenu === 'apology') {
+                            // Reload content to show the new apology
+                            window.loadContent('apology');
+                            // Optional: Alert notification
+                            // alert("📨 새로운 사과문이 도착했습니다.");
+                        } else {
+                            // Show notification indicator/alert if elsewhere
+                            // (Can be added later, for now just ensure data is fresh)
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error('Polling error:', err));
+    }, 3000);
+}
 
 function loadCaseData() {
     const caseNumber = localStorage.getItem('current_case_number');
