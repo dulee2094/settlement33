@@ -496,9 +496,10 @@
                         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 분석 및 전송중...';
                         btn.disabled = true;
 
+
                         const caseId = localStorage.getItem('current_case_id');
                         const userInfoStr = localStorage.getItem('user_info');
-                        let userId = 1; // Default fallback
+                        let userId = null;
 
                         if (userInfoStr) {
                             try {
@@ -507,6 +508,12 @@
                             } catch (e) {
                                 console.error('Token parsing error', e);
                             }
+                        }
+
+                        if (!caseId || !userId) {
+                            alert("로그인 정보가 없거나 사건이 선택되지 않았습니다.\n초기화면으로 이동합니다.");
+                            location.href = 'dashboard.html';
+                            return;
                         }
 
                         console.log('Submitting proposal:', { caseId, userId, amount: myAmount });

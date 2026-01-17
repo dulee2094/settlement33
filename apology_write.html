@@ -541,7 +541,14 @@
 
             try {
                 // 1. Capture as Image
-                const canvasEl = await html2canvas(document.getElementById('paperArea'), { scale: 2 });
+                // Scroll to top temporarily to ensure full capture or use options
+                const canvasEl = await html2canvas(document.getElementById('paperArea'), {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollY: -window.scrollY, // Critical for capturing elements when page is scrolled
+                    windowHeight: document.documentElement.scrollHeight
+                });
                 const fileData = canvasEl.toDataURL('image/png');
 
                 // 2. Upload to Document Box
