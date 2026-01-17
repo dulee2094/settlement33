@@ -355,18 +355,38 @@
                                 }
 
                                 // 4. Restore State
+                                // 4. Restore State
                                 if (proposalCount > 0) {
-                                    // If already proposed, check status
-                                    // If both proposed, we might show analysis.
-                                    // For now, keep simple reload logic.
-                                    if (data.hasOpponentProposed) {
-                                        // Ideally fetch diff here and showAnalysisResult
-                                        // For MVP, if status is 'analyzed', maybe we should...
-                                        // But logic is complex to reconstruct without calling submitProposal logic.
-                                        // Let's just rely on user history table for now.
+                                    if (data.status === 'analyzed') {
+                                        const diff = data.data.diff;
+                                        const myAmount = window.myLastProposalAmount;
+                                        if (myAmount) {
+                                            const gapPercent = (diff / myAmount) * 100;
+                                            showAnalysisResult(gapPercent, myAmount, diff);
+                                            addToHistory(myAmount, '분석 완료', '#4ade80');
+                                        }
                                     } else {
                                         document.getElementById('waitingState').style.display = 'block';
                                         document.getElementById('resultState').style.display = 'none';
+
+                                        if (window.myLastProposalAmount) {
+                                            addToHistory(window.myLastProposalAmount, '대기 중', '#888');
+                                        }
+
+                                        if (data.hasOpponentProposed) {
+                                            // If analyzed failed but opponent proposed (should be rare now)
+                                            document.getElementById('waitingState').innerHTML = `
+                                                <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
+                                                <h3>제안이 등록되었습니다</h3>
+                                                <p style="color: var(--text-muted); margin-top: 10px;">결과를 불러오는 중입니다...</p>
+                                             `;
+                                        } else {
+                                            document.getElementById('waitingState').innerHTML = `
+                                                <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
+                                                <h3>제안이 등록되었습니다</h3>
+                                                <p style="color: var(--text-muted); margin-top: 10px;">상대방이 제안하면 분석 결과가 표시됩니다.</p>
+                                             `;
+                                        }
                                     }
                                 }
                             }

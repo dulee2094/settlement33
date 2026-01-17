@@ -116,6 +116,27 @@ app.get('/api/case/proposal', async (req, res) => {
             }
         }
 
+        // Check Gap Analysis
+        const allProposals = await Proposal.findAll({
+            where: { caseId },
+            limit: 20,
+            order: [['createdAt', 'DESC']]
+        });
+
+        let gapStatus = 'waiting';
+        let gapData = {};
+
+        const pOffender = allProposals.find(p => p.proposerId == c.offenderId);
+        const pVictim = allProposals.find(p => p.proposerId == c.victimId);
+
+        if (pOffender && pVictim) {
+            const amt1 = pOffender.amount;
+            const amt2 = pVictim.amount;
+            const diff = Math.abs(amt1 - amt2);
+            gapStatus = 'analyzed';
+            gapData = { diff };
+        }
+
         res.json({
             success: true,
             myProposalCount: myProposals.length,
@@ -124,7 +145,9 @@ app.get('/api/case/proposal', async (req, res) => {
             hasOpponentProposed: opponentProposals.length > 0,
             isExtended,
             iAgreed,
-            oppAgreed
+            oppAgreed,
+            status: gapStatus,
+            data: gapData
         });
     } catch (e) {
         console.error(e);
@@ -134,7 +157,9 @@ app.get('/api/case/proposal', async (req, res) => {
 
 // Submit Proposal
 app.post('/api/case/proposal', async (req, res) => {
-    const { userId, caseId, amount, duration } = req.body;
+    let { userId, caseId, amount, duration } = req.body;
+    userId = parseInt(userId, 10); // Ensure Integer
+
     try {
         const c = await Case.findByPk(caseId);
         if (!c) return res.json({ success: false, error: 'Case not found' });
@@ -165,7 +190,7 @@ app.post('/api/case/proposal', async (req, res) => {
         // --- GAP ANALYSIS (Regression Fix) ---
         const proposals = await Proposal.findAll({
             where: { caseId },
-            limit: 10,
+            limit: 20, // Increased limit to ensure we find latest from both
             order: [['createdAt', 'DESC']]
         });
 
@@ -174,8 +199,9 @@ app.post('/api/case/proposal', async (req, res) => {
         let midpointTriggered = false;
         let midpointAmount = 0;
 
-        const pOffender = proposals.find(p => p.proposerId === c.offenderId);
-        const pVictim = proposals.find(p => p.proposerId === c.victimId);
+        // Use loose equality or explicit cast to ensure matching works regardless of type quirks
+        const pOffender = proposals.find(p => p.proposerId == c.offenderId);
+        const pVictim = proposals.find(p => p.proposerId == c.victimId);
 
         if (pOffender && pVictim) {
             const amt1 = pOffender.amount;
@@ -353,7 +379,8 @@ app.post('/api/login', async (req, res) => {
 
 // 3. Create/Link Case
 app.post('/api/case/link', async (req, res) => {
-    const { userId, caseNumber, role, summary } = req.body;
+    let { userId, caseNumber, role, summary } = req.body;
+    userId = parseInt(userId, 10);
 
     let caseData = await Case.findOne({ where: { caseNumber } });
 
@@ -560,7 +587,8 @@ app.get('/api/case/search', async (req, res) => {
 
 // 4.8 Join Room
 app.post('/api/case/join-room', async (req, res) => {
-    const { userId, caseId, password } = req.body;
+    let { userId, caseId, password } = req.body;
+    userId = parseInt(userId, 10);
 
     try {
         const caseData = await Case.findByPk(caseId);
@@ -646,7 +674,8 @@ app.get('/api/case/chat', async (req, res) => {
 });
 
 app.post('/api/case/chat', async (req, res) => {
-    const { caseId, senderId, content } = req.body;
+    let { caseId, senderId, content } = req.body;
+    senderId = parseInt(senderId, 10);
     try {
         await Message.create({ caseId, senderId, content });
         res.json({ success: true });
@@ -658,7 +687,8 @@ app.post('/api/case/chat', async (req, res) => {
 
 // 5.6 Payment Request System (Real)
 app.post('/api/case/payment-request', async (req, res) => {
-    const { caseId, requesterId, bank, accountNumber, accountHolder, amount, signature } = req.body;
+    let { caseId, requesterId, bank, accountNumber, accountHolder, amount, signature } = req.body;
+    requesterId = parseInt(requesterId, 10);
     try {
         // Upsert (One request per case mostly, or just create new)
         // Let's replace previous if exists for this user/case or just create
@@ -762,7 +792,8 @@ const Document = sequelize.define('Document', {
 
 // Endpoint 8.1: Upload Document
 app.post('/api/case/document', async (req, res) => {
-    const { caseId, uploaderId, category, fileName, fileType, fileData } = req.body;
+    let { caseId, uploaderId, category, fileName, fileType, fileData } = req.body;
+    uploaderId = parseInt(uploaderId, 10);
     try {
         await Document.create({
             caseId, uploaderId, category, fileName, fileType, fileData
