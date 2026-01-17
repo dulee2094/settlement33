@@ -436,7 +436,7 @@
                         const rawInput = document.getElementById('myAmount').value.replace(/,/g, '');
                         if (!rawInput) return alert('희망 금액을 입력해주세요.');
 
-                        const selectedDuration = document.querySelector('.duration-btn.active')?.dataset.days;
+                        // Global variable selectedDuration is updated by selectDuration()
                         if (!selectedDuration) return alert('제안 유효 기간을 선택해주세요.');
 
                         // Double check limit before sending (UI sync)

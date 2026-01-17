@@ -162,7 +162,48 @@ app.post('/api/case/proposal', async (req, res) => {
             await c.save();
         }
 
-        res.json({ success: true, leftCount: limit - count - 1 });
+        // --- GAP ANALYSIS (Regression Fix) ---
+        const proposals = await Proposal.findAll({
+            where: { caseId },
+            limit: 10,
+            order: [['createdAt', 'DESC']]
+        });
+
+        let gapStatus = 'waiting';
+        let gapData = {};
+        let midpointTriggered = false;
+        let midpointAmount = 0;
+
+        const pOffender = proposals.find(p => p.proposerId === c.offenderId);
+        const pVictim = proposals.find(p => p.proposerId === c.victimId);
+
+        if (pOffender && pVictim) {
+            const amt1 = pOffender.amount;
+            const amt2 = pVictim.amount;
+            const diff = Math.abs(amt1 - amt2);
+
+            gapStatus = 'analyzed';
+            gapData = { diff };
+
+            const maxVal = Math.max(amt1, amt2);
+            if (diff <= (maxVal * 0.1)) {
+                midpointTriggered = true;
+                midpointAmount = Math.floor((amt1 + amt2) / 2);
+                c.midpointProposed = true;
+                c.midpointAmount = midpointAmount;
+                await c.save();
+            }
+        }
+
+        res.json({
+            success: true,
+            leftCount: limit - count - 1,
+            status: gapStatus,
+            data: gapData,
+            midpointTriggered,
+            midpointAmount,
+            myLastProposal: { amount, position: null }
+        });
     } catch (e) {
         console.error(e);
         res.status(500).json({ success: false, error: e.message });
@@ -219,17 +260,17 @@ app.post('/api/case/proposal/midpoint-agree', async (req, res) => {
 
         // Check if both agreed
         const bothAgreed = c.midpointOffenderAgreed && c.midpointVictimAgreed;
-        
+
         // If both agreed, update case status to settled
         if (bothAgreed) {
             c.status = 'settled';
             await c.save();
         }
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             bothAgreed,
-            midpointAmount: c.midpointAmount 
+            midpointAmount: c.midpointAmount
         });
     } catch (e) {
         console.error(e);
