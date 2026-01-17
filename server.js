@@ -827,9 +827,43 @@ app.get('/api/admin/consultations', async (req, res) => {
 });
 
 
+// 7. Apology System
+app.post('/api/case/apology', async (req, res) => {
+    const { caseId, content } = req.body;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.status(404).json({ success: false, error: 'Case not found' });
+        c.apologyContent = content;
+        c.apologyStatus = 'sent';
+        await c.save();
+        res.json({ success: true });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/case/apology', async (req, res) => {
+    const { caseId } = req.query;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.status(404).json({ success: false, error: 'Case not found' });
+        res.json({
+            success: true,
+            status: c.apologyStatus,
+            content: c.apologyContent,
+            date: c.updatedAt
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // Initialize & Start
 sequelize.sync({ alter: true }).then(() => {
     app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });
 });
+

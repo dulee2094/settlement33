@@ -299,8 +299,14 @@
                                 // 3. Notification Logic
                                 const notifArea = document.getElementById('notificationArea');
 
+                                // Check Midpoint Status First (Highest Priority)
+                                const midpointShown = await checkMidpointStatus();
+
+                                if (midpointShown) {
+                                    // Already shown by checkMidpointStatus
+                                }
                                 // Priority 1: Extension Request from Opponent (If I haven't agreed yet)
-                                if (oppAgreedExtension && !iAgreedExtension && !isExtended) {
+                                else if (oppAgreedExtension && !iAgreedExtension && !isExtended) {
                                     notifArea.style.display = 'block';
                                     notifArea.innerHTML = `
                                         <div class="glass-card" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; display: flex; align-items: center; gap: 20px; padding: 25px; animation: pulse-border 2s infinite;">
@@ -424,39 +430,32 @@
                         }
                     }
 
-                    async function submitProposal() {
-                        // 1. Check Limits
-                        if (proposalCount >= maxLimit) {
-                            return alert(`제안 횟수(${maxLimit}회)를 모두 소진했습니다.`);
-                        }
 
-                        const rawInput = parseInt(document.getElementById('myAmount').value);
+
+                    window.submitProposal = async () => {
+                        const rawInput = document.getElementById('myAmount').value.replace(/,/g, '');
                         if (!rawInput) return alert('희망 금액을 입력해주세요.');
 
-                        // --- Validation: Convergence Enforcement ---
-                        if (window.myLastProposalAmount !== undefined && window.myLastProposalAmount !== null) {
-                            const newAmount = rawInput * 10000;
-                            const lastAmount = window.myLastProposalAmount;
+                        const selectedDuration = document.querySelector('.duration-btn.active')?.dataset.days;
+                        if (!selectedDuration) return alert('제안 유효 기간을 선택해주세요.');
 
-                            // Payer (Maintains Up-only)
-                            if (currentPosition === 'payer') {
-                                if (newAmount < lastAmount) {
-                                    alert(`⚠️ [금액 제한 알림]\n이전 제안(${lastAmount / 10000}만원)보다 낮출 수 없습니다.`);
+                        // Double check limit before sending (UI sync)
+                        if (proposalCount >= maxLimit) {
+                            // Check extension possibility again
+                            if (proposalCount === 5 && !isExtended) {
+                                if (confirm('기본 제안 횟수(5회)를 모두 소진했습니다.\n\n상대방에게 [협상 연장]을 요청하시겠습니까?\n(양측 동의 시 3회 추가)')) {
+                                    requestExtension();
                                     return;
                                 }
-                            }
-                            // Receiver (Maintains Down-only)
-                            else if (currentPosition === 'receiver') {
-                                if (newAmount > lastAmount) {
-                                    alert(`⚠️ [금액 제한 알림]\n이전 제안(${lastAmount / 10000}만원)보다 높일 수 없습니다.`);
-                                    return;
-                                }
+                                return;
+                            } else {
+                                return alert('제안 횟수를 모두 소진했습니다.');
                             }
                         }
 
                         const positionText = currentPosition === 'payer' ? '지급' : '수령';
                         const remaining = maxLimit - proposalCount - 1;
-                        if (!confirm(`[남은 제안 횟수: ${remaining}회]\n\n${rawInput}만원을 '${positionText}'하는 조건으로 제안하시겠습니까?\n한 번 제안하면 되돌릴 수 없습니다.`)) return;
+                        if (!confirm(`[남은 제안 횟수: ${remaining}회]\n\n${parseInt(rawInput).toLocaleString()}만원을 '${positionText}'하는 조건으로 제안하시겠습니까?\n한 번 제안하면 되돌릴 수 없습니다.`)) return;
 
                         const myAmount = rawInput * 10000;
                         const btn = document.querySelector('.btn-primary');
@@ -465,8 +464,19 @@
                         btn.disabled = true;
 
                         const caseId = localStorage.getItem('current_case_id');
-                        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-                        const userId = userInfo.id || 1;
+                        const userInfoStr = localStorage.getItem('user_info');
+                        let userId = 1; // Default fallback
+
+                        if (userInfoStr) {
+                            try {
+                                const userInfo = JSON.parse(userInfoStr);
+                                if (userInfo.id) userId = userInfo.id;
+                            } catch (e) {
+                                console.error('Token parsing error', e);
+                            }
+                        }
+
+                        console.log('Submitting proposal:', { caseId, userId, amount: myAmount });
 
                         try {
                             const res = await fetch('/api/case/proposal', {
@@ -483,10 +493,16 @@
                                 return;
                             }
 
+                            // Check Midpoint Trigger
+                            if (data.midpointTriggered) {
+                                alert(`✨ 10% 이내 합의 제안!\n\n양측의 제안 금액이 10% 이내로 매우 가깝습니다!\n중간 금액 ${(data.midpointAmount / 10000).toLocaleString()}만원으로 합의하시겠습니까?\n\n[확인]을 누르면 합의 제안 화면으로 이동합니다.`);
+                                location.reload();
+                                return;
+                            }
+
                             // Increase Count
                             proposalCount++;
                             if (data.myLastProposal) {
-                                // Ideally server returns full object, but let's update locally
                                 window.myLastProposalAmount = myAmount;
                             } else {
                                 window.myLastProposalAmount = myAmount;
@@ -514,14 +530,13 @@
 
                         } catch (err) {
                             console.error(err);
-                            alert('서버 통신 오류');
+                            alert('서버 통신 오류: ' + err.message);
                         } finally {
-                            /* Button state handled in updateCountUI usually, but wait... */
                             if (proposalCount < maxLimit) {
                                 btn.innerHTML = originalBtnText;
                                 btn.disabled = false;
                             } else {
-                                updateCountUI(); // Refreshes button state
+                                updateCountUI();
                             }
                         }
                     }

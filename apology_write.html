@@ -570,6 +570,17 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    // 3. Update Apology Status (Server)
+                    try {
+                        await fetch('/api/case/apology', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ caseId, content: canvas.value })
+                        });
+                    } catch (err) {
+                        console.error('Apology status update failed', err);
+                    }
+
                     alert("✅ 사과문이 성공적으로 전송되고 공유함에 저장되었습니다.");
                     // Save text for local edit capability if needed (optional)
                     localStorage.setItem('current_apology_status', 'sent');

@@ -77,6 +77,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (elSidebarCase) elSidebarCase.textContent = displayTitle;
         if (elSidebarCounter) elSidebarCounter.textContent = counterparty;
+
+        // [New] Sync Apology Status from Server
+        const caseId = localStorage.getItem('current_case_id');
+        if (caseId) {
+            fetch(`/api/case/apology?caseId=${caseId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.status !== 'none') {
+                        localStorage.setItem('current_apology_status', data.status);
+                        localStorage.setItem('current_apology_content', data.content);
+                        if (data.date) {
+                            const d = new Date(data.date);
+                            localStorage.setItem('current_apology_date', d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        }
+                    }
+                })
+                .catch(err => console.error('Sync error:', err));
+        }
     }
 
     function getRoleText(role) {
@@ -152,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'apology':
                 contentArea.innerHTML = getApologyHTML();
+                loadApologyImage();
                 break;
             case 'agreement':
                 contentArea.innerHTML = getAgreementHTML();
@@ -666,7 +685,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 style="margin-bottom: 20px;"><i class="fas fa-envelope-open-text"></i> 도착한 사과문</h3>
                         <p style="color: var(--text-muted); margin-bottom: 30px;">피의자로부터 도착한 사과문입니다.</p>
 
-                        <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8; white-space: pre-wrap;">${apologyContent}</div>
+                        <!-- Apology Image Area -->
+                        <div id="apologyImageContainer" style="margin-bottom: 30px; text-align: center; display: none;">
+                            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; display: inline-block;">
+                                <img id="apologyImage" src="" alt="사과문 이미지" style="max-width: 100%; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <a id="apologyDownloadBtn" href="#" download class="btn btn-glass" style="font-size: 0.9rem; padding: 8px 16px;">
+                                    <i class="fas fa-download"></i> 이미지 원본 다운로드
+                                </a>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8; white-space: pre-wrap; border: 1px solid rgba(255,255,255,0.05);">${apologyContent}</div>
                         
                         <div style="display: flex; justify-content: flex-end;">
                             <span style="font-size: 0.85rem; color: var(--text-muted);">${apologyDate} 수신됨</span>
@@ -1870,4 +1901,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+        async function loadApologyImage() {
+        const caseId = localStorage.getItem('current_case_id');
+        const imgEl = document.getElementById('apologyImage');
+        const container = document.getElementById('apologyImageContainer');
+        const downloadBtn = document.getElementById('apologyDownloadBtn');
+
+        if (!caseId || !imgEl) return;
+
+        try {
+            const listRes = await fetch('/api/case/' + caseId + '/documents');
+            const listData = await listRes.json();
+            
+            if (!listData.success || !listData.documents) return;
+
+            const apologyDocs = listData.documents.filter(d => d.category === 'apology');
+            if (apologyDocs.length === 0) return;
+
+            const latestDocId = apologyDocs[0].id;
+
+            const fileRes = await fetch('/api/document/' + latestDocId);
+            const fileJson = await fileRes.json();
+
+            if (fileJson.success) {
+                imgEl.src = fileJson.fileData;
+                container.style.display = 'block';
+                downloadBtn.href = fileJson.fileData;
+                downloadBtn.download = fileJson.fileName;
+            }
+        } catch (e) {
+            console.error('Failed to load apology image', e);
+        }
+    }
 });
