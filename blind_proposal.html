@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Midpoint Agreement Functions -->
+    <script src="midpoint_agreement.js"></script>
     <style>
         @keyframes pulse-border {
             0% {
@@ -90,9 +92,151 @@
 
             <!-- Blind Proposal Section -->
             <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
-                <!-- ... (Content remains same) ... -->
+                <!-- Left Column: Input Form -->
+                <div class="glass-card" id="myProposalCard">
+                    <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-edit" style="color: #3b82f6;"></i> 나의 제안 등록
+                    </h3>
 
-                <!-- ... -->
+                    <!-- Convergence Guide -->
+                    <div
+                        style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #fbbf24;">
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i> <strong>주의
+                            (Irreversible)</strong><br>
+                        한 번 제안한 금액은 되돌릴 수 없으며, 다음 차수 제안 시 <strong>"합의 수렴 원칙"</strong>에 따라 본인에게 더 유리한 금액(지급액 축소/수령액 증액)으로
+                        변경할 수 없습니다. 신중하게 제안해주세요.
+                    </div>
+
+                    <div
+                        style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                        <!-- Position Toggle -->
+                        <div
+                            style="display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 10px;">
+                            <button id="pos-payer" onclick="selectPosition('payer')"
+                                style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid transparent; background: rgba(59, 130, 246, 0.2); color: white; border-color: #3b82f6; transition: all 0.3s; cursor: pointer;">
+                                <i class="fas fa-hand-holding-usd"></i> 지급 (주겠습니다)
+                            </button>
+                            <button id="pos-receiver" onclick="selectPosition('receiver')"
+                                style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid transparent; background: rgba(255,255,255,0.05); color: #888; transition: all 0.3s; cursor: pointer;">
+                                <i class="fas fa-hand-holding-heart"></i> 수령 (받겠습니다)
+                            </button>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label
+                                style="display: block; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">합의
+                                희망 금액 (만원)</label>
+                            <div style="position: relative;">
+                                <input type="number" id="myAmount" placeholder="예: 500"
+                                    style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: white; font-size: 1.1rem; padding-right: 50px;">
+                                <span
+                                    style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #888;">만원</span>
+                            </div>
+                            <p id="amountGuideText" style="font-size: 0.8rem; color: #888; margin-top: 8px;">
+                                상대방에게 지급할 금액을 입력하세요.
+                            </p>
+                        </div>
+
+                        <!-- Duration -->
+                        <div style="margin-bottom: 20px;">
+                            <label
+                                style="display: block; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">제안
+                                유효 기간</label>
+                            <div style="display: flex; gap: 8px;">
+                                <div class="duration-btn" id="btn-0.25" onclick="selectDuration(0.25)"
+                                    style="padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #888;">
+                                    6시간</div>
+                                <div class="duration-btn active" id="btn-1" onclick="selectDuration(1)"
+                                    style="padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid #4ade80; background: #4ade80; color: #000; font-weight: bold; box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);">
+                                    1일</div> <!-- Default Active -->
+                                <div class="duration-btn" id="btn-3" onclick="selectDuration(3)"
+                                    style="padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #888;">
+                                    3일</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="submitProposal()"
+                            style="width: 100%; padding: 15px; font-size: 1rem;">
+                            제안 등록하기
+                        </button>
+                        <div style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: #888;">
+                            남은 제안 횟수: <span id="leftCount" style="color: #4ade80; font-weight: bold;">?</span>회
+                        </div>
+                    </div>
+
+                    <!-- History -->
+                    <div>
+                        <h4 style="margin-bottom: 15px; font-size: 1rem; color: #cbd5e1;">나의 제안 이력</h4>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                            <thead>
+                                <tr
+                                    style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); text-align: left;">
+                                    <th style="padding: 10px;">차수</th>
+                                    <th style="padding: 10px;">일시</th>
+                                    <th style="padding: 10px;">금액(원)</th>
+                                    <th style="padding: 10px;">결과</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Column: Result / Status -->
+                <div class="glass-card"
+                    style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 480px;">
+
+                    <!-- 1. Waiting State -->
+                    <div id="waitingState" style="display: block;">
+                        <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h3 style="color: var(--text-muted);">아직 제안을 등록하지 않았습니다</h3>
+                        <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">
+                            좌측에서 희망 금액을 입력하고<br>제안을 등록해주세요.
+                        </p>
+                    </div>
+
+                    <!-- 2. Result State (Analysis) -->
+                    <div id="resultState" style="display: none; width: 100%;">
+                        <div id="gapTitle"
+                            style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: #fff;"></div>
+                        <div id="gapDesc" style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem;">
+                        </div>
+
+                        <!-- Gauge Visual -->
+                        <div
+                            style="width: 100%; max-width: 300px; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; margin: 0 auto 30px auto; position: relative; overflow: hidden;">
+                            <div id="gapGauge"
+                                style="height: 100%; width: 0%; background: #4ade80; border-radius: 5px; transition: width 1s ease;">
+                            </div>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; text-align: left;">
+                            <div class="glass-card" style="background: rgba(255,255,255,0.03); padding: 15px;">
+                                <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">나의 제안</div>
+                                <div style="font-size: 1.1rem; font-weight: bold; color: #fff;" id="myCurrentDisplay">-
+                                </div>
+                            </div>
+                            <div class="glass-card" style="background: rgba(255,255,255,0.03); padding: 15px;"
+                                id="rangeHintBox">
+                                <div style="font-size: 0.85rem; color: #aaa; margin-bottom: 5px;">금액 차이(Gap)</div>
+                                <div style="font-size: 1.1rem; font-weight: bold; color: #fff;">분석 중...</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-bottom: 15px; color: #fff; font-size: 1rem;">SafeHappE AI 조언</h4>
+                        <div
+                            style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6; text-align: left; font-size: 0.9rem; color: #cbd5e1; line-height: 1.6;">
+                            현재 격차를 줄이기 위해서는 상대방의 입장을 고려한 조금 더 유연한 제안이 필요할 수 있습니다. <br>
+                            만약 격차가 10% 이내라면, <strong>중간 지점</strong>에서의 합의를 강력히 권장합니다.
+                        </div>
+                    </div>
+                </div>
 
                 <script>
                     // Proposal History State
@@ -104,6 +248,13 @@
                     let isExtended = false;
                     let iAgreedExtension = false;
                     let oppAgreedExtension = false;
+
+                    // Midpoint Agreement State
+                    let midpointProposed = false;
+                    let midpointAmount = 0;
+                    let iAgreedMidpoint = false;
+                    let oppAgreedMidpoint = false;
+                    let bothAgreedMidpoint = false;
 
                     // Position Selection
                     let currentPosition = 'payer'; // Default: Paying
@@ -250,7 +401,7 @@
                     }
 
                     // Duration Selection
-                    let selectedDuration = 7; // default 1 week
+                    let selectedDuration = 1; // default 1 day
 
                     function selectDuration(days) {
                         selectedDuration = days;

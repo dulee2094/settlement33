@@ -44,7 +44,12 @@ const Case = sequelize.define('Case', {
     apologyContent: { type: DataTypes.TEXT }, // New: Apology Letter Content
     apologyStatus: { type: DataTypes.ENUM('none', 'sent', 'read'), defaultValue: 'none' }, // New: Apology Status
     proposalExtendOffender: { type: DataTypes.BOOLEAN, defaultValue: false },
-    proposalExtendVictim: { type: DataTypes.BOOLEAN, defaultValue: false }
+    proposalExtendVictim: { type: DataTypes.BOOLEAN, defaultValue: false },
+    // Midpoint Agreement (10% within)
+    midpointProposed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Whether midpoint agreement is proposed
+    midpointAmount: { type: DataTypes.INTEGER }, // The calculated midpoint amount
+    midpointOffenderAgreed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Offender's agreement
+    midpointVictimAgreed: { type: DataTypes.BOOLEAN, defaultValue: false } // Victim's agreement
 });
 
 const Proposal = sequelize.define('Proposal', {
@@ -191,6 +196,83 @@ app.post('/api/case/proposal/extend', async (req, res) => {
 });
 
 // Routes
+
+// Midpoint Agreement - Agree to Midpoint
+app.post('/api/case/proposal/midpoint-agree', async (req, res) => {
+    const { caseId, userId } = req.body;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        const uid = parseInt(userId);
+
+        // Set agreement flag
+        if (c.offenderId === uid) {
+            c.midpointOffenderAgreed = true;
+        } else if (c.victimId === uid) {
+            c.midpointVictimAgreed = true;
+        } else {
+            return res.json({ success: false, error: 'Not a participant' });
+        }
+
+        await c.save();
+
+        // Check if both agreed
+        const bothAgreed = c.midpointOffenderAgreed && c.midpointVictimAgreed;
+        
+        // If both agreed, update case status to settled
+        if (bothAgreed) {
+            c.status = 'settled';
+            await c.save();
+        }
+
+        res.json({ 
+            success: true, 
+            bothAgreed,
+            midpointAmount: c.midpointAmount 
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Midpoint Agreement - Get Status
+app.get('/api/case/proposal/midpoint-status', async (req, res) => {
+    const { caseId, userId } = req.query;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        const uid = parseInt(userId);
+        let iAgreed = false;
+        let oppAgreed = false;
+
+        if (c.offenderId === uid) {
+            iAgreed = c.midpointOffenderAgreed;
+            oppAgreed = c.midpointVictimAgreed;
+        } else if (c.victimId === uid) {
+            iAgreed = c.midpointVictimAgreed;
+            oppAgreed = c.midpointOffenderAgreed;
+        }
+
+        const bothAgreed = c.midpointOffenderAgreed && c.midpointVictimAgreed;
+
+        res.json({
+            success: true,
+            midpointProposed: c.midpointProposed,
+            midpointAmount: c.midpointAmount,
+            iAgreed,
+            oppAgreed,
+            bothAgreed
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+
 
 // 1. Sign Up
 app.post('/api/signup', async (req, res) => {
