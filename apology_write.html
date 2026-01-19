@@ -536,25 +536,48 @@
             if (!confirm("작성하신 사과문을 전송하시겠습니까?\n전송된 사과문은 서류 공유함에 자동 저장됩니다.")) return;
 
             const btn = document.querySelector('.action-float .btn-primary');
+            const originalBtnText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 전송 및 저장 중...';
             btn.disabled = true;
 
+            // --- KEY FIX: Swap Textarea with Div for accurate Capture ---
+            const originalDisplay = canvas.style.display;
+            const tempDiv = document.createElement('div');
+
+            // Copy styles
+            tempDiv.style.width = '100%';
+            tempDiv.style.minHeight = canvas.style.height; // Use calculated height
+            tempDiv.style.fontFamily = getComputedStyle(canvas).fontFamily;
+            tempDiv.style.fontSize = getComputedStyle(canvas).fontSize;
+            tempDiv.style.lineHeight = getComputedStyle(canvas).lineHeight;
+            tempDiv.style.color = getComputedStyle(canvas).color;
+            tempDiv.style.whiteSpace = 'pre-wrap';
+            tempDiv.style.wordBreak = 'break-word';
+            tempDiv.innerText = canvas.value;
+
+            // Swap
+            canvas.style.display = 'none';
+            paper.insertBefore(tempDiv, canvas);
+            // -----------------------------------------------------------
+
             try {
                 // 1. Capture as Image
-                // Scroll to top temporarily to ensure full capture or use options
                 const canvasEl = await html2canvas(document.getElementById('paperArea'), {
                     scale: 2,
                     useCORS: true,
                     allowTaint: true,
-                    scrollY: -window.scrollY, // Critical for capturing elements when page is scrolled
+                    scrollY: -window.scrollY,
                     windowHeight: document.documentElement.scrollHeight
                 });
                 const fileData = canvasEl.toDataURL('image/png');
 
                 // 2. Upload to Document Box
                 const caseId = localStorage.getItem('current_case_id');
-                const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-                const userId = userInfo.id || 0;
+                let userId = localStorage.getItem('user_id');
+                if (!userId) {
+                    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+                    userId = userInfo.id || 0;
+                }
 
                 const res = await fetch('/api/case/document', {
                     method: 'POST',
@@ -589,7 +612,7 @@
                     }
 
                     alert("✅ 사과문이 성공적으로 전송되고 공유함에 저장되었습니다.");
-                    // Save text for local edit capability if needed (optional)
+
                     localStorage.setItem('current_apology_status', 'sent');
                     localStorage.setItem('current_apology_date', new Date().toLocaleDateString());
                     location.href = 'case_detail.html';
@@ -601,7 +624,11 @@
                 console.error(e);
                 alert("오류가 발생했습니다: " + e.message);
             } finally {
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> 전송하기';
+                // Restore Textarea
+                paper.removeChild(tempDiv);
+                canvas.style.display = originalDisplay;
+
+                btn.innerHTML = originalBtnText;
                 btn.disabled = false;
             }
         }

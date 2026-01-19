@@ -267,9 +267,20 @@
                     });
 
                     async function initializePage() {
+                        // --- 1. Session Check ---
                         const caseId = localStorage.getItem('current_case_id');
-                        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-                        const userId = userInfo.id;
+                        let userId = localStorage.getItem('user_id');
+
+                        // Fallback for legacy user_info object if user_id not found
+                        if (!userId) {
+                            try {
+                                const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+                                userId = userInfo.id;
+                            } catch (e) { }
+                        }
+
+                        // Ensure userId is valid
+                        if (userId) userId = parseInt(userId, 10);
 
                         // UI Binding
                         const caseNum = localStorage.getItem('current_case_number') || localStorage.getItem('current_case_title') || '-';
@@ -498,17 +509,20 @@
 
 
                         const caseId = localStorage.getItem('current_case_id');
-                        const userInfoStr = localStorage.getItem('user_info');
-                        let userId = null;
+                        let userId = localStorage.getItem('user_id');
 
-                        if (userInfoStr) {
-                            try {
-                                const userInfo = JSON.parse(userInfoStr);
-                                if (userInfo.id) userId = userInfo.id;
-                            } catch (e) {
-                                console.error('Token parsing error', e);
+                        // Fallback check
+                        if (!userId) {
+                            const userInfoStr = localStorage.getItem('user_info');
+                            if (userInfoStr) {
+                                try {
+                                    const userInfo = JSON.parse(userInfoStr);
+                                    if (userInfo.id) userId = userInfo.id;
+                                } catch (e) { }
                             }
                         }
+
+                        if (userId) userId = parseInt(userId, 10);
 
                         if (!caseId || !userId) {
                             alert("로그인 정보가 없거나 사건이 선택되지 않았습니다.\n초기화면으로 이동합니다.");
