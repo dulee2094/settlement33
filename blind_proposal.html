@@ -31,6 +31,65 @@
                 border-color: rgba(59, 130, 246, 0.6);
             }
         }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+                transform: scale(1);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes slide-in-right {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce-icon {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .glass-card {
+                min-height: auto !important;
+            }
+        }
     </style>
 </head>
 
@@ -88,9 +147,6 @@
                         style="background: var(--bg-card); color: var(--text-muted);">제안 대기중</span>
                 </div>
             </div>
-
-            <!-- Notification Area -->
-            <div id="notificationArea" style="display: none; margin-bottom: 20px;"></div>
 
             <!-- Blind Proposal Section -->
             <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
@@ -186,23 +242,28 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Result / Status -->
+                <!-- Right Column: Dynamic Status Panel -->
                 <div class="glass-card"
                     style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 480px;">
 
-                    <!-- 1. Waiting State -->
-                    <div id="waitingState" style="display: block;">
-                        <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
-                            <i class="fas fa-hourglass-half"></i>
-                        </div>
-                        <h3 style="color: var(--text-muted);">아직 제안을 등록하지 않았습니다</h3>
-                        <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">
-                            좌측에서 희망 금액을 입력하고<br>제안을 등록해주세요.
-                        </p>
+                    <!-- Priority 1: Midpoint Agreement Notification (Highest) -->
+                    <div id="midpointResultArea"
+                        style="display: none; width: 100%; animation: slide-in-right 0.5s ease-out;"></div>
+
+                    <!-- Priority 2: Opponent Proposed Notification (NEW - Moved from Top) -->
+                    <div id="opponentProposedNotification"
+                        style="display: none; width: 100%; animation: slide-in-right 0.5s ease-out;">
+                        <!-- Dynamic content will be inserted here -->
                     </div>
 
-                    <!-- 2. Result State (Analysis) -->
-                    <div id="resultState" style="display: none; width: 100%;">
+                    <!-- Priority 3: Extension Request Notification -->
+                    <div id="extensionNotification"
+                        style="display: none; width: 100%; animation: slide-in-right 0.5s ease-out;">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+
+                    <!-- Priority 4: Analysis Result State -->
+                    <div id="resultState" style="display: none; width: 100%; animation: fade-in 0.5s ease-out;">
                         <div id="gapTitle"
                             style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: #fff;"></div>
                         <div id="gapDesc" style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem;">
@@ -238,6 +299,17 @@
                             만약 격차가 10% 이내라면, <strong>중간 지점</strong>에서의 합의를 강력히 권장합니다.
                         </div>
                     </div>
+
+                    <!-- Priority 5: Default Waiting State -->
+                    <div id="waitingState" style="display: block; animation: fade-in 0.5s ease-out;">
+                        <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h3 style="color: var(--text-muted);">아직 제안을 등록하지 않았습니다</h3>
+                        <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">
+                            좌측에서 희망 금액을 입력하고<br>제안을 등록해주세요.
+                        </p>
+                    </div>
                 </div>
 
                 <script>
@@ -245,6 +317,20 @@
                     let proposalHistory = [];
                     let proposalCount = 0;
                     let maxLimit = 5; // Default Base
+
+                    // Round State (NEW)
+                    let currentRound = 1;
+                    let myRound = 0;
+                    let oppRound = 0;
+                    let roundCompleted = false;
+                    let previousRounds = [];
+                    let currentRoundData = null;
+
+                    // Result Viewing State (NEW - Phase 1)
+                    let roundStatus = 'waiting'; // 'waiting', 'proposing', 'ready', 'completed'
+                    let myResultViewed = false;
+                    let oppResultViewed = false;
+                    let analysisData = null;
 
                     // Extension State
                     let isExtended = false;
@@ -264,7 +350,130 @@
                     // Initialize: Check Status from Server
                     document.addEventListener('DOMContentLoaded', async () => {
                         await initializePage();
+
+                        // Polling for Opponent's Proposal & Midpoint Status
+                        setInterval(async () => {
+                            await checkStatusUpdate();
+                        }, 5000); // Check every 5 seconds
                     });
+
+                    // Helper function to hide all right panel states
+                    function hideAllRightPanelStates() {
+                        document.getElementById('midpointResultArea').style.display = 'none';
+                        document.getElementById('opponentProposedNotification').style.display = 'none';
+                        document.getElementById('extensionNotification').style.display = 'none';
+                        document.getElementById('resultState').style.display = 'none';
+                        document.getElementById('waitingState').style.display = 'none';
+                    }
+
+                    // Helper function to show specific state with animation
+                    function showRightPanelState(stateId) {
+                        hideAllRightPanelStates();
+                        const element = document.getElementById(stateId);
+                        if (element) {
+                            element.style.display = 'block';
+                        }
+                    }
+
+                    async function checkStatusUpdate() {
+                        // Don't poll if already agreed or max limit reached (optimization)
+                        if (proposalCount >= 5 && !isExtended) return;
+
+                        const caseId = localStorage.getItem('current_case_id');
+                        let userId = localStorage.getItem('user_id');
+
+                        // Fallback for legacy user_info object
+                        if (!userId) {
+                            try {
+                                const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+                                userId = userInfo.id;
+                            } catch (e) { }
+                        }
+                        if (userId) userId = parseInt(userId, 10);
+                        if (!caseId || !userId) return;
+
+                        try {
+                            const res = await fetch(`/api/case/proposal?caseId=${caseId}&userId=${userId}`);
+                            const data = await res.json();
+
+                            if (data.success) {
+                                // Priority 1: Check for Midpoint Proposal (Highest Priority)
+                                const midpointShown = await checkMidpointStatus();
+                                if (midpointShown) return;
+
+                                // Priority 2: Extension Request from Opponent
+                                if (data.oppAgreedExtension && !data.iAgreed && !data.isExtended) {
+                                    showRightPanelState('extensionNotification');
+                                    document.getElementById('extensionNotification').innerHTML = `
+                                        <div style="
+                                            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+                                            border: 2px solid #f59e0b;
+                                            border-radius: 16px;
+                                            padding: 30px;
+                                            text-align: center;
+                                            animation: pulse-glow 2s infinite;
+                                        ">
+                                            <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                                                🤝
+                                            </div>
+                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                                상대방이 협상 연장을 요청했습니다
+                                            </h3>
+                                            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; font-size: 0.95rem;">
+                                                이 제안을 수락하면 양측 모두<br>
+                                                제안 기회가 <strong style="color: #fbbf24;">3회 추가</strong>됩니다.<br>
+                                                아직 합의 가능성이 보인다면 연장에 동의해주세요.
+                                            </p>
+                                            <button class="btn btn-primary" onclick="requestExtension()" 
+                                                style="background: #f59e0b; border:none; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); padding: 12px 30px; font-size: 1rem;">
+                                                <i class="fas fa-handshake" style="margin-right: 8px;"></i>
+                                                연장 동의하기 (+3회)
+                                            </button>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+
+                                // Priority 3: Opponent Proposed (Standard Blind Alert)
+                                if (data.hasOpponentProposed && proposalCount === 0) {
+                                    showRightPanelState('opponentProposedNotification');
+                                    document.getElementById('opponentProposedNotification').innerHTML = `
+                                        <div style="
+                                            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
+                                            border: 2px solid #3b82f6;
+                                            border-radius: 16px;
+                                            padding: 30px;
+                                            text-align: center;
+                                            animation: pulse-glow 2s infinite;
+                                        ">
+                                            <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                                                🔔
+                                            </div>
+                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                                상대방이 제안을 등록했습니다!
+                                            </h3>
+                                            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
+                                                상대방은 기다리고 있습니다.<br>
+                                                좌측에서 금액을 입력하면<br>
+                                                <strong style="color: #60a5fa;">즉시 AI 격차 분석 결과</strong>를 확인할 수 있습니다.
+                                            </p>
+                                            <div style="
+                                                background: rgba(0,0,0,0.3);
+                                                padding: 12px 20px;
+                                                border-radius: 25px;
+                                                display: inline-block;
+                                                font-size: 0.85rem;
+                                                color: #94a3b8;
+                                            ">
+                                                <i class="fas fa-lock" style="margin-right: 5px;"></i> 상대방 금액 비공개 중
+                                            </div>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+                            }
+                        } catch (e) { console.error("Polling Error", e); }
+                    }
 
                     async function initializePage() {
                         // --- 1. Session Check ---
@@ -310,18 +519,31 @@
                                 // Update Max Limit
                                 maxLimit = isExtended ? 8 : 5;
 
-                                // 2. Update Local State
+                                // 2. Update Round State (NEW)
+                                currentRound = data.currentRound || 1;
+                                myRound = data.myRound || 0;
+                                oppRound = data.oppRound || 0;
+                                previousRounds = data.previousRounds || [];
+                                currentRoundData = data.currentRoundData;
+
+                                // Check if current round is completed
+                                roundCompleted = currentRoundData && currentRoundData.completed;
+
+                                // 3. Update Local State
                                 proposalCount = data.myProposalCount;
                                 if (data.myLastProposal) {
                                     window.myLastProposalAmount = data.myLastProposal.amount;
                                     if (data.myLastProposal.position) {
                                         selectPosition(data.myLastProposal.position);
                                     }
+                                    // Store Expiration Time
+                                    if (data.myLastProposal.expiresAt) {
+                                        proposalExpiration = data.myLastProposal.expiresAt;
+                                    }
                                 }
                                 updateCountUI();
 
-                                // 3. Notification Logic
-                                const notifArea = document.getElementById('notificationArea');
+                                // 4. Notification Logic - Use Right Panel States
 
                                 // Check Midpoint Status First (Highest Priority)
                                 const midpointShown = await checkMidpointStatus();
@@ -329,56 +551,78 @@
                                 if (midpointShown) {
                                     // Already shown by checkMidpointStatus
                                 }
-                                // Priority 1: Extension Request from Opponent (If I haven't agreed yet)
+                                // Priority 2: Show Round Completion (NEW!)
+                                else if (roundCompleted && myRound === currentRound && oppRound === currentRound) {
+                                    showRoundCompletionUI();
+                                }
+                                // Priority 3: Extension Request from Opponent (If I haven't agreed yet)
                                 else if (oppAgreedExtension && !iAgreedExtension && !isExtended) {
-                                    notifArea.style.display = 'block';
-                                    notifArea.innerHTML = `
-                                        <div class="glass-card" style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; display: flex; align-items: center; gap: 20px; padding: 25px; animation: pulse-border 2s infinite;">
-                                            <div style="width: 60px; height: 60px; background: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);">
-                                                <i class="fas fa-handshake" style="color: white; font-size: 1.8rem;"></i>
+                                    showRightPanelState('extensionNotification');
+                                    document.getElementById('extensionNotification').innerHTML = `
+                                        <div style="
+                                            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+                                            border: 2px solid #f59e0b;
+                                            border-radius: 16px;
+                                            padding: 30px;
+                                            text-align: center;
+                                            animation: pulse-glow 2s infinite;
+                                        ">
+                                            <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                                                🤝
                                             </div>
-                                            <div style="flex: 1;">
-                                                <h3 style="margin: 0 0 8px 0; color: #fff; font-size: 1.2rem;">🔄 상대방이 협상 연장을 요청했습니다</h3>
-                                                <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
-                                                    이 제안을 수락하면 양측 모두 제안 기회가 <strong>3회 추가</strong>됩니다.<br>
-                                                    아직 합의 가능성이 보인다면 연장에 동의해주세요.
-                                                </p>
-                                            </div>
-                                            <div style="text-align: right;">
-                                                <button class="btn btn-primary" onclick="requestExtension()" style="background: #f59e0b; border:none; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
-                                                    연장 동의하기 (+3회)
-                                                </button>
-                                            </div>
+                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                                상대방이 협상 연장을 요청했습니다
+                                            </h3>
+                                            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; font-size: 0.95rem;">
+                                                이 제안을 수락하면 양측 모두<br>
+                                                제안 기회가 <strong style="color: #fbbf24;">3회 추가</strong>됩니다.<br>
+                                                아직 합의 가능성이 보인다면 연장에 동의해주세요.
+                                            </p>
+                                            <button class="btn btn-primary" onclick="requestExtension()" 
+                                                style="background: #f59e0b; border:none; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); padding: 12px 30px; font-size: 1rem;">
+                                                <i class="fas fa-handshake" style="margin-right: 8px;"></i>
+                                                연장 동의하기 (+3회)
+                                            </button>
                                         </div>
                                     `;
                                 }
-                                // Priority 2: Opponent Proposed (Standard Blind Alert)
+                                // Priority 3: Opponent Proposed (Standard Blind Alert)
                                 else if (data.hasOpponentProposed && proposalCount === 0) {
-                                    notifArea.style.display = 'block';
-                                    notifArea.innerHTML = `
-                                        <div class="glass-card" style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; display: flex; align-items: center; gap: 20px; padding: 25px; animation: pulse-border 2s infinite;">
-                                            <div style="width: 60px; height: 60px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);">
-                                                <i class="fas fa-envelope-open-text" style="color: white; font-size: 1.8rem;"></i>
+                                    showRightPanelState('opponentProposedNotification');
+                                    document.getElementById('opponentProposedNotification').innerHTML = `
+                                        <div style="
+                                            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
+                                            border: 2px solid #3b82f6;
+                                            border-radius: 16px;
+                                            padding: 30px;
+                                            text-align: center;
+                                            animation: pulse-glow 2s infinite;
+                                        ">
+                                            <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                                                🔔
                                             </div>
-                                            <div style="flex: 1;">
-                                                <h3 style="margin: 0 0 8px 0; color: #fff; font-size: 1.2rem;">🔔 상대방이 합의 희망 금액을 제안했습니다!</h3>
-                                                <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
-                                                    상대방은 기다리고 있습니다. <br>
-                                                    지금 본인의 금액을 입력하면, <strong>즉시 AI 격차 분석 결과</strong>를 확인하실 수 있습니다.
-                                                </p>
-                                            </div>
-                                            <div style="text-align: right;">
-                                                <span style="font-size: 0.8rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 20px; color: #94a3b8;">
-                                                    <i class="fas fa-lock"></i> 상대방 금액 비공개 중
-                                                </span>
+                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                                상대방이 제안을 등록했습니다!
+                                            </h3>
+                                            <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
+                                                상대방은 기다리고 있습니다.<br>
+                                                좌측에서 금액을 입력하면<br>
+                                                <strong style="color: #60a5fa;">즉시 AI 격차 분석 결과</strong>를 확인할 수 있습니다.
+                                            </p>
+                                            <div style="
+                                                background: rgba(0,0,0,0.3);
+                                                padding: 12px 20px;
+                                                border-radius: 25px;
+                                                display: inline-block;
+                                                font-size: 0.85rem;
+                                                color: #94a3b8;
+                                            ">
+                                                <i class="fas fa-lock" style="margin-right: 5px;"></i> 상대방 금액 비공개 중
                                             </div>
                                         </div>
                                     `;
-                                } else {
-                                    notifArea.style.display = 'none';
                                 }
 
-                                // 4. Restore State
                                 // 4. Restore State
                                 if (proposalCount > 0) {
                                     if (data.status === 'analyzed') {
@@ -390,8 +634,7 @@
                                             addToHistory(myAmount, '분석 완료', '#4ade80');
                                         }
                                     } else {
-                                        document.getElementById('waitingState').style.display = 'block';
-                                        document.getElementById('resultState').style.display = 'none';
+                                        showRightPanelState('waitingState');
 
                                         if (window.myLastProposalAmount) {
                                             addToHistory(window.myLastProposalAmount, '대기 중', '#888');
@@ -409,7 +652,9 @@
                                                 <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
                                                 <h3>제안이 등록되었습니다</h3>
                                                 <p style="color: var(--text-muted); margin-top: 10px;">상대방이 제안하면 분석 결과가 표시됩니다.</p>
+                                                <div id="expirationTimerDisplay"></div>
                                              `;
+                                            startExpirationTimer();
                                         }
                                     }
                                 }
@@ -549,7 +794,7 @@
 
                             // Check Midpoint Trigger
                             if (data.midpointTriggered) {
-                                alert(`✨ 10% 이내 합의 제안!\n\n양측의 제안 금액이 10% 이내로 매우 가깝습니다!\n중간 금액 ${(data.midpointAmount / 10000).toLocaleString()}만원으로 합의하시겠습니까?\n\n[확인]을 누르면 합의 제안 화면으로 이동합니다.`);
+                                alert(`✨ 10% 이내 합의 제안!\n\n양측의 제안 금액이 10% 이내로 매우 가깝습니다!\n\n공정한 '중간 금액'(비공개)으로 합의하시겠습니까?\n[확인]을 누르면 동의 화면으로 이동합니다.`);
                                 location.reload();
                                 return;
                             }
@@ -565,14 +810,13 @@
                             updateCountUI();
 
                             if (data.status === 'waiting') {
-                                document.getElementById('waitingState').style.display = 'block';
+                                showRightPanelState('waitingState');
                                 document.getElementById('waitingState').innerHTML = `
                                     <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
                                     <h3>제안이 성공적으로 등록되었습니다</h3>
                                     <p style="color: var(--text-muted); margin-top: 10px;">상대방이 제안하면 분석 결과가 표시됩니다.</p>
                                     <button class="btn btn-glass" onclick="location.reload()" style="margin-top:20px;">새로고침</button>
                                 `;
-                                document.getElementById('resultState').style.display = 'none';
                                 addToHistory(myAmount, '대기 중', '#888');
 
                             } else if (data.status === 'analyzed') {
@@ -596,8 +840,7 @@
                     }
 
                     function showAnalysisResult(gapPercent, myAmount, diff) {
-                        document.getElementById('waitingState').style.display = 'none';
-                        document.getElementById('resultState').style.display = 'block';
+                        showRightPanelState('resultState');
 
                         const gapTitle = document.getElementById('gapTitle');
                         const gapDesc = document.getElementById('gapDesc');
@@ -728,6 +971,166 @@
                             console.error(e);
                             alert("오류 발생");
                         }
+                    }
+
+                    // Expiration Timer (NEW)
+                    let proposalExpiration = null;
+                    let timerInterval = null;
+
+                    function startExpirationTimer() {
+                        const timerEl = document.getElementById('expirationTimerDisplay');
+
+                        // Clear existing timer
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                        }
+
+                        // Exit if element doesn't exist or no expiration date
+                        if (!timerEl || !proposalExpiration) return;
+
+                        function update() {
+                            const now = new Date().getTime();
+                            const expireTime = new Date(proposalExpiration).getTime();
+                            const diff = expireTime - now;
+
+                            if (diff < 0) {
+                                clearInterval(timerInterval);
+                                timerEl.innerHTML = `
+                                    <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid #ef4444; margin-top: 20px;">
+                                        <div style="color: #ef4444; font-weight: bold; margin-bottom: 5px;">⚠️ 제안 유효 시간이 만료되었습니다.</div>
+                                        <div style="font-size: 0.85rem; color: #fca5a5;">상대방이 시간 내에 응답하지 않아<br>이 라운드는 종료되었습니다.</div>
+                                        <button class="btn btn-sm" onclick="location.reload()" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">
+                                            상태 업데이트
+                                        </button>
+                                    </div>
+                                `;
+                                return;
+                            }
+
+                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                            // Style based on remaining time
+                            let timeColor = '#4ade80'; // Default Green
+                            let containerStyle = 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);';
+                            let icon = '';
+
+                            if (diff < 1000 * 60 * 10) { // < 10 mins
+                                timeColor = '#ef4444';
+                                containerStyle = 'background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); animation: pulse-border 2s infinite;';
+                                icon = '⚠️ ';
+                            } else if (diff < 1000 * 60 * 60) { // < 1 hour
+                                timeColor = '#f59e0b';
+                                containerStyle = 'background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.5);';
+                            }
+
+                            timerEl.innerHTML = `
+                                <div style="${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;">
+                                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">${icon}제안 유효 시간</div>
+                                    <div style="font-size: 1.8rem; font-weight: bold; color: ${timeColor}; font-family: monospace; letter-spacing: 2px; line-height: 1;">
+                                        ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 8px;">
+                                        ${new Date(expireTime).toLocaleDateString()} ${new Date(expireTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 만료
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        update();
+                        timerInterval = setInterval(update, 1000);
+                    }
+
+                    function showRoundCompletionUI() {
+                        showRightPanelState('resultState');
+
+                        const resultState = document.getElementById('resultState');
+
+                        // Build previous rounds history HTML
+                        let historyHTML = '';
+                        if (previousRounds.length > 0) {
+                            historyHTML = `
+                                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                                    <h4 style="margin-bottom: 15px; color: #cbd5e1; font-size: 0.95rem;">이전 라운드 결과</h4>
+                                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                                        ${previousRounds.map(r => {
+                                if (r.completed) {
+                                    return `
+                                                    <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 0.85rem;">
+                                                        <div style="color: #94a3b8; margin-bottom: 5px;">라운드 ${r.round}</div>
+                                                        <div style="color: #fff;">차이: ${r.diff.toLocaleString()}원</div>
+                                                    </div>
+                                                `;
+                                } else {
+                                    return `
+                                                    <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; font-size: 0.85rem; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                                        <div style="color: #fca5a5;">라운드 ${r.round}: 시간 만료</div>
+                                                    </div>
+                                                `;
+                                }
+                            }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        resultState.innerHTML = `
+                            <div style="width: 100%;">
+                                <div style="background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1)); border: 2px solid #4ade80; border-radius: 16px; padding: 25px; margin-bottom: 20px;">
+                                    <div style="font-size: 2.5rem; margin-bottom: 15px;">✅</div>
+                                    <h3 style="color: #fff; margin-bottom: 10px; font-size: 1.3rem;">라운드 ${currentRound} 완료!</h3>
+                                    <p style="color: #cbd5e1; font-size: 0.9rem;">양측의 제안이 모두 등록되었습니다.</p>
+                                </div>
+                                
+                                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                    <h4 style="margin-bottom: 15px; color: #fff;">라운드 ${currentRound} 분석 결과</h4>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                        <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                                            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">가해자 제안</div>
+                                            <div style="font-size: 1.1rem; font-weight: bold; color: #60a5fa;">${currentRoundData.offenderAmount.toLocaleString()}원</div>
+                                        </div>
+                                        <div style="background: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);">
+                                            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">피해자 제안</div>
+                                            <div style="font-size: 1.1rem; font-weight: bold; color: #c084fc;">${currentRoundData.victimAmount.toLocaleString()}원</div>
+                                        </div>
+                                    </div>
+                                    <div style="background: rgba(251, 191, 36, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3); text-align: center;">
+                                        <div style="font-size: 0.85rem; color: #fbbf24; margin-bottom: 5px;">금액 차이</div>
+                                        <div style="font-size: 1.3rem; font-weight: bold; color: #fbbf24;">${currentRoundData.diff.toLocaleString()}원</div>
+                                    </div>
+                                </div>
+                                
+                                ${historyHTML}
+                                
+                                <button class="btn btn-primary" onclick="startNextRound()" style="width: 100%; padding: 15px; font-size: 1rem; margin-top: 20px;">
+                                    <i class="fas fa-arrow-right" style="margin-right: 8px;"></i>
+                                    다음 라운드 시작 (라운드 ${currentRound + 1})
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    // NEW: Start Next Round
+                    function startNextRound() {
+                        // Reset round completion flag
+                        roundCompleted = false;
+
+                        // Show waiting state for next round
+                        showRightPanelState('waitingState');
+                        document.getElementById('waitingState').innerHTML = `
+                            <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <h3 style="color: var(--text-muted);">라운드 ${currentRound + 1} 시작</h3>
+                            <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">
+                                좌측에서 새로운 제안을 등록해주세요.
+                            </p>
+                        `;
+
+                        // Scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
 
                     function resetForNewProposal() {

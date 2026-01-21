@@ -56,8 +56,13 @@ const Proposal = sequelize.define('Proposal', {
     caseId: { type: DataTypes.INTEGER, allowNull: false },
     proposerId: { type: DataTypes.INTEGER, allowNull: false },
     amount: { type: DataTypes.INTEGER, allowNull: false },
+    round: { type: DataTypes.INTEGER, defaultValue: 1 }, // Round number for matching proposals
+    position: { type: DataTypes.STRING }, // 'payer' or 'receiver'
     message: { type: DataTypes.TEXT },
-    duration: { type: DataTypes.INTEGER } // 1, 3, 7 days
+    duration: { type: DataTypes.INTEGER }, // 1, 3, 7 days
+    expiresAt: { type: DataTypes.DATE }, // Calculated expiration time
+    resultViewed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Whether user viewed the analysis result
+    viewedAt: { type: DataTypes.DATE } // When the result was viewed
 });
 
 const Message = sequelize.define('Message', {
@@ -96,7 +101,8 @@ app.get('/api/case/proposal', async (req, res) => {
             where: {
                 caseId,
                 proposerId: { [Sequelize.Op.ne]: userId } // Not me
-            }
+            },
+            order: [['createdAt', 'DESC']]
         });
 
         // Check Case Extension Status
@@ -116,25 +122,88 @@ app.get('/api/case/proposal', async (req, res) => {
             }
         }
 
-        // Check Gap Analysis
+        // Calculate current round
+        const myRound = myProposals.length > 0 ? myProposals[0].round : 0;
+        const oppRound = opponentProposals.length > 0 ? opponentProposals[0].round : 0;
+        const currentRound = Math.max(myRound, oppRound);
+
+        // Check Gap Analysis for CURRENT round
         const allProposals = await Proposal.findAll({
             where: { caseId },
-            limit: 20,
             order: [['createdAt', 'DESC']]
         });
 
         let gapStatus = 'waiting';
         let gapData = {};
+        let currentRoundData = null;
+        let roundStatus = 'waiting'; // 'waiting', 'proposing', 'ready', 'completed'
 
-        const pOffender = allProposals.find(p => p.proposerId == c.offenderId);
-        const pVictim = allProposals.find(p => p.proposerId == c.victimId);
+        // Find proposals for current round
+        const pOffenderCurrent = allProposals.find(p =>
+            p.proposerId == c.offenderId && p.round == currentRound
+        );
+        const pVictimCurrent = allProposals.find(p =>
+            p.proposerId == c.victimId && p.round == currentRound
+        );
 
-        if (pOffender && pVictim) {
-            const amt1 = pOffender.amount;
-            const amt2 = pVictim.amount;
+        // Determine my proposal and opponent's proposal
+        const myProposal = allProposals.find(p =>
+            p.proposerId == myUid && p.round == currentRound
+        );
+        const oppProposal = allProposals.find(p =>
+            p.proposerId != myUid && p.round == currentRound
+        );
+
+        if (pOffenderCurrent && pVictimCurrent) {
+            const amt1 = pOffenderCurrent.amount;
+            const amt2 = pVictimCurrent.amount;
             const diff = Math.abs(amt1 - amt2);
-            gapStatus = 'analyzed';
-            gapData = { diff };
+
+            // Check if both viewed results
+            const bothViewed = pOffenderCurrent.resultViewed && pVictimCurrent.resultViewed;
+
+            if (bothViewed) {
+                gapStatus = 'analyzed';
+                roundStatus = 'completed';
+            } else {
+                gapStatus = 'ready'; // Both proposed, waiting for view
+                roundStatus = 'ready';
+            }
+
+            gapData = { diff, round: currentRound };
+            currentRoundData = {
+                round: currentRound,
+                offenderAmount: amt1,
+                victimAmount: amt2,
+                diff: diff,
+                completed: true,
+                bothViewed: bothViewed
+            };
+        } else if (pOffenderCurrent || pVictimCurrent) {
+            roundStatus = 'proposing'; // One side proposed
+        }
+
+        // Get previous rounds history
+        const previousRounds = [];
+        for (let r = 1; r < currentRound; r++) {
+            const pOff = allProposals.find(p => p.proposerId == c.offenderId && p.round == r);
+            const pVic = allProposals.find(p => p.proposerId == c.victimId && p.round == r);
+
+            if (pOff && pVic) {
+                previousRounds.push({
+                    round: r,
+                    offenderAmount: pOff.amount,
+                    victimAmount: pVic.amount,
+                    diff: Math.abs(pOff.amount - pVic.amount),
+                    completed: true
+                });
+            } else {
+                previousRounds.push({
+                    round: r,
+                    completed: false,
+                    expired: true // Timeout assumed
+                });
+            }
         }
 
         res.json({
@@ -143,11 +212,19 @@ app.get('/api/case/proposal', async (req, res) => {
             myLastProposal: myProposals.length > 0 ? myProposals[0] : null,
             opponentProposalCount: opponentProposals.length,
             hasOpponentProposed: opponentProposals.length > 0,
+            currentRound: currentRound,
+            myRound: myRound,
+            oppRound: oppRound,
+            roundStatus: roundStatus, // NEW: 'waiting', 'proposing', 'ready', 'completed'
+            myResultViewed: myProposal?.resultViewed || false, // NEW
+            oppResultViewed: oppProposal?.resultViewed || false, // NEW
             isExtended,
             iAgreed,
             oppAgreed,
             status: gapStatus,
-            data: gapData
+            data: gapData,
+            currentRoundData: currentRoundData,
+            previousRounds: previousRounds
         });
     } catch (e) {
         console.error(e);
@@ -157,7 +234,7 @@ app.get('/api/case/proposal', async (req, res) => {
 
 // Submit Proposal
 app.post('/api/case/proposal', async (req, res) => {
-    let { userId, caseId, amount, duration } = req.body;
+    let { userId, caseId, amount, duration, position } = req.body;
     userId = parseInt(userId, 10); // Ensure Integer
 
     try {
@@ -174,11 +251,54 @@ app.post('/api/case/proposal', async (req, res) => {
             return res.json({ success: false, error: `제안 횟수(${limit}회)를 모두 소진했습니다.` });
         }
 
+        // Calculate current round for this user
+        const myProposals = await Proposal.findAll({
+            where: { caseId, proposerId: userId },
+            order: [['createdAt', 'DESC']]
+        });
+        const currentRound = myProposals.length > 0 ? myProposals[0].round + 1 : 1;
+
+        // --- CONVERGENCE PRINCIPLE CHECK ---
+        const myPrevProposals = await Proposal.findAll({
+            where: { caseId, proposerId: userId },
+            order: [['createdAt', 'DESC']],
+            limit: 1
+        });
+
+        if (myPrevProposals.length > 0) {
+            const lastAmount = myPrevProposals[0].amount;
+
+            // Check Role
+            if (userId === c.offenderId) {
+                // Offender: Should INCREASE or STAY (Cannot propose less than before)
+                if (amount < lastAmount) {
+                    return res.json({ success: false, error: `합의 수렴 원칙 위배: 이전 제안(${lastAmount.toLocaleString()}원)보다 낮은 금액을 제안할 수 없습니다.` });
+                }
+            } else if (userId === c.victimId) {
+                // Victim: Should DECREASE or STAY (Cannot propose more than before)
+                if (amount > lastAmount) {
+                    return res.json({ success: false, error: `합의 수렴 원칙 위배: 이전 제안(${lastAmount.toLocaleString()}원)보다 높은 금액을 제안할 수 없습니다.` });
+                }
+            }
+        }
+        // -----------------------------------
+
+        // Calculate expiration time
+        const expiresAt = new Date();
+        if (duration === 0.25) {
+            expiresAt.setHours(expiresAt.getHours() + 6);
+        } else {
+            expiresAt.setDate(expiresAt.getDate() + duration);
+        }
+
         await Proposal.create({
             caseId,
             proposerId: userId,
             amount,
-            duration
+            round: currentRound,
+            position: position || 'payer',
+            duration,
+            expiresAt
         });
 
         // Update case status to negotiating if not already
@@ -187,10 +307,9 @@ app.post('/api/case/proposal', async (req, res) => {
             await c.save();
         }
 
-        // --- GAP ANALYSIS (Regression Fix) ---
+        // --- GAP ANALYSIS (Round-Based) ---
         const proposals = await Proposal.findAll({
             where: { caseId },
-            limit: 20, // Increased limit to ensure we find latest from both
             order: [['createdAt', 'DESC']]
         });
 
@@ -199,9 +318,9 @@ app.post('/api/case/proposal', async (req, res) => {
         let midpointTriggered = false;
         let midpointAmount = 0;
 
-        // Use loose equality or explicit cast to ensure matching works regardless of type quirks
-        const pOffender = proposals.find(p => p.proposerId == c.offenderId);
-        const pVictim = proposals.find(p => p.proposerId == c.victimId);
+        // Find proposals for CURRENT round only
+        const pOffender = proposals.find(p => p.proposerId == c.offenderId && p.round == currentRound);
+        const pVictim = proposals.find(p => p.proposerId == c.victimId && p.round == currentRound);
 
         if (pOffender && pVictim) {
             const amt1 = pOffender.amount;
@@ -209,7 +328,7 @@ app.post('/api/case/proposal', async (req, res) => {
             const diff = Math.abs(amt1 - amt2);
 
             gapStatus = 'analyzed';
-            gapData = { diff };
+            gapData = { diff, round: currentRound };
 
             const maxVal = Math.max(amt1, amt2);
             if (diff <= (maxVal * 0.1)) {
@@ -226,9 +345,73 @@ app.post('/api/case/proposal', async (req, res) => {
             leftCount: limit - count - 1,
             status: gapStatus,
             data: gapData,
+            currentRound: currentRound,
             midpointTriggered,
-            midpointAmount,
-            myLastProposal: { amount, position: null }
+            midpointAmount: null, // BLIND LOGIC: Don't show amount until agreed
+            myLastProposal: { amount, position, round: currentRound }
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// View Analysis Result (NEW - Phase 1)
+app.post('/api/case/proposal/view-result', async (req, res) => {
+    const { userId, caseId, round } = req.body;
+
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        const uid = parseInt(userId);
+
+        // Find my proposal for this round
+        const myProposal = await Proposal.findOne({
+            where: { caseId, proposerId: uid, round }
+        });
+
+        if (!myProposal) {
+            return res.json({ success: false, error: 'Proposal not found' });
+        }
+
+        // Mark as viewed
+        myProposal.resultViewed = true;
+        myProposal.viewedAt = new Date();
+        await myProposal.save();
+
+        // Get both proposals for this round
+        const proposals = await Proposal.findAll({
+            where: { caseId, round }
+        });
+
+        const pOffender = proposals.find(p => p.proposerId == c.offenderId);
+        const pVictim = proposals.find(p => p.proposerId == c.victimId);
+
+        if (!pOffender || !pVictim) {
+            return res.json({ success: false, error: 'Both proposals not found' });
+        }
+
+        // Check if both viewed
+        const bothViewed = pOffender.resultViewed && pVictim.resultViewed;
+
+        // Calculate analysis
+        const diff = Math.abs(pOffender.amount - pVictim.amount);
+        const maxAmount = Math.max(pOffender.amount, pVictim.amount);
+        const diffPercent = (diff / maxAmount * 100).toFixed(2);
+
+        res.json({
+            success: true,
+            bothViewed,
+            analysis: {
+                round,
+                offenderAmount: pOffender.amount,
+                victimAmount: pVictim.amount,
+                diff,
+                diffPercent,
+                myAmount: myProposal.amount,
+                oppAmount: uid == c.offenderId ? pVictim.amount : pOffender.amount
+            }
         });
     } catch (e) {
         console.error(e);
@@ -328,7 +511,7 @@ app.get('/api/case/proposal/midpoint-status', async (req, res) => {
         res.json({
             success: true,
             midpointProposed: c.midpointProposed,
-            midpointAmount: c.midpointAmount,
+            midpointAmount: bothAgreed ? c.midpointAmount : null, // BLIND LOGIC: Hide until agreement
             iAgreed,
             oppAgreed,
             bothAgreed
