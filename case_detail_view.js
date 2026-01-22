@@ -472,7 +472,8 @@ window.getApologyHTML = function () {
                         </div>
                     </div>
 
-                    <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8; white-space: pre-wrap; border: 1px solid rgba(255,255,255,0.05);">${apologyContent}</div>
+                    <!-- Text Fallback: Hidden by default, shown only if image fails to load -->
+                    <div id="apologyTextFallback" style="display: none; background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; margin-bottom: 20px; line-height: 1.8; white-space: pre-wrap; border: 1px solid rgba(255,255,255,0.05);">${apologyContent}</div>
                     
                     <div style="display: flex; justify-content: flex-end;">
                         <span style="font-size: 0.85rem; color: var(--text-muted);">${apologyDate} 수신됨</span>

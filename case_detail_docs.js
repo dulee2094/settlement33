@@ -204,19 +204,36 @@ window.loadApologyImage = async function () {
     const imgEl = document.getElementById('apologyImage');
     const container = document.getElementById('apologyImageContainer');
     const downloadBtn = document.getElementById('apologyDownloadBtn');
+    const fallbackText = document.getElementById('apologyTextFallback');
 
-    if (!caseId || !imgEl) return;
+    // Helper to show fallback text
+    const showFallback = () => {
+        if (container) container.style.display = 'none';
+        if (fallbackText) fallbackText.style.display = 'block';
+    };
+
+    if (!caseId || !imgEl) {
+        showFallback();
+        return;
+    }
 
     try {
         const listRes = await fetch('/api/case/' + caseId + '/documents');
         const listData = await listRes.json();
 
-        if (!listData.success || !listData.documents) return;
+        if (!listData.success || !listData.documents) {
+            showFallback();
+            return;
+        }
 
         const apologyDocs = listData.documents.filter(d => d.category === 'apology');
-        if (apologyDocs.length === 0) return;
+        if (apologyDocs.length === 0) {
+            showFallback();
+            return;
+        }
 
-        const latestDocId = apologyDocs[0].id;
+        // Get the latest one
+        const latestDocId = apologyDocs[apologyDocs.length - 1].id;
 
         const fileRes = await fetch('/api/document/' + latestDocId);
         const fileJson = await fileRes.json();
@@ -226,8 +243,14 @@ window.loadApologyImage = async function () {
             container.style.display = 'block';
             downloadBtn.href = fileJson.fileData;
             downloadBtn.download = fileJson.fileName;
+
+            // Ensure fallback is hidden if image loads successfully
+            if (fallbackText) fallbackText.style.display = 'none';
+        } else {
+            showFallback();
         }
     } catch (e) {
         console.error('Failed to load apology image', e);
+        showFallback();
     }
 };
