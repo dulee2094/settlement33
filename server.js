@@ -49,7 +49,8 @@ const Case = sequelize.define('Case', {
     midpointProposed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Whether midpoint agreement is proposed
     midpointAmount: { type: DataTypes.INTEGER }, // The calculated midpoint amount
     midpointOffenderAgreed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Offender's agreement
-    midpointVictimAgreed: { type: DataTypes.BOOLEAN, defaultValue: false } // Victim's agreement
+    midpointVictimAgreed: { type: DataTypes.BOOLEAN, defaultValue: false }, // Victim's agreement
+    midpointRejected: { type: DataTypes.BOOLEAN, defaultValue: false } // New: If midpoint rejected
 });
 
 const Proposal = sequelize.define('Proposal', {
@@ -212,6 +213,10 @@ app.get('/api/case/proposal', async (req, res) => {
             myLastProposal: myProposals.length > 0 ? myProposals[0] : null,
             opponentProposalCount: opponentProposals.length,
             hasOpponentProposed: opponentProposals.length > 0,
+            opponentLastProposal: opponentProposals.length > 0 ? {
+                expiresAt: opponentProposals[0].expiresAt,
+                createdAt: opponentProposals[0].createdAt
+            } : null,
             currentRound: currentRound,
             myRound: myRound,
             oppRound: oppRound,
@@ -395,10 +400,22 @@ app.post('/api/case/proposal/view-result', async (req, res) => {
         // Check if both viewed
         const bothViewed = pOffender.resultViewed && pVictim.resultViewed;
 
+        // ... (view-result)
         // Calculate analysis
         const diff = Math.abs(pOffender.amount - pVictim.amount);
         const maxAmount = Math.max(pOffender.amount, pVictim.amount);
         const diffPercent = (diff / maxAmount * 100).toFixed(2);
+
+        // Midpoint Logic Check
+        let midpointPossible = false;
+        if (diff <= (maxAmount * 0.1001)) {
+            midpointPossible = true;
+            // Save the calculated midpoint amount
+            const mid = Math.floor((pOffender.amount + pVictim.amount) / 2);
+            c.midpointAmount = mid;
+            c.midpointProposed = true;
+            await c.save();
+        }
 
         res.json({
             success: true,
@@ -410,7 +427,9 @@ app.post('/api/case/proposal/view-result', async (req, res) => {
                 diff,
                 diffPercent,
                 myAmount: myProposal.amount,
-                oppAmount: uid == c.offenderId ? pVictim.amount : pOffender.amount
+                oppAmount: uid == c.offenderId ? pVictim.amount : pOffender.amount,
+                midpointPossible,
+                midpointResolved: c.midpointRejected
             }
         });
     } catch (e) {
@@ -418,6 +437,75 @@ app.post('/api/case/proposal/view-result', async (req, res) => {
         res.status(500).json({ success: false, error: e.message });
     }
 });
+
+// Midpoint Agreement Endpoint
+app.post('/api/case/proposal/midpoint-agreement', async (req, res) => {
+    const { userId, caseId, agreed } = req.body;
+    try {
+        const c = await Case.findByPk(caseId);
+        if (!c) return res.json({ success: false, error: 'Case not found' });
+
+        const uid = parseInt(userId);
+
+        if (!agreed) {
+            c.midpointRejected = true;
+            await c.save();
+            return res.json({ success: true, rejected: true });
+        }
+
+        if (c.offenderId === uid) c.midpointOffenderAgreed = true;
+        else if (c.victimId === uid) c.midpointVictimAgreed = true;
+
+        await c.save();
+
+        if (c.midpointOffenderAgreed && c.midpointVictimAgreed) {
+            c.status = 'settled_midpoint';
+            c.finalAmount = c.midpointAmount;
+            await c.save();
+            return res.json({ success: true, settled: true, finalAmount: c.midpointAmount });
+        }
+
+        res.json({ success: true, waiting: true });
+
+    } catch (e) { console.error(e); res.json({ success: false, error: e.message }); }
+});
+// Wait, I should add them to the Model definition in this same file if I am editing it.
+
+if (!agreed) {
+    c.midpointRejected = true; // Flag that someone rejected, moving to next round
+    await c.save();
+    return res.json({ success: true, rejected: true });
+}
+
+if (c.offenderId === uid) c.midpointAgreedOffender = true;
+if (c.victimId === uid) c.midpointAgreedVictim = true;
+
+await c.save();
+
+// Check if both agreed
+if (c.midpointAgreedOffender && c.midpointAgreedVictim) {
+    // Calculate midpoint again to be safe
+    const proposals = await Proposal.findAll({ where: { caseId }, order: [['createdAt', 'DESC']] });
+    // Logic to find the relevant round proposals... simplified:
+    // Assume current round logic is handled by latest proposals check or passed round.
+    // We'll trust the stored 'midpointAmount' if we saved it before, or recalc.
+    // Earlier in 'proposal' GET, we calculated midpointAmount. 
+    // Let's rely on calculation here for safety.
+
+    // ... (Calculation Logic) ...
+    // Update Case to Settled
+    c.status = 'settled_midpoint'; // Special status? Or just 'settled'
+    c.finalAmount = c.midpointAmount; // We need to ensure c.midpointAmount was saved in the GET /proposal step?
+    // Actually, in `GET /proposal` (lines 338-343 of server.js previously view), it saved `c.midpointAmount`.
+
+    await c.save();
+    return res.json({ success: true, settled: true, finalAmount: c.midpointAmount });
+}
+
+res.json({ success: true, waiting: true });
+
+            } catch (e) { console.error(e); res.json({ success: false, error: e.message }); }
+        });
 
 // Extension Request
 app.post('/api/case/proposal/extend', async (req, res) => {

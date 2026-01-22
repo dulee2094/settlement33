@@ -262,8 +262,68 @@
                         <!-- Dynamic content will be inserted here -->
                     </div>
 
-                    <!-- Priority 4: Analysis Result State -->
+                    <!-- Priority 4.2: Midpoint Agreement (Blind Consent) -->
+                    <div id="midpointAgreementState"
+                        style="display: none; width: 100%; animation: fade-in 0.5s ease-out;">
+                        <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                            ⚖️
+                        </div>
+                        <h3 style="color: #fff; margin-bottom: 15px;">합의 가능 구간(10%) 진입!</h3>
+                        <div
+                            style="background: rgba(251, 191, 36, 0.1); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                            <p style="color: #fca5a5; font-weight: bold; margin-bottom: 10px;">
+                                <i class="fas fa-lock"></i> 금액 비공개
+                            </p>
+                            <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
+                                양측의 제안 차이가 <strong>10% 이내</strong>로 좁혀졌습니다.<br>
+                                두 금액의 <strong>[정확한 중간값]</strong>으로<br>
+                                합의금을 확정하시겠습니까?
+                            </p>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="btnRejectMidpoint" class="btn btn-glass"
+                                style="flex: 1; border: 1px solid rgba(255,100,100,0.3); color: #fca5a5;">
+                                아니오<br><span style="font-size: 0.8rem;">협상 계속</span>
+                            </button>
+                            <button id="btnAgreeMidpoint" class="btn btn-primary"
+                                style="flex: 1.5; background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
+                                네, 동의합니다<br><span style="font-size: 0.8rem;">즉시 타결</span>
+                            </button>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 0.8rem; color: #64748b;">
+                            * 양측 모두 동의 시 합의가 성립되며 금액이 공개됩니다.
+                        </p>
+                    </div>
+
+                    <!-- Priority 4.5: Analysis Confirmation (Two-Step Verification) -->
+                    <div id="analysisReadyState" style="display: none; width: 100%; animation: fade-in 0.5s ease-out;">
+                        <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
+                            🎉
+                        </div>
+                        <h3 style="color: #fff; margin-bottom: 15px;">1라운드 분석 완료!</h3>
+                        <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 30px;">
+                            양측의 제안이 모두 등록되어<br>
+                            AI 격차 분석이 완료되었습니다.<br>
+                            결과를 확인하시겠습니까?
+                        </p>
+                        <button class="btn btn-primary" onclick="viewAnalysisResult()"
+                            style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 50px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                            <i class="fas fa-search-dollar" style="margin-right: 10px;"></i> 분석 결과 확인하기
+                        </button>
+                        <p style="margin-top: 15px; font-size: 0.8rem; color: #64748b;">
+                            * 결과를 확인하면 1라운드가 종료됩니다.
+                        </p>
+                    </div>
+
+                    <!-- Priority 5: Result Analysis State (Graph) -->
                     <div id="resultState" style="display: none; width: 100%; animation: fade-in 0.5s ease-out;">
+                        <!-- Round End Badge -->
+                        <div
+                            style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                            🛑 1라운드 종료
+                        </div>
+
                         <div id="gapTitle"
                             style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: #fff;"></div>
                         <div id="gapDesc" style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.95rem;">
@@ -298,9 +358,15 @@
                             현재 격차를 줄이기 위해서는 상대방의 입장을 고려한 조금 더 유연한 제안이 필요할 수 있습니다. <br>
                             만약 격차가 10% 이내라면, <strong>중간 지점</strong>에서의 합의를 강력히 권장합니다.
                         </div>
+
+                        <!-- Proceed to Next Round Button -->
+                        <button class="btn btn-glass" onclick="location.reload()"
+                            style="width: 100%; margin-top: 20px; padding: 12px; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.2);">
+                            <i class="fas fa-redo" style="margin-right: 8px;"></i> 2라운드 제안하러 가기
+                        </button>
                     </div>
 
-                    <!-- Priority 5: Default Waiting State -->
+                    <!-- Priority 6: Default Waiting State -->
                     <div id="waitingState" style="display: block; animation: fade-in 0.5s ease-out;">
                         <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.3;">
                             <i class="fas fa-hourglass-half"></i>
@@ -437,6 +503,12 @@
                                 // Priority 3: Opponent Proposed (Standard Blind Alert)
                                 if (data.hasOpponentProposed && proposalCount === 0) {
                                     showRightPanelState('opponentProposedNotification');
+                                    let expDateStr = "정보 없음";
+                                    if (data.opponentLastProposal && data.opponentLastProposal.expiresAt) {
+                                        const d = new Date(data.opponentLastProposal.expiresAt);
+                                        expDateStr = d.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                                    }
+
                                     document.getElementById('opponentProposedNotification').innerHTML = `
                                         <div style="
                                             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
@@ -449,9 +521,12 @@
                                             <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
                                                 🔔
                                             </div>
-                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                            <h3 style="color: #fff; margin-bottom: 10px; font-size: 1.3rem;">
                                                 상대방이 제안을 등록했습니다!
                                             </h3>
+                                            <div style="margin-bottom: 20px; font-size: 0.9rem; color: #fbbf24; font-weight: 600; background: rgba(251, 191, 36, 0.1); display: inline-block; padding: 5px 12px; border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                                                <i class="fas fa-clock" style="margin-right: 5px;"></i> 유효기간: ${expDateStr} 까지
+                                            </div>
                                             <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
                                                 상대방은 기다리고 있습니다.<br>
                                                 좌측에서 금액을 입력하면<br>
@@ -589,6 +664,12 @@
                                 // Priority 3: Opponent Proposed (Standard Blind Alert)
                                 else if (data.hasOpponentProposed && proposalCount === 0) {
                                     showRightPanelState('opponentProposedNotification');
+                                    let expDateStr = "정보 없음";
+                                    if (data.opponentLastProposal && data.opponentLastProposal.expiresAt) {
+                                        const d = new Date(data.opponentLastProposal.expiresAt);
+                                        expDateStr = d.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                                    }
+
                                     document.getElementById('opponentProposedNotification').innerHTML = `
                                         <div style="
                                             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));
@@ -601,9 +682,12 @@
                                             <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
                                                 🔔
                                             </div>
-                                            <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">
+                                            <h3 style="color: #fff; margin-bottom: 10px; font-size: 1.3rem;">
                                                 상대방이 제안을 등록했습니다!
                                             </h3>
+                                            <div style="margin-bottom: 20px; font-size: 0.9rem; color: #fbbf24; font-weight: 600; background: rgba(251, 191, 36, 0.1); display: inline-block; padding: 5px 12px; border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                                                <i class="fas fa-clock" style="margin-right: 5px;"></i> 유효기간: ${expDateStr} 까지
+                                            </div>
                                             <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem;">
                                                 상대방은 기다리고 있습니다.<br>
                                                 좌측에서 금액을 입력하면<br>
@@ -625,35 +709,69 @@
 
                                 // 4. Restore State
                                 if (proposalCount > 0) {
-                                    if (data.status === 'analyzed') {
-                                        const diff = data.data.diff;
-                                        const myAmount = window.myLastProposalAmount;
-                                        if (myAmount) {
-                                            const gapPercent = (diff / myAmount) * 100;
+                                    // Status Logic:
+                                    // 1. If I viewed the result -> Show Result (Graph)
+                                    // 2. If valid proposal pair exists but I haven't viewed -> Show Confirmation (Ready)
+                                    // 3. Else -> Waiting
+
+                                    if (data.myResultViewed) {
+                                        // Show Result
+                                        showRightPanelState('resultState');
+                                        if (data.currentRoundData) {
+                                            const d = data.currentRoundData;
+                                            // If currentRoundData exists for THIS round
+                                            const diff = d.diff;
+                                            // We need my amount from history or current data
+                                            const myAmount = window.myLastProposalAmount;
+                                            const gapPercent = (diff / Math.max(d.offenderAmount, d.victimAmount)) * 100;
+
                                             showAnalysisResult(gapPercent, myAmount, diff);
-                                            addToHistory(myAmount, '분석 완료', '#4ade80');
                                         }
+                                        // If not in currentRoundData (e.g. moved to next round?), use history? 
+                                        // For simplicity, we trust currentRoundData returns the *latest relevant* data from API.
+
+                                    } else if (data.roundStatus === 'ready') {
+                                        // Both proposed, neither (or just me) hasn't viewed
+                                        showRightPanelState('analysisReadyState');
+
                                     } else {
-                                        showRightPanelState('waitingState');
-
-                                        if (window.myLastProposalAmount) {
-                                            addToHistory(window.myLastProposalAmount, '대기 중', '#888');
-                                        }
-
+                                        // Waiting for opponent or analyzed failed
+                                        // Standard Waiting Logic
                                         if (data.hasOpponentProposed) {
-                                            // If analyzed failed but opponent proposed (should be rare now)
-                                            document.getElementById('waitingState').innerHTML = `
-                                                <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
-                                                <h3>제안이 등록되었습니다</h3>
-                                                <p style="color: var(--text-muted); margin-top: 10px;">결과를 불러오는 중입니다...</p>
-                                             `;
+                                            if (data.myResultViewed) {
+                                                // Should be covered by block #1, but fallback
+                                                showRightPanelState('resultState');
+                                            } else {
+                                                // I proposed, Opponent proposed, but server didn't say 'ready'?
+                                                // This implies round mismatch or something. 
+                                                // But usually means 'waiting' if 'ready' logic in server is consistent.
+                                                // If I haven't viewed, but opp proposed, server sends 'ready'.
+                                                // If I viewed, server sends 'completed' or 'analyzed'.
+
+                                                // Fallback: If hasOpponentProposed but not 'ready/analyzed', 
+                                                // it means opponent proposed in DIFFERENT round? 
+                                                // Or server logic is strictly 'ready' instantly.
+                                                // Let's assume 'ready' covers it.
+
+                                                // Display waiting just in case
+                                                showRightPanelState('waitingState');
+                                                document.getElementById('waitingState').innerHTML = `
+                                                    <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
+                                                    <h3>제안 등록 완료</h3>
+                                                    <p style="color: var(--text-muted); margin-top: 10px;">상대방의 제안을 기다리는 중입니다...</p>
+                                                    <div id="expirationTimerDisplay"></div>
+                                                `;
+                                                startExpirationTimer();
+                                            }
                                         } else {
+                                            // I proposed, Opponent hasn't
+                                            showRightPanelState('waitingState');
                                             document.getElementById('waitingState').innerHTML = `
                                                 <div style="font-size: 4rem; color: #4ade80; margin-bottom: 20px;"><i class="fas fa-check-circle"></i></div>
-                                                <h3>제안이 등록되었습니다</h3>
+                                                <h3>제안 등록 완료</h3>
                                                 <p style="color: var(--text-muted); margin-top: 10px;">상대방이 제안하면 분석 결과가 표시됩니다.</p>
                                                 <div id="expirationTimerDisplay"></div>
-                                             `;
+                                            `;
                                             startExpirationTimer();
                                         }
                                     }
@@ -721,6 +839,106 @@
 
 
 
+                    window.viewAnalysisResult = async () => {
+                        const caseId = localStorage.getItem('current_case_id');
+                        const userId = localStorage.getItem('user_id');
+
+                        // Current round state comes from global `currentRound`
+                        // But be careful, if opponent hasn't viewed, server says 'ready' but we want to confirm 'view'.
+
+                        try {
+                            const btn = document.querySelector('#analysisReadyState button');
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 확인 중...';
+                            btn.disabled = true;
+
+                            const res = await fetch('/api/case/proposal/view-result', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId, caseId, round: currentRound })
+                            });
+                            const data = await res.json();
+
+                            if (data.success) {
+                                // Update Local UI immediately
+                                showRightPanelState('resultState');
+
+                                const analysis = data.analysis;
+                                const diff = analysis.diff;
+                                const myAmt = analysis.myAmount;
+                                const gapPercent = analysis.diffPercent;
+
+                                showAnalysisResult(gapPercent, myAmt, diff);
+                                addToHistory(myAmt, `R${currentRound} 완료`, '#4ade80', currentRound); // Helper needs update to accept round/color
+
+                                // Reset round state logic locally to avoid flashing
+                                roundStatus = 'completed';
+                                myResultViewed = true;
+
+                            } else {
+                                alert('오류: ' + data.error);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('통신 오류가 발생했습니다.');
+                        }
+                    };
+
+                    window.handleNextRoundAction = async () => {
+                        // Check if we are at the limit (Round 5 or 8)
+                        // Note: currentRound is updated from server. If we just finished Round 5, custom logic needed.
+
+                        // We need global 'isExtended' to be accurate.
+                        // Assuming maxLimit is handling it (5 or 8).
+
+                        // Case 1: Normal rounds
+                        if (currentRound < maxLimit) {
+                            location.reload();
+                            return;
+                        }
+
+                        // Case 2: Round 5 Finished, Not Extended
+                        if (currentRound === 5 && !isExtended) {
+                            if (confirm("정규 라운드(5회)가 모두 종료되었습니다.\n\n아직 합의에 이르지 못했다면, [협상 연장]을 요청하여\n3회의 추가 기회를 가질 수 있습니다.\n\n연장을 요청하시겠습니까?")) {
+                                try {
+                                    const caseId = localStorage.getItem('current_case_id');
+                                    const userId = localStorage.getItem('user_id');
+                                    const res = await fetch('/api/case/proposal/extend', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ caseId, userId })
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        if (data.isExtended) {
+                                            alert("양측 모두 동의하여 협상이 연장되었습니다! (총 8라운드)");
+                                        } else {
+                                            alert("연장 요청이 접수되었습니다.\n상대방도 동의하면 라운드가 추가됩니다.");
+                                        }
+                                        location.reload();
+                                    } else {
+                                        alert("오류: " + data.error);
+                                    }
+                                } catch (e) { console.error(e); }
+                            } else {
+                                // User rejected extension
+                                alert("협상이 최종 결렬되었습니다.");
+                                location.href = 'dashboard.html'; // Or relevant exit
+                            }
+                            return;
+                        }
+
+                        // Case 3: Round 8 Finished (Final)
+                        if (currentRound >= 8) {
+                            alert("최종 라운드(8회)까지 합의되지 않았습니다.\n협상이 결렬되었습니다.");
+                            location.href = 'dashboard.html';
+                            return;
+                        }
+
+                        // Fallback
+                        location.reload();
+                    };
+
                     window.submitProposal = async () => {
                         const rawInput = document.getElementById('myAmount').value.replace(/,/g, '');
                         if (!rawInput) return alert('희망 금액을 입력해주세요.');
@@ -776,6 +994,30 @@
                         }
 
                         console.log('Submitting proposal:', { caseId, userId, amount: myAmount });
+
+                        // --- CONVERGENCE PRINCIPLE CHECK (Frontend) ---
+                        // Check if previous proposal exists (Round 2+)
+                        if (window.myLastProposalAmount && window.myLastProposalAmount > 0) {
+                            const lastAmount = window.myLastProposalAmount;
+
+                            // 1. Offender (Payer): Cannot propose LESS than before
+                            if (currentPosition === 'payer' && myAmount < lastAmount) {
+                                alert(`⛔ [합의 수렴 원칙 알림]\n\n이전 제안(${lastAmount.toLocaleString()}원)보다 낮은 금액을 제안할 수 없습니다.\n\n합의 가능성을 높이기 위해 이전 제안보다 같거나 높은 금액을 입력해주세요.`);
+                                btn.innerHTML = originalBtnText;
+                                btn.disabled = false;
+                                return;
+                            }
+
+                            // 2. Victim (Receiver): Cannot propose MORE than before
+                            // Note: 'receiver' logic assumes user wants to receive money.
+                            if (currentPosition === 'receiver' && myAmount > lastAmount) {
+                                alert(`⛔ [합의 수렴 원칙 알림]\n\n이전 제안(${lastAmount.toLocaleString()}원)보다 높은 금액을 제안할 수 없습니다.\n\n합의 가능성을 높이기 위해 이전 제안보다 같거나 낮은 금액을 입력해주세요.`);
+                                btn.innerHTML = originalBtnText;
+                                btn.disabled = false;
+                                return;
+                            }
+                        }
+                        // -----------------------------------------------
 
                         try {
                             const res = await fetch('/api/case/proposal', {
@@ -881,16 +1123,29 @@
                         }
                     }
 
-                    function addToHistory(amount, result, color) {
+                    function addToHistory(amount, result, color, round) {
                         const now = new Date();
                         const timeString = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-                        const historyItem = { round: proposalCount, time: timeString, amount: amount, result: result, color: color };
-                        proposalHistory.unshift(historyItem);
+
+                        // Use round if provided, otherwise fallback to proposalCount
+                        // Note: proposalCount is 0-indexed in some contexts? No, it's 1-based count.
+                        // But currentRound is better.
+                        const rLabel = round ? round : (currentRound || proposalCount);
+
+                        const historyItem = { round: rLabel, time: timeString, amount: amount, result: result, color: color };
+
+                        // Check duplicate to avoid visual spam (if init called multiple times)
+                        const exists = proposalHistory.some(h => h.round == rLabel && h.amount === amount);
+                        if (!exists) {
+                            proposalHistory.unshift(historyItem);
+                        }
 
                         const tbody = document.getElementById('historyTableBody');
+                        if (!tbody) return;
+
                         tbody.innerHTML = proposalHistory.map(item => `
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                <td style="padding: 15px;">${item.round}차</td>
+                                <td style="padding: 15px;">R${item.round}</td>
                                 <td style="padding: 15px; color: var(--text-muted); font-size: 0.9rem;">${item.time}</td>
                                 <td style="padding: 15px; font-weight: bold;">${item.amount.toLocaleString()}</td>
                                 <td style="padding: 15px;">
