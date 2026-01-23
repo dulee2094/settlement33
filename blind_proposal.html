@@ -860,10 +860,22 @@
                             const data = await res.json();
 
                             if (data.success) {
+                                const analysis = data.analysis;
+                                // Priority 4.2: Midpoint Agreement Logic
+                                if (analysis.midpointPossible && !analysis.midpointResolved) {
+                                    showRightPanelState('midpointAgreementState');
+                                    const btnAgree = document.getElementById('btnAgreeMidpoint');
+                                    const btnReject = document.getElementById('btnRejectMidpoint');
+
+                                    if (btnAgree) btnAgree.onclick = () => handleMidpointDecision(true);
+                                    if (btnReject) btnReject.onclick = () => handleMidpointDecision(false);
+                                    return;
+                                }
+
                                 // Update Local UI immediately
                                 showRightPanelState('resultState');
 
-                                const analysis = data.analysis;
+
                                 const diff = analysis.diff;
                                 const myAmt = analysis.myAmount;
                                 const gapPercent = analysis.diffPercent;
@@ -881,6 +893,46 @@
                         } catch (e) {
                             console.error(e);
                             alert('통신 오류가 발생했습니다.');
+                        }
+                    };
+
+                    // Add Midpoint Decision Handler
+                    window.handleMidpointDecision = async (agreed) => {
+                        const caseId = localStorage.getItem('current_case_id');
+                        const userId = localStorage.getItem('user_id');
+
+                        try {
+                            if (agreed) {
+                                if (!confirm("정말 동의하시겠습니까?\n\n양측이 모두 동의하면 즉시 '중간값'으로 합의가 체결되며, 금액이 공개됩니다.")) return;
+                            } else {
+                                if (!confirm("거절하시겠습니까?\n\n거절 시 현재 라운드가 종료되며, 다음 라운드(또는 최종 결렬)로 진행됩니다.")) return;
+                            }
+
+                            const res = await fetch('/api/case/proposal/midpoint-agreement', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId, caseId, round: currentRound, agreed })
+                            });
+                            const result = await res.json();
+
+                            if (result.success) {
+                                if (result.settled) {
+                                    localStorage.setItem('final_agreed_amount', result.finalAmount);
+                                    localStorage.setItem('current_case_status', 'settled');
+                                    alert(`축하합니다! 합의가 성립되었습니다.\n\n최종 합의금: ${result.finalAmount.toLocaleString()}원\n\n[확인]을 누르면 합의서 작성 페이지로 이동합니다.`);
+                                    location.href = 'agreement.html';
+                                } else if (result.rejected) {
+                                    alert("중간값 합의가 거절되었습니다. 2라운드를 진행합니다.");
+                                    location.reload();
+                                } else {
+                                    alert("선택이 완료되었습니다. 상대방의 결정을 기다려주세요.");
+                                    location.reload();
+                                }
+                            } else {
+                                alert('오류: ' + result.error);
+                            }
+                        } catch (e) {
+                            console.error(e);
                         }
                     };
 

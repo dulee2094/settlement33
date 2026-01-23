@@ -469,43 +469,7 @@ app.post('/api/case/proposal/midpoint-agreement', async (req, res) => {
 
     } catch (e) { console.error(e); res.json({ success: false, error: e.message }); }
 });
-// Wait, I should add them to the Model definition in this same file if I am editing it.
 
-if (!agreed) {
-    c.midpointRejected = true; // Flag that someone rejected, moving to next round
-    await c.save();
-    return res.json({ success: true, rejected: true });
-}
-
-if (c.offenderId === uid) c.midpointAgreedOffender = true;
-if (c.victimId === uid) c.midpointAgreedVictim = true;
-
-await c.save();
-
-// Check if both agreed
-if (c.midpointAgreedOffender && c.midpointAgreedVictim) {
-    // Calculate midpoint again to be safe
-    const proposals = await Proposal.findAll({ where: { caseId }, order: [['createdAt', 'DESC']] });
-    // Logic to find the relevant round proposals... simplified:
-    // Assume current round logic is handled by latest proposals check or passed round.
-    // We'll trust the stored 'midpointAmount' if we saved it before, or recalc.
-    // Earlier in 'proposal' GET, we calculated midpointAmount. 
-    // Let's rely on calculation here for safety.
-
-    // ... (Calculation Logic) ...
-    // Update Case to Settled
-    c.status = 'settled_midpoint'; // Special status? Or just 'settled'
-    c.finalAmount = c.midpointAmount; // We need to ensure c.midpointAmount was saved in the GET /proposal step?
-    // Actually, in `GET /proposal` (lines 338-343 of server.js previously view), it saved `c.midpointAmount`.
-
-    await c.save();
-    return res.json({ success: true, settled: true, finalAmount: c.midpointAmount });
-}
-
-res.json({ success: true, waiting: true });
-
-            } catch (e) { console.error(e); res.json({ success: false, error: e.message }); }
-        });
 
 // Extension Request
 app.post('/api/case/proposal/extend', async (req, res) => {
