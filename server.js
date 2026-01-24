@@ -2,7 +2,7 @@
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-const { sequelize } = require('./models');
+const { sequelize } = require('./models/index.js');
 
 const authRoutes = require('./routes/auth');
 const caseRoutes = require('./routes/case');
