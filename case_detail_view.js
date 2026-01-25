@@ -68,20 +68,20 @@ window.getOverviewHTML = function () {
                         <span>본인 인증 완료</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="${window.getIconClass(isConnected)}" style="color: ${getColor(isConnected)}; font-size: 1.2rem; opacity: ${getOpacity(isConnected)}"></i>
-                        <span style="opacity: ${getOpacity(isConnected)}">상대방 연결</span>
+                        <i class="${window.getIconClass(isConnected)}" style="color: ${window.getColor(isConnected)}; font-size: 1.2rem; opacity: ${window.getOpacity(isConnected)}"></i>
+                        <span style="opacity: ${window.getOpacity(isConnected)}">상대방 연결</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="${window.getIconClass(isNegotiating)}" style="color: ${getColor(isNegotiating)}; font-size: 1.2rem; opacity: ${getOpacity(isNegotiating)}"></i>
-                        <span style="opacity: ${getOpacity(isNegotiating)}">합의금 협상</span>
+                        <i class="${window.getIconClass(isNegotiating)}" style="color: ${window.getColor(isNegotiating)}; font-size: 1.2rem; opacity: ${window.getOpacity(isNegotiating)}"></i>
+                        <span style="opacity: ${window.getOpacity(isNegotiating)}">합의금 협상</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="${window.getIconClass(isAgreed)}" style="color: ${getColor(isAgreed)}; font-size: 1.2rem; opacity: ${getOpacity(isAgreed)}"></i>
-                        <span style="opacity: ${getOpacity(isAgreed)}">최종 합의서 작성</span>
+                        <i class="${window.getIconClass(isAgreed)}" style="color: ${window.getColor(isAgreed)}; font-size: 1.2rem; opacity: ${window.getOpacity(isAgreed)}"></i>
+                        <span style="opacity: ${window.getOpacity(isAgreed)}">최종 합의서 작성</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="${window.getIconClass(isEscrow)}" style="color: ${getColor(isEscrow)}; font-size: 1.2rem; opacity: ${getOpacity(isEscrow)}"></i>
-                        <span style="opacity: ${getOpacity(isEscrow)}">에스크로 입금</span>
+                        <i class="${window.getIconClass(isEscrow)}" style="color: ${window.getColor(isEscrow)}; font-size: 1.2rem; opacity: ${window.getOpacity(isEscrow)}"></i>
+                        <span style="opacity: ${window.getOpacity(isEscrow)}">에스크로 입금</span>
                     </div>
                 </div>
             </div>
