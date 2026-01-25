@@ -3,3 +3,6 @@ database.sqlite
 .env
 deploy/
 .DS_Store
+*.log
+.vscode/
+.idea/
