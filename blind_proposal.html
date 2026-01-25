@@ -305,74 +305,71 @@
                 </div>
 
                 <!-- Core Logic Script -->
+                <script src="js/modules/proposal_api.js"></script>
+                <script src="js/modules/proposal_ui.js"></script>
                 <script src="js/blind_proposal.js"></script>
             </div>
         </main>
 
-        <!-- Onboarding Guide Modal -->
+        <!-- Onboarding Guide Modal (Single Page) -->
         <div id="guideModal" class="guide-modal-overlay">
-            <div class="guide-modal">
-                <button class="guide-close-btn" onclick="closeGuide()">×</button>
+            <div class="guide-modal" style="max-width: 700px; padding: 0; overflow: hidden; border-radius: 24px;">
+                <!-- Header -->
+                <div
+                    style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 2.5rem; margin-bottom: 15px;">⚖️</div>
+                    <h2 style="color: white; margin: 0; font-size: 1.5rem;">블라인드 합의 제안 규칙</h2>
+                    <p style="color: #94a3b8; margin: 10px 0 0; font-size: 0.95rem;">공정하고 안전한 합의를 위해 4가지 원칙을 꼭 확인하세요.
+                    </p>
+                </div>
 
-                <div class="guide-slides-container">
-                    <!-- Step 1: Blind Bidding -->
-                    <div class="guide-slide active" data-step="1">
-                        <div class="guide-icon">🙈</div>
-                        <h3>서로의 금액은 보이지 않습니다</h3>
-                        <p>상대방의 패를 보지 못한 채,<br>내가 생각하는 <strong>가장 합리적인 금액</strong>을 제안하세요.<br>상대방도 이 규칙에 동의하고 참여합니다.</p>
-                        <div class="guide-tag">Blind System</div>
+                <!-- 4 Rules Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: #fff;">
+
+                    <!-- Rule 1 -->
+                    <div style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🙈</div>
+                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">철저한 비공개</h4>
+                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">상대에게 내 제안 금액이<br>절대
+                            보이지 않습니다.</p>
                     </div>
 
-                    <!-- Step 2: Traffic Light -->
-                    <div class="guide-slide" data-step="2">
-                        <div class="guide-icon">🚦</div>
-                        <h3>결과는 '색상'으로만 알려드립니다</h3>
-                        <p>상대방이 제안한 금액과의 격차를<br><strong>신호등 색상</strong>으로 분석해드립니다.</p>
-                        <div class="guide-traffic-example">
-                            <span><i class="fas fa-circle" style="color:#4ade80"></i> 성사 확실</span>
-                            <span><i class="fas fa-circle" style="color:#facc15"></i> 조율 필요</span>
-                            <span><i class="fas fa-circle" style="color:#ef4444"></i> 격차 큼</span>
-                        </div>
+                    <!-- Rule 2 -->
+                    <div style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🚦</div>
+                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">색상으로 격차 확인</h4>
+                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">금액 대신 격차 수준만<br>신호등
+                            색상으로 알려줍니다.</p>
                     </div>
 
-                    <!-- Step 3: Limit & Rules -->
-                    <div class="guide-slide" data-step="3">
-                        <div class="guide-icon">⚠️</div>
-                        <h3>기회는 총 5번입니다</h3>
-                        <p>한 번 제안한 금액은 <strong>되돌릴 수 없으며</strong>,<br>이전보다 불리한 금액으로 변경할 수 없습니다.<br>신중하게 제안해주세요.</p>
-                        <div class="guide-tag">Irreversible</div>
+                    <!-- Rule 3 -->
+                    <div style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
+                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">제안 기회 5회</h4>
+                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">기회는 단 5번뿐입니다.<br>신중하게
+                            제안하세요.</p>
                     </div>
 
-                    <!-- Step 4: Settlement -->
-                    <div class="guide-slide" data-step="4">
-                        <div class="guide-icon">⚖️</div>
-                        <h3>합리적인 '중간값' 합의</h3>
-                        <p>양측의 제안 차이가 <strong>10% 이내</strong>로 좁혀지면,<br>AI가 공정한 <strong>[중간값]</strong>을 제시하여<br>즉시 타결을
-                            도와드립니다.</p>
-                        <div class="guide-tag">Auto-Settlement</div>
+                    <!-- Rule 4 -->
+                    <div style="text-align: center; padding: 15px;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🤖</div>
+                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">AI 자동 타결</h4>
+                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">격차가 10% 이내로
+                            줄어들면<br>중간값으로 즉시 합의됩니다.</p>
                     </div>
                 </div>
 
-                <!-- Navigation -->
-                <div class="guide-footer">
-                    <div class="guide-dots">
-                        <span class="dot active"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </div>
-                    <div class="guide-controls">
-                        <button class="btn-text" onclick="skipGuide()" id="skipBtn">건너뛰기</button>
-                        <button class="btn-next" onclick="nextSlide()" id="nextBtn">다음 <i
-                                class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
-
-                <!-- Do not show again -->
-                <div class="guide-noshow">
-                    <label>
-                        <input type="checkbox" id="dontShowAgain"> 다시 보지 않기
+                <!-- Footer Action -->
+                <div
+                    style="background: #f8fafc; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0;">
+                    <label
+                        style="color: #64748b; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="dontShowAgain" style="transform: scale(1.2);"> 다시 보지 않기
                     </label>
+                    <button onclick="closeGuide()"
+                        style="padding: 12px 30px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);">
+                        확인했습니다
+                    </button>
                 </div>
             </div>
         </div>

@@ -35,7 +35,36 @@ document.addEventListener('DOMContentLoaded', () => {
         window.activateMenu(savedTab);
         localStorage.removeItem('active_tab_on_load');
     } else {
-        window.loadContent('overview');
+        // Safety check: Ensure getOverviewHTML is defined
+        if (typeof window.getOverviewHTML === 'function') {
+            window.loadContent('overview');
+        } else {
+            console.error('getOverviewHTML is not defined. Retrying in 100ms...');
+            setTimeout(() => {
+                if (typeof window.getOverviewHTML === 'function') {
+                    window.loadContent('overview');
+                } else {
+                    console.error('getOverviewHTML still not defined. Please check script loading order.');
+                    // Fallback: Show error message
+                    const contentArea = document.getElementById('contentArea');
+                    if (contentArea) {
+                        contentArea.innerHTML = `
+                            <div class="glass-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 60px 20px;">
+                                <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+                                <h3 style="margin-bottom: 15px; color: #fbbf24;">페이지 로딩 오류</h3>
+                                <p style="color: var(--text-muted); margin-bottom: 30px;">
+                                    페이지를 불러오는 중 문제가 발생했습니다.<br>
+                                    페이지를 새로고침해주세요.
+                                </p>
+                                <button class="btn btn-primary" onclick="location.reload()">
+                                    <i class="fas fa-redo"></i> 새로고침
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+            }, 100);
+        }
     }
 
     // 5. Check Toast Messages
@@ -168,46 +197,68 @@ window.loadContent = function (menuName) {
     const contentArea = document.getElementById('contentArea');
     if (!contentArea) return;
 
+    // Helper function to check if function exists
+    const safeCall = (funcName, fallbackHTML) => {
+        if (typeof window[funcName] === 'function') {
+            return window[funcName]();
+        } else {
+            console.error(`${funcName} is not defined`);
+            return fallbackHTML || `
+                <div class="glass-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+                    <h3 style="margin-bottom: 15px; color: #fbbf24;">콘텐츠 로딩 오류</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 30px;">
+                        이 섹션을 불러오는 중 문제가 발생했습니다.<br>
+                        페이지를 새로고침해주세요.
+                    </p>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="fas fa-redo"></i> 새로고침
+                    </button>
+                </div>
+            `;
+        }
+    };
+
     switch (menuName) {
         case 'overview':
-            contentArea.innerHTML = window.getOverviewHTML();
+            contentArea.innerHTML = safeCall('getOverviewHTML');
             break;
         case 'proposal':
-            contentArea.innerHTML = window.getProposalHTML();
+            contentArea.innerHTML = safeCall('getProposalHTML');
             // initializeProposal is possibly from case_proposal.js if it exists, checking import order.
             if (window.initializeProposal) window.initializeProposal();
             break;
         case 'analysis':
-            contentArea.innerHTML = window.getAnalysisHTML();
+            contentArea.innerHTML = safeCall('getAnalysisHTML');
             setTimeout(() => { if (window.initializeChart) window.initializeChart(); }, 100);
             break;
         case 'chat':
-            contentArea.innerHTML = window.getChatHTML();
+            contentArea.innerHTML = safeCall('getChatHTML');
             if (window.initializeChat) window.initializeChat();
             break;
         case 'apology':
-            contentArea.innerHTML = window.getApologyHTML();
+            contentArea.innerHTML = safeCall('getApologyHTML');
             if (window.loadApologyImage) window.loadApologyImage();
             break;
         case 'agreement':
-            contentArea.innerHTML = window.getAgreementHTML();
+            contentArea.innerHTML = safeCall('getAgreementHTML');
             break;
         case 'documents':
-            contentArea.innerHTML = window.getDocumentsHTML();
+            contentArea.innerHTML = safeCall('getDocumentsHTML');
             if (window.loadDocuments) window.loadDocuments();
             break;
         case 'mediation':
-            contentArea.innerHTML = window.getMediationHTML();
+            contentArea.innerHTML = safeCall('getMediationHTML');
             break;
         case 'account':
-            contentArea.innerHTML = window.getAccountInfoHTML();
+            contentArea.innerHTML = safeCall('getAccountInfoHTML');
             setTimeout(() => {
                 if (window.initializeSignaturePad) window.initializeSignaturePad();
                 if (window.loadPaymentRequestStatus) window.loadPaymentRequestStatus();
             }, 100);
             break;
         default:
-            contentArea.innerHTML = window.getOverviewHTML();
+            contentArea.innerHTML = safeCall('getOverviewHTML');
     }
 };
 
