@@ -15,6 +15,17 @@ app.use(express.static(path.join(__dirname, '/'))); // Serve static files from r
 
 // Routes
 // Note: Adjusting paths based on your file structure conventions
+
+// Health Check Endpoint (for Render)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 try {
     const proposalRoutes = require('./routes/proposal');
     const caseRoutes = require('./routes/case');
@@ -23,8 +34,11 @@ try {
     app.use('/api/case/proposal', proposalRoutes);
     app.use('/api/case', caseRoutes);
     app.use('/api/auth', authRoutes);
+
+    console.log('✅ All API routes loaded successfully');
 } catch (error) {
-    console.warn("Some routes could not be loaded:", error.message);
+    console.warn("⚠️ Some routes could not be loaded:", error.message);
+    console.warn("Stack trace:", error.stack);
 }
 
 // Default Route
