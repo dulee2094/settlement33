@@ -39,15 +39,25 @@ async function startServer() {
     try {
         if (sequelize) {
             await sequelize.sync({ force: false });
-            console.log('Database synced successfully.');
+            console.log('✅ Database synced successfully.');
         }
     } catch (err) {
-        console.error('Database sync failed (continuing anyway):', err.message);
+        console.error('⚠️ Database sync failed (continuing anyway):', err.message);
+        console.log('Server will continue running for static file serving.');
     }
 
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-        console.log(`Test Page: http://localhost:${PORT}/blind_proposal.html`);
+    // Bind to 0.0.0.0 to accept external connections (required for Render)
+    const HOST = process.env.HOST || '0.0.0.0';
+
+    app.listen(PORT, HOST, () => {
+        console.log(`✅ Server is running on ${HOST}:${PORT}`);
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`Test Page: http://localhost:${PORT}/blind_proposal.html`);
+        }
+    }).on('error', (err) => {
+        console.error('❌ Server failed to start:', err.message);
+        process.exit(1);
     });
 }
 
