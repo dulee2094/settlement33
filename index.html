@@ -276,7 +276,7 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                constdata = await res.json();
+                const data = await res.json();
 
                 if (data.success) {
                     localStorage.setItem('user_id', data.userId);
