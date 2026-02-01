@@ -30,10 +30,12 @@ try {
     const proposalRoutes = require('./routes/proposal');
     const caseRoutes = require('./routes/case');
     const authRoutes = require('./routes/auth');
+    const notificationRoutes = require('./routes/notification'); // NEW
 
     app.use('/api/case/proposal', proposalRoutes);
     app.use('/api/case', caseRoutes);
     app.use('/api/auth', authRoutes);
+    app.use('/api/notification', notificationRoutes); // NEW
 
     console.log('✅ All API routes loaded successfully');
 } catch (error) {
