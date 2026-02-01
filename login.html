@@ -120,7 +120,7 @@
             const phoneNumber = document.getElementById('regPhone').value;
 
             try {
-                const res = await fetch(`${API_BASE}/signup`, {
+                const res = await fetch(`${API_BASE}/auth/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password, name, phoneNumber })
@@ -146,7 +146,7 @@
             const password = document.getElementById('loginPw').value;
 
             try {
-                const res = await fetch(`${API_BASE}/login`, {
+                const res = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
