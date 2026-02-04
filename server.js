@@ -16,46 +16,51 @@ app.use(express.static(path.join(__dirname, '/'))); // Serve static files from r
 // Routes
 // Note: Adjusting paths based on your file structure conventions
 
-// Track route loading status
-let routeLoadError = null;
-
-try {
-    const proposalRoutes = require('./routes/proposal');
-    const caseRoutes = require('./routes/case');
-    const authRoutes = require('./routes/auth');
-    const notificationRoutes = require('./routes/notification'); // NEW
-    const roomRoutes = require('./routes/room'); // NEW
-    const apologyRoutes = require('./routes/apology'); // NEW
-
-    app.use('/api/case/proposal', proposalRoutes);
-    app.use('/api/case/apology', apologyRoutes); // NEW: Mounted at /api/case/apology
-    app.use('/api/case', roomRoutes); // NEW: Mounted at /api/case (contains create-room etc)
-    app.use('/api/case', caseRoutes); // Remains for other routes (falls through if not matched above)
-    app.use('/api/auth', authRoutes);
-    app.use('/api/notification', notificationRoutes); // NEW
-
-    console.log('✅ All API routes loaded successfully');
-} catch (error) {
-    console.warn("⚠️ Some routes could not be loaded:", error.message);
-    console.warn("Stack trace:", error.stack);
-    routeLoadError = { message: error.message, stack: error.stack };
+// Route Loading Helper
+function loadRoute(path, name) {
+    try {
+        const route = require(path);
+        app.use('/api/case' + (name === 'case' ? '' : '/' + name), route);
+        console.log(`✅ Route loaded: ${name}`);
+    } catch (e) {
+        console.error(`❌ Failed to load route: ${name}`, e.message);
+    }
 }
 
-// Health Check Endpoint (for Render)
-// Moved below try-catch to include status
+// Manually load routes individually to prevent cascading failures
+try {
+    app.use('/api/auth', require('./routes/auth'));
+    console.log('✅ Route loaded: auth');
+} catch (e) { console.error('❌ Failed to load route: auth', e.message); }
+
+try {
+    app.use('/api/notification', require('./routes/notification'));
+    console.log('✅ Route loaded: notification');
+} catch (e) { console.error('❌ Failed to load route: notification', e.message); }
+
+// Case related routes
+loadRoute('./routes/proposal', 'proposal');
+loadRoute('./routes/apology', 'apology');
+loadRoute('./routes/room', 'case'); // Mounted at /api/case (special case)
+loadRoute('./routes/case', 'case'); // Mounted at /api/case (special case)
+
+// Health Check Endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({
-        status: routeLoadError ? 'PARTIAL_ERROR' : 'OK',
+        status: 'OK',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
-        routeLoadError: routeLoadError // Expose error for debugging
+        uptime: process.uptime()
     });
 });
 
-// Default Route
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'blind_proposal.html')); // Default to blind_proposal for easy testing
+// Explicit 404 Handler for API
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ success: false, error: `API endpoint not found: ${req.method} ${req.originalUrl}` });
+});
+
+// Default Route (Serve Frontend)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'blind_proposal.html'));
 });
 
 // Database Sync & Server Start
