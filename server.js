@@ -16,24 +16,21 @@ app.use(express.static(path.join(__dirname, '/'))); // Serve static files from r
 // Routes
 // Note: Adjusting paths based on your file structure conventions
 
-// Health Check Endpoint (for Render)
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development'
-    });
-});
+// Track route loading status
+let routeLoadError = null;
 
 try {
     const proposalRoutes = require('./routes/proposal');
     const caseRoutes = require('./routes/case');
     const authRoutes = require('./routes/auth');
     const notificationRoutes = require('./routes/notification'); // NEW
+    const roomRoutes = require('./routes/room'); // NEW
+    const apologyRoutes = require('./routes/apology'); // NEW
 
     app.use('/api/case/proposal', proposalRoutes);
-    app.use('/api/case', caseRoutes);
+    app.use('/api/case/apology', apologyRoutes); // NEW: Mounted at /api/case/apology
+    app.use('/api/case', roomRoutes); // NEW: Mounted at /api/case (contains create-room etc)
+    app.use('/api/case', caseRoutes); // Remains for other routes (falls through if not matched above)
     app.use('/api/auth', authRoutes);
     app.use('/api/notification', notificationRoutes); // NEW
 
@@ -41,7 +38,20 @@ try {
 } catch (error) {
     console.warn("⚠️ Some routes could not be loaded:", error.message);
     console.warn("Stack trace:", error.stack);
+    routeLoadError = { message: error.message, stack: error.stack };
 }
+
+// Health Check Endpoint (for Render)
+// Moved below try-catch to include status
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: routeLoadError ? 'PARTIAL_ERROR' : 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development',
+        routeLoadError: routeLoadError // Expose error for debugging
+    });
+});
 
 // Default Route
 app.get('/', (req, res) => {

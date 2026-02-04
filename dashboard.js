@@ -5,7 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const DEMO_MODE = false;
-    const API_BASE = IS_LOCAL ? 'http://localhost:3000/api' : '/api';
+    const API_BASE = IS_LOCAL ? 'http://localhost:3300/api' : '/api';
     window.API_BASE = API_BASE;
 
     // Define Functions First

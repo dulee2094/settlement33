@@ -32,9 +32,10 @@ Start-Sleep -Seconds 3
 
 # Check if server is running
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+    $response = Invoke-WebRequest -Uri "http://localhost:3300" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
     Write-Host "Server is running!" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "WARNING: Server might not be ready yet" -ForegroundColor Yellow
     Write-Host "Continuing anyway..." -ForegroundColor Gray
 }
@@ -45,12 +46,12 @@ Write-Host ""
 
 # Open Chrome (User A - Offender)
 Write-Host "Opening Chrome for User A (Offender)..." -ForegroundColor White
-Start-Process "chrome.exe" -ArgumentList "http://localhost:3000", "--new-window"
+Start-Process "chrome.exe" -ArgumentList "http://localhost:3300", "--new-window"
 Start-Sleep -Seconds 1
 
 # Open Edge (User B - Victim)
 Write-Host "Opening Edge for User B (Victim)..." -ForegroundColor White
-Start-Process "msedge.exe" -ArgumentList "http://localhost:3000", "--new-window"
+Start-Process "msedge.exe" -ArgumentList "http://localhost:3300", "--new-window"
 
 Write-Host ""
 Write-Host "=== Test Environment Ready! ===" -ForegroundColor Green
@@ -63,7 +64,7 @@ Write-Host "Test Accounts (if you created them):" -ForegroundColor Yellow
 Write-Host "  User A: offender@test.com / test1234" -ForegroundColor Gray
 Write-Host "  User B: victim@test.com / test1234" -ForegroundColor Gray
 Write-Host ""
-Write-Host "Server URL: http://localhost:3000" -ForegroundColor Cyan
+Write-Host "Server URL: http://localhost:3300" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Tips:" -ForegroundColor Yellow
 Write-Host "  - Use Win+Left/Right to split windows side by side" -ForegroundColor White
