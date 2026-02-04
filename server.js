@@ -64,8 +64,8 @@ app.get('/', (req, res) => {
 async function startServer() {
     try {
         if (sequelize) {
-            await sequelize.sync({ force: false });
-            console.log('✅ Database synced successfully.');
+            await sequelize.sync({ alter: true });
+            console.log('✅ Database synced successfully (Schema Updated).');
         }
     } catch (err) {
         console.error('⚠️ Database sync failed (continuing anyway):', err.message);

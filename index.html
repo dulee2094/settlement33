@@ -253,41 +253,32 @@
                 return;
             }
 
+            // API 설정
+            const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const API_BASE = IS_LOCAL ? 'http://localhost:3300/api' : '/api';
+
             try {
-                // Determine API URL (Local vs Prod)
-                const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const API_BASE = IS_LOCAL ? 'http://localhost:3300/api' : '/api';
-
-                // Demo Mode handling for static deployment without backend
-                const DEMO_MODE = false;
-
-                if (DEMO_MODE) {
-                    // ... Demo logic equivalent to login.js ...
-                    alert('데모 로그인 성공!');
-                    localStorage.setItem('user_id', 'demo_123');
-                    localStorage.setItem('user_name', '데모사용자');
-                    window.location.href = 'dashboard.html';
-                    return;
-                }
-
                 const res = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
 
-                const data = await res.json();
+                const isJson = res.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await res.json() : null;
 
-                if (data.success) {
+                if (res.ok && data && data.success) {
                     localStorage.setItem('user_id', data.userId);
                     localStorage.setItem('user_name', data.name);
+                    alert(`${data.name}님 환영합니다!`);
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert('로그인 실패: ' + (data.error || '이메일 또는 비밀번호를 확인해주세요.'));
+                    const errorMsg = (data && data.error) ? data.error : '이메일 또는 비밀번호를 확인해주세요.';
+                    alert(`로그인 실패: ${errorMsg}`);
                 }
             } catch (err) {
                 console.error(err);
-                alert('서버 연결 오류가 발생했습니다.');
+                alert(`서버 연결 오류:\n${err.message}\n(서버 상태를 확인해주세요)`);
             }
         }
     </script>
