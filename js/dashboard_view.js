@@ -220,33 +220,17 @@ window.getNotificationsPageHTML = function () {
     return `
         <div class="top-bar">
             <h2>알림 센터</h2>
-            <button class="btn btn-glass" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+            <button class="btn btn-glass" style="font-size: 0.85rem; padding: 0.5rem 1rem;" onclick="markAllNotificationsRead()">
                 <i class="fas fa-check-double"></i> 모두 읽음 처리
             </button>
         </div>
 
         <div style="max-width: 900px; margin: 20px auto;">
             <div class="glass-card">
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; gap: 15px; padding: 15px; background: rgba(100, 100, 255, 0.1); border-radius: 8px; border-left: 3px solid #4A9EFF;">
-                        <div style="width: 40px; height: 40px; background: rgba(74, 158, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-comment" style="color: #4A9EFF;"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 5px;">김피해님이 메시지를 전송했습니다</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제12345 ? 10분 전</div>
-                        </div>
-                        <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">확인</button>
-                    </div>
-                    <!-- (More notifications omitted for brevity but logic is here) -->
-                    <div style="display: flex; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; opacity: 0.7;">
-                        <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user-plus" style="color: var(--text-muted);"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 5px;">새로운 사건이 등록되었습니다</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">사건 2024형제11111 ? 2일 전</div>
-                        </div>
+                <div id="notificationList" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 15px;"></i>
+                        <p style="color: var(--text-muted);">알림을 불러오는 중...</p>
                     </div>
                 </div>
             </div>

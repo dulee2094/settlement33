@@ -1,12 +1,12 @@
 // utils.js
 // Shared utility functions for case_detail module.
-// Exposed on window for backward compatibility.
+// Exposed on window for global access.
 
-export function getRoleText(role) {
+function getRoleText(role) {
     return role === 'offender' ? '피의자 (가해자)' : '피해자';
 }
 
-export function getStatusText(status) {
+function getStatusText(status) {
     switch (status) {
         case 'connected': return '연결 완료';
         case 'pending': return '수락 대기';
@@ -17,19 +17,19 @@ export function getStatusText(status) {
     }
 }
 
-export function getIconClass(condition) {
+function getIconClass(condition) {
     return condition ? 'fas fa-check-circle' : 'far fa-circle';
 }
 
-export function getColor(condition) {
+function getColor(condition) {
     return condition ? 'var(--secondary)' : 'var(--text-muted)';
 }
 
-export function getOpacity(condition) {
+function getOpacity(condition) {
     return condition ? '1' : '0.5';
 }
 
-// Backward compatibility (old global functions)
+// Expose functions globally
 window.getRoleText = getRoleText;
 window.getStatusText = getStatusText;
 window.getIconClass = getIconClass;
