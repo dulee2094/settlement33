@@ -18,9 +18,67 @@ let proposalExpiration = null;
 let myResultViewed = false;
 let oppResultViewed = false;
 
+// UI State
+let selectedRole = localStorage.getItem('user_role') || 'offender'; // Default to stored role
+let selectedDuration = 1; // Default 1 day
+
 // Expose functions for HTML event handlers
 window.closeGuide = () => ProposalUI.closeGuide();
 window.skipGuide = () => ProposalUI.closeGuide();
+
+// UI Interaction Functions
+window.selectPosition = function (role) {
+    selectedRole = role;
+
+    // Update UI
+    const payerBtn = document.getElementById('pos-payer');
+    const receiverBtn = document.getElementById('pos-receiver');
+
+    // Reset styles
+    if (payerBtn) {
+        payerBtn.style.background = 'rgba(255,255,255,0.05)';
+        payerBtn.style.color = '#888';
+        payerBtn.style.borderColor = 'transparent';
+    }
+    if (receiverBtn) {
+        receiverBtn.style.background = 'rgba(255,255,255,0.05)';
+        receiverBtn.style.color = '#888';
+        receiverBtn.style.borderColor = 'transparent';
+    }
+
+    // Active style
+    const activeBtn = role === 'payer' ? payerBtn : receiverBtn;
+    if (activeBtn) {
+        activeBtn.style.background = 'rgba(59, 130, 246, 0.2)';
+        activeBtn.style.color = 'white';
+        activeBtn.style.borderColor = '#3b82f6';
+    }
+};
+
+window.selectDuration = function (days) {
+    selectedDuration = days;
+
+    // Update UI
+    document.querySelectorAll('.duration-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = '#888';
+        btn.style.fontWeight = 'normal';
+        btn.style.boxShadow = 'none';
+    });
+
+    const activeBtn = document.getElementById(`btn-${days}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.style.border = '1px solid #4ade80';
+        activeBtn.style.background = '#4ade80';
+        activeBtn.style.color = '#000';
+        activeBtn.style.fontWeight = 'bold';
+        activeBtn.style.boxShadow = '0 0 10px rgba(74, 222, 128, 0.3)';
+    }
+};
+
 
 // Action: Confirm Next Round Intent (New)
 window.confirmNextRoundIntent = async () => {
@@ -39,10 +97,20 @@ window.confirmNextRoundIntent = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize UI State
+    if (localStorage.getItem('user_role') === 'victim') {
+        window.selectPosition('receiver');
+    } else {
+        window.selectPosition('payer');
+    }
+
     await initializePage();
 
     // Event Listeners
-    document.getElementById('submitProposalBtn')?.addEventListener('click', submitProposal);
+    // Use click listener or HTML onclick, but ensure no conflict.
+    // HTML has onclick="submitProposal()". We will remove the duplicate listener if it causes issues,
+    // but defining the function in global scope is key.
+    // document.getElementById('submitProposalBtn')?.addEventListener('click', submitProposal);
 
     // Polling
     setInterval(async () => {
@@ -259,7 +327,7 @@ async function initializePage() {
                     <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1)); border: 2px solid #f59e0b; border-radius: 16px; padding: 30px; text-align: center; animation: pulse-glow 2s infinite;">
                         <div style="font-size: 3rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">🤝</div>
                         <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.3rem;">상대방이 협상 연장을 요청했습니다</h3>
-                        <button class="btn btn-primary" onclick="requestExtension()" style="background: #f59e0b; border:none; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); padding: 12px 30px; font-size: 1rem;"><i class="fas fa-handshake" style="margin-right: 8px;"></i> 연장 동의하기 (+3회)</button>
+                        <button class="btn btn-primary" onclick="requestExtension()" style="background: #f59e0b; border:none; box-shadow: 0 4px 15px rgba(rgba(245, 158, 11, 0.4); padding: 12px 30px; font-size: 1rem;"><i class="fas fa-handshake" style="margin-right: 8px;"></i> 연장 동의하기 (+3회)</button>
                     </div>`;
                 return;
             }
@@ -305,9 +373,9 @@ async function initializePage() {
 }
 
 // Action: Submit Proposal
-async function submitProposal() {
-    const amountInput = document.getElementById('proposalAmount');
-    if (!amountInput.value) { alert('금액을 입력해주세요.'); return; }
+window.submitProposal = async function () {
+    const amountInput = document.getElementById('myAmount'); // Fixed ID
+    if (!amountInput || !amountInput.value) { alert('금액을 입력해주세요.'); return; }
 
     // UI Loading state...
 
@@ -316,12 +384,14 @@ async function submitProposal() {
         let userId = localStorage.getItem('user_id');
         if (!userId) { const u = JSON.parse(localStorage.getItem('user_info') || '{}'); userId = u.id; }
 
+        const mappedRole = selectedRole === 'payer' ? 'offender' : (selectedRole === 'receiver' ? 'victim' : selectedRole);
+
         const payload = {
             userId: parseInt(userId),
             caseId: caseId,
             amount: parseInt(amountInput.value.replace(/,/g, '')),
-            duration: 0,
-            position: localStorage.getItem('user_role') || 'offender'
+            duration: selectedDuration, // Use global selectedDuration
+            position: mappedRole // Use global selectedRole (mapped)
         };
 
         const data = await ProposalAPI.submitProposal(payload);
