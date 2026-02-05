@@ -145,24 +145,39 @@ window.ProposalUI = {
         const gapGauge = document.getElementById('gapGauge');
         const statusBadge = document.getElementById('statusBadge');
 
-        let color, title, desc, width, badgeText;
+        const aiAdviceBox = document.querySelector('#resultState .ai-advice-content'); // Add this class to HTML or select by structure
+        // Note: HTML might need update to allow easy selection of AI advice text. 
+        // Current HTML:  <div style="background: ..."> text </div>. 
+        // Let's rely on selecting the div after the h4 "SafeHappE AI 조언"
+        const adviceHeader = Array.from(document.querySelectorAll('h4')).find(el => el.textContent.includes('AI 조언'));
+        const adviceDiv = adviceHeader ? adviceHeader.nextElementSibling : null;
+
+        let color, title, desc, width, badgeText, advice;
 
         if (gapPercent <= 10) {
-            color = '#4ade80'; title = "축하합니다! 의견이 거의 일치합니다";
-            desc = "제안하신 금액과 상대방의 희망 금액 차이가 <strong>10% 이내</strong>입니다.";
+            color = '#4ade80';
+            title = "🟢 축하합니다! 의견이 거의 일치합니다";
+            desc = "제안하신 금액과 상대방의 희망 금액 차이가 <strong>10% 이내</strong>입니다.<br>합의가 눈앞에 있습니다!";
             width = '98%'; badgeText = "성사 확실";
+            advice = "격차가 매우 좁혀졌습니다. <strong>[중간값 합의]</strong>를 통해 즉시 타결하는 것을 강력히 추천합니다.";
         } else if (gapPercent <= 30) {
-            color = '#3b82f6'; title = "긍정적인 조율 단계입니다";
-            desc = "의견 차이가 크지 않습니다. 조금만 더 조율하면 합의점을 찾을 수 있습니다.";
+            color = '#3b82f6';
+            title = "🔵 긍정적인 조율 단계입니다";
+            desc = "의견 차이가 크지 않습니다.<br>조금만 더 조율하면 합의점을 찾을 수 있습니다.";
             width = '75%'; badgeText = "조율 가능";
+            advice = "상대방과 긍정적인 범위 내에서 대화가 진행 중입니다. 다음 라운드에서 조금 더 유연한 제안을 해보세요.";
         } else if (gapPercent <= 60) {
-            color = '#facc15'; title = "희망 금액의 차이가 큽니다";
-            desc = "생각의 차이가 존재합니다. 신중한 재고가 필요합니다.";
+            color = '#facc15';
+            title = "🟡 생각의 차이가 존재합니다";
+            desc = "희망 금액의 차이가 다소 큽니다.<br>서로의 입장을 다시 한번 고려해보세요.";
             width = '50%'; badgeText = "차이 발생";
+            advice = "격차를 줄이기 위해 큰 폭의 양보가 필요할 수 있습니다. 감정적 대응보다는 실리적인 접근이 필요합니다.";
         } else {
-            color = '#ef4444'; title = "입장 차이가 매우 큽니다";
-            desc = "상대방과 금액에 대한 기준이 많이 다릅니다.";
+            color = '#ef4444';
+            title = "🔴 입장 차이가 매우 큽니다";
+            desc = "상대방과 금액에 대한 기준이 많이 다릅니다.<br>현실적인 대안을 고민해야 합니다.";
             width = '25%'; badgeText = "큰 격차";
+            advice = "현재 격차가 매우 큽니다. 무리한 설득보다는 상대방의 상황을 이해하려는 노력이 선행되어야 합니다.";
         }
 
         if (gapTitle) gapTitle.innerHTML = title;
@@ -176,6 +191,12 @@ window.ProposalUI = {
             statusBadge.textContent = badgeText;
             statusBadge.style.color = color;
             statusBadge.style.border = `1px solid ${color}`;
+        }
+
+        if (adviceDiv) {
+            adviceDiv.innerHTML = advice;
+            adviceDiv.style.borderLeftColor = color; // Dynamic border color
+            adviceDiv.style.background = color + '15'; // 10% opacity roughly if hex, but simpler to use constant opacity
         }
 
         // --- Logic Branch: Midpoint vs Next Round ---
@@ -273,13 +294,15 @@ window.ProposalUI = {
             }
 
         } else {
-            // --- NORMAL NEXT ROUND SCENARIO ---
+            // NEXT ROUND (NORMAL) SCENARIO
+            const strategyTip = "💡 <strong>AI Tip:</strong> 상대방과의 격차를 줄이기 위해 다음 라운드에서는 약 5~10% 정도 조정한 금액을 제안해보세요.";
+
             if (myStatus && !oppStatus) {
                 // State: Waiting for Opponent
                 html = `
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; padding: 25px; border-radius: 16px;">
-                        <div style="font-size: 2rem; margin-bottom: 10px; animation: spin-slow 3s infinite linear;">⏳</div>
-                        <h3 style="color: #60a5fa; margin-bottom: 5px;">상대방의 입장을 기다리고 있습니다</h3>
+                        <div style="font-size: 2rem; margin-bottom: 10px; animation: bounce 2s infinite;">⏳</div>
+                        <h3 style="color: #60a5fa; margin-bottom: 5px;">다음 라운드 대기 중</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem;">
                             귀하는 2라운드 진행에 동의하셨습니다.<br>상대방이 동의하면 즉시 다음 단계로 넘어갑니다.
                         </p>
@@ -299,7 +322,7 @@ window.ProposalUI = {
                         <p style="color: #e2e8f0; margin-bottom: 20px;">
                             아직 기회는 남아있습니다. 포기하지 마세요.<br>지금 버튼을 눌러 협상을 이어가세요.
                         </p>
-                        <button onclick="confirmNextRoundIntent()"
+                        <button onclick="ProposalAPI.submitNextRoundIntent('${localStorage.getItem('current_case_id')}', '${localStorage.getItem('user_id')}', 'agree').then(() => checkStatusUpdate())"
                             style="width: 100%; padding: 18px; font-size: 1.2rem; font-weight: bold; color: white; background: linear-gradient(135deg, #ef4444, #b91c1c); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s;">
                             🚀 2라운드 바로 입장하기
                         </button>
@@ -314,9 +337,12 @@ window.ProposalUI = {
                             격차가 크더라도 실망하지 마세요.<br>
                             다음 라운드에서 금액을 조정해볼 수 있습니다.
                         </p>
-                        <button onclick="confirmNextRoundIntent()"
+                        <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
+                             ${strategyTip}
+                        </div>
+                        <button onclick="ProposalAPI.submitNextRoundIntent('${localStorage.getItem('current_case_id')}', '${localStorage.getItem('user_id')}', 'agree').then(() => checkStatusUpdate())"
                             style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.2s;">
-                            👇 2라운드 시작하기 (진행 동의)
+                            👇 다음 라운드 시작하기 (진행 동의)
                         </button>
                     </div>
                 `;
@@ -341,12 +367,12 @@ window.ProposalUI = {
             if (diff < 0) {
                 clearInterval(this._timerInterval);
                 timerEl.innerHTML = `
-                    <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid #ef4444; margin-top: 20px;">
+                < div style = "background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid #ef4444; margin-top: 20px;" >
                         <div style="color: #ef4444; font-weight: bold; margin-bottom: 5px;">⚠️ 제안 유효 시간이 만료되었습니다.</div>
                         <button class="btn btn-sm" onclick="location.reload()" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px;">
                             상태 업데이트
                         </button>
-                    </div>
+                    </div >
                 `;
                 return;
             }
@@ -366,13 +392,13 @@ window.ProposalUI = {
             }
 
             timerEl.innerHTML = `
-                <div style="${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;">
+                < div style = "${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;" >
                     <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">제안 유효 시간</div>
                     <div style="font-size: 1.8rem; font-weight: bold; color: ${timeColor}; font-family: monospace;">
                         ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
                     </div>
-                </div>
-            `;
+                </div >
+                `;
         };
 
         update();
