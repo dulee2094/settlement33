@@ -26,9 +26,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elInitial) elInitial.textContent = userName.charAt(0).toUpperCase();
 
         const notifBadge = document.getElementById('notifBadge');
-        if (notifBadge) {
-            notifBadge.textContent = '5';
-            notifBadge.style.display = 'block';
+        if (notifBadge && userId) {
+            // Initial hide or 0
+            notifBadge.style.display = 'none';
+            // Fetch real count
+            fetch(`${API_BASE}/notification/${userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const unreadCount = data.notifications.filter(n => !n.isRead).length;
+                        if (unreadCount > 0) {
+                            notifBadge.textContent = unreadCount;
+                            notifBadge.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(e => console.error('Badge fetch error:', e));
         }
     }
 

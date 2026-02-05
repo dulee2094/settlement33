@@ -197,10 +197,27 @@ window.loadContent = function (menuName) {
     const contentArea = document.getElementById('contentArea');
     if (!contentArea) return;
 
-    // Helper function to check if function exists
+    // Helper function to check if function exists and execute safely
     const safeCall = (funcName, fallbackHTML) => {
         if (typeof window[funcName] === 'function') {
-            return window[funcName]();
+            try {
+                return window[funcName]();
+            } catch (e) {
+                console.error(`Error executing ${funcName}:`, e);
+                return `
+                    <div class="glass-card" style="max-width: 600px; margin: 20px auto; padding: 30px; text-align: center; border: 1px solid #ff6b6b;">
+                        <div style="font-size: 2rem; margin-bottom: 15px; color: #ff6b6b;">⚠️</div>
+                        <h3 style="margin-bottom: 15px; color: #ff6b6b;">화면 렌더링 오류</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">
+                            화면을 구성하는 도중 문제가 발생했습니다.<br>
+                            (함수: ${funcName})
+                        </p>
+                        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; text-align: left; font-family: monospace; font-size: 0.8rem; color: #ffcccc; overflow-x: auto;">
+                            ${e.message}
+                        </div>
+                    </div>
+                `;
+            }
         } else {
             console.error(`${funcName} is not defined`);
             return fallbackHTML || `
@@ -208,7 +225,7 @@ window.loadContent = function (menuName) {
                     <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
                     <h3 style="margin-bottom: 15px; color: #fbbf24;">콘텐츠 로딩 오류</h3>
                     <p style="color: var(--text-muted); margin-bottom: 30px;">
-                        이 섹션을 불러오는 중 문제가 발생했습니다.<br>
+                        필요한 리소스(${funcName})를 찾을 수 없습니다.<br>
                         페이지를 새로고침해주세요.
                     </p>
                     <button class="btn btn-primary" onclick="location.reload()">
