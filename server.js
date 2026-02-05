@@ -11,10 +11,15 @@ const PORT = process.env.PORT || 3300;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '/'))); // Serve static files from root
 
-// Routes
-// Note: Adjusting paths based on your file structure conventions
+// Better Static File Serving
+app.use(express.static(__dirname));
+app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+
+// --- API ROUTES ---
 
 // Route Loading Helper
 function loadRoute(path, name) {
@@ -58,8 +63,21 @@ app.use('/api/*', (req, res) => {
     res.status(404).json({ success: false, error: `API endpoint not found: ${req.method} ${req.originalUrl}` });
 });
 
+// --- FRONTEND ROUTES ---
+
+// explicit route for case_detail.html to ensure it works if requested without extension
+app.get('/case_detail', (req, res) => {
+    res.sendFile(path.join(__dirname, 'case_detail.html'));
+});
+
 // Default Route (Serve Frontend)
+// ONLY serve blind_proposal.html for non-asset requests (likely navigation)
 app.get('*', (req, res) => {
+    // If request has an extension that we likely missed or is 404
+    if (req.path.includes('.') && !req.path.endsWith('.html')) {
+        return res.status(404).send('Not Found');
+    }
+    // Default fallback
     res.sendFile(path.join(__dirname, 'blind_proposal.html'));
 });
 
