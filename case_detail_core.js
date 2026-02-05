@@ -186,7 +186,7 @@ window.loadContent = function (menuName) {
     const contentArea = document.getElementById('contentArea');
     if (!contentArea) return;
 
-    // Helper function to check if function exists and execute safely
+    // Helper function to check if function exists and execute safely with retry
     const safeCall = (funcName, fallbackHTML) => {
         if (typeof window[funcName] === 'function') {
             try {
@@ -208,14 +208,24 @@ window.loadContent = function (menuName) {
                 `;
             }
         } else {
+            // Retry logic for slow loading scripts
+            setTimeout(() => {
+                if (typeof window[funcName] === 'function') {
+                    // If it became available, re-render the content area
+                    const reContent = window[funcName]();
+                    const area = document.getElementById('contentArea');
+                    if (area) area.innerHTML = reContent;
+                }
+            }, 500);
+
             console.error(`${funcName} is not defined`);
             return fallbackHTML || `
                 <div class="glass-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 60px 20px;">
-                    <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
-                    <h3 style="margin-bottom: 15px; color: #fbbf24;">콘텐츠 로딩 오류</h3>
+                    <div style="font-size: 3rem; margin-bottom: 20px;">⏳</div>
+                    <h3 style="margin-bottom: 15px;">화면을 불러오는 중...</h3>
                     <p style="color: var(--text-muted); margin-bottom: 30px;">
-                        필요한 리소스(${funcName})를 찾을 수 없습니다.<br>
-                        페이지를 새로고침해주세요.
+                        잠시만 기다려주세요.<br>
+                        (리소스 로딩 중: ${funcName})
                     </p>
                     <button class="btn btn-primary" onclick="location.reload()">
                         <i class="fas fa-redo"></i> 새로고침
