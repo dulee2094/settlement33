@@ -362,7 +362,7 @@ async function initializePage() {
 
             // --- Show Guide (Last Check) ---
             const hasSeenGuide = localStorage.getItem('blind_guide_seen');
-            if (currentRound === 1 && proposalCount === 0 && !hasSeenGuide) {
+            if (!hasSeenGuide) {
                 setTimeout(() => ProposalUI.showGuide(), 500);
             }
 
@@ -389,7 +389,7 @@ window.submitProposal = async function () {
         const payload = {
             userId: parseInt(userId),
             caseId: caseId,
-            amount: parseInt(amountInput.value.replace(/,/g, '')),
+            amount: parseInt(amountInput.value.replace(/,/g, '')) * 10000,
             duration: selectedDuration, // Use global selectedDuration
             position: mappedRole // Use global selectedRole (mapped)
         };
