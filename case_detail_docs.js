@@ -1,4 +1,3 @@
-
 // case_detail_docs.js
 // Handles Document Sharing Box Logic
 
