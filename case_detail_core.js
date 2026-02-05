@@ -7,11 +7,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Environment
     const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-    // 1. Load Data
-    loadCaseData();
+    // --- SAFETY CHECK: Utils Fallback ---
+    if (typeof window.getRoleText !== 'function') {
+        console.warn('Utils module missing. Defining fallbacks.');
+        window.getRoleText = (r) => r === 'offender' ? '피의자' : '피해자';
+        window.getStatusText = (s) => s || '상태 미정';
+        window.getIconClass = () => 'fas fa-question';
+        window.getColor = () => '#ccc';
+        window.getOpacity = () => '0.5';
+    }
 
-    // 2. Initialize Menu Listeners
-    initializeMenu();
+    // 1. Load Data (Protected)
+    try {
+        loadCaseData();
+    } catch (e) {
+        console.error("Critical Error in loadCaseData:", e);
+        // Continue execution despite error
+    }
+
+    // 2. Initialize Menu Listeners (Protected)
+    try {
+        initializeMenu();
+    } catch (e) {
+        console.error("Error initializing menu:", e);
+    }
 
     // 3. Session Integrity Check
     try {
@@ -20,8 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setInterval(() => {
                 const currentUserId = localStorage.getItem('user_id');
                 if (currentUserId !== initialUserId) {
-                    // Silent reload or alert if critical
-                    // alert('로그인 정보가 변경되었습니다. 최신 정보로 갱신합니다.');
                     window.location.reload();
                 }
             }, 2000);
@@ -49,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.loadContent('overview');
             } else {
                 console.error("loadContent function missing");
+                const area = document.getElementById('contentArea');
+                if (area) area.innerHTML = '<div style="color:red; padding:20px; text-align:center;">시스템 초기화 오류: loadContent 함수를 찾을 수 없습니다. 페이지를 새로고침 해주세요.</div>';
             }
         }
     } catch (err) {
@@ -56,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentArea = document.getElementById('contentArea');
         if (contentArea) contentArea.innerHTML = `<div class="glass-card" style="padding:20px; text-align:center; color:#ff6b6b;">초기화 중 오류 발생: ${err.message}</div>`;
     }
+
     // 5. Check Toast Messages
     if (localStorage.getItem('show_draft_applied_msg') === 'true') {
         setTimeout(() => {
@@ -65,7 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 6. Start Polling for Apology Status
-    startApologyPolling();
+    try {
+        startApologyPolling();
+    } catch (e) { console.warn("Polling init failed", e); }
 });
 
 function startApologyPolling() {
@@ -96,11 +118,6 @@ function startApologyPolling() {
                         if (activeMenu === 'apology') {
                             // Reload content to show the new apology
                             window.loadContent('apology');
-                            // Optional: Alert notification
-                            // alert("📨 새로운 사과문이 도착했습니다.");
-                        } else {
-                            // Show notification indicator/alert if elsewhere
-                            // (Can be added later, for now just ensure data is fresh)
                         }
                     }
                 }
@@ -116,12 +133,7 @@ function loadCaseData() {
     const status = localStorage.getItem('current_case_status');
     const counterparty = localStorage.getItem('current_counterparty');
 
-    if (!caseNumber && !caseTitle) {
-        return;
-    }
-
-    const displayTitle = caseTitle || caseNumber;
-
+    // Safe retrieval of elements
     const elHeaderCase = document.getElementById('headerCaseNumber');
     const elHeaderRole = document.getElementById('headerMyRole');
     const elHeaderCounter = document.getElementById('headerCounterparty');
@@ -129,18 +141,22 @@ function loadCaseData() {
     const elSidebarCase = document.getElementById('sidebarCaseNumber');
     const elSidebarCounter = document.getElementById('sidebarCounterparty');
 
+    const displayTitle = caseTitle || caseNumber || '사건 정보 없음';
+
     if (elHeaderCase) {
         elHeaderCase.textContent = displayTitle;
-        if (caseTitle) elHeaderCase.setAttribute('title', `사건번호: ${caseNumber}`);
+        if (caseTitle && caseNumber) elHeaderCase.setAttribute('title', `사건번호: ${caseNumber}`);
     }
-    if (elHeaderRole) elHeaderRole.textContent = window.getRoleText(myRole);
-    if (elHeaderCounter) elHeaderCounter.textContent = counterparty;
-    if (elHeaderStatus) elHeaderStatus.textContent = window.getStatusText(status);
+
+    // Use fallback-safe utils
+    if (elHeaderRole) elHeaderRole.textContent = window.getRoleText ? window.getRoleText(myRole) : (myRole || '-');
+    if (elHeaderCounter) elHeaderCounter.textContent = counterparty || '-';
+    if (elHeaderStatus) elHeaderStatus.textContent = window.getStatusText ? window.getStatusText(status) : (status || '-');
 
     if (elSidebarCase) elSidebarCase.textContent = displayTitle;
-    if (elSidebarCounter) elSidebarCounter.textContent = counterparty;
+    if (elSidebarCounter) elSidebarCounter.textContent = counterparty || '-';
 
-    // Sync Apology Status
+    // Sync Apology Status (Async, safe)
     const caseId = localStorage.getItem('current_case_id');
     if (caseId) {
         fetch(`/api/case/apology?caseId=${caseId}`)
