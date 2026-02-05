@@ -14,59 +14,48 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeMenu();
 
     // 3. Session Integrity Check
-    const initialUserId = JSON.parse(localStorage.getItem('user_info') || '{}').id;
-    setInterval(() => {
-        const currentUserInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-        if (currentUserInfo.id !== initialUserId) {
-            alert('로그인 정보가 변경되었습니다. 최신 정보로 갱신합니다.');
-            window.location.reload();
-        }
-    }, 2000);
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            const currentUserInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
-            if (currentUserInfo.id !== initialUserId) window.location.reload();
-        }
-    });
-
-    // 4. Load Initial Content
-    const savedTab = localStorage.getItem('active_tab_on_load');
-    if (savedTab && window.activateMenu) {
-        window.activateMenu(savedTab);
-        localStorage.removeItem('active_tab_on_load');
-    } else {
-        // Safety check: Ensure getOverviewHTML is defined
-        if (typeof window.getOverviewHTML === 'function') {
-            window.loadContent('overview');
-        } else {
-            console.error('getOverviewHTML is not defined. Retrying in 100ms...');
-            setTimeout(() => {
-                if (typeof window.getOverviewHTML === 'function') {
-                    window.loadContent('overview');
-                } else {
-                    console.error('getOverviewHTML still not defined. Please check script loading order.');
-                    // Fallback: Show error message
-                    const contentArea = document.getElementById('contentArea');
-                    if (contentArea) {
-                        contentArea.innerHTML = `
-                            <div class="glass-card" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 60px 20px;">
-                                <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
-                                <h3 style="margin-bottom: 15px; color: #fbbf24;">페이지 로딩 오류</h3>
-                                <p style="color: var(--text-muted); margin-bottom: 30px;">
-                                    페이지를 불러오는 중 문제가 발생했습니다.<br>
-                                    페이지를 새로고침해주세요.
-                                </p>
-                                <button class="btn btn-primary" onclick="location.reload()">
-                                    <i class="fas fa-redo"></i> 새로고침
-                                </button>
-                            </div>
-                        `;
-                    }
+    try {
+        const initialUserId = localStorage.getItem('user_id');
+        if (initialUserId) {
+            setInterval(() => {
+                const currentUserId = localStorage.getItem('user_id');
+                if (currentUserId !== initialUserId) {
+                    // Silent reload or alert if critical
+                    // alert('로그인 정보가 변경되었습니다. 최신 정보로 갱신합니다.');
+                    window.location.reload();
                 }
-            }, 100);
+            }, 2000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    const currentUserId = localStorage.getItem('user_id');
+                    if (currentUserId !== initialUserId) window.location.reload();
+                }
+            });
         }
+    } catch (err) {
+        console.warn('Session integrity check failed:', err);
     }
 
+    // 4. Load Initial Content
+    try {
+        const savedTab = localStorage.getItem('active_tab_on_load');
+        if (savedTab && window.activateMenu) {
+            window.activateMenu(savedTab);
+            localStorage.removeItem('active_tab_on_load');
+        } else {
+            // Default load
+            if (typeof window.loadContent === 'function') {
+                window.loadContent('overview');
+            } else {
+                console.error("loadContent function missing");
+            }
+        }
+    } catch (err) {
+        console.error("Initial load failed:", err);
+        const contentArea = document.getElementById('contentArea');
+        if (contentArea) contentArea.innerHTML = `<div class="glass-card" style="padding:20px; text-align:center; color:#ff6b6b;">초기화 중 오류 발생: ${err.message}</div>`;
+    }
     // 5. Check Toast Messages
     if (localStorage.getItem('show_draft_applied_msg') === 'true') {
         setTimeout(() => {
