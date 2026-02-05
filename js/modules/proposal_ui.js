@@ -367,12 +367,12 @@ window.ProposalUI = {
             if (diff < 0) {
                 clearInterval(this._timerInterval);
                 timerEl.innerHTML = `
-                < div style = "background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid #ef4444; margin-top: 20px;" >
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 10px; border: 1px solid #ef4444; margin-top: 20px;">
                         <div style="color: #ef4444; font-weight: bold; margin-bottom: 5px;">⚠️ 제안 유효 시간이 만료되었습니다.</div>
                         <button class="btn btn-sm" onclick="location.reload()" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px;">
                             상태 업데이트
                         </button>
-                    </div >
+                    </div>
                 `;
                 return;
             }
@@ -392,12 +392,12 @@ window.ProposalUI = {
             }
 
             timerEl.innerHTML = `
-                < div style = "${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;" >
+                <div style="${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;">
                     <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">제안 유효 시간</div>
                     <div style="font-size: 1.8rem; font-weight: bold; color: ${timeColor}; font-family: monospace;">
                         ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
                     </div>
-                </div >
+                </div>
                 `;
         };
 

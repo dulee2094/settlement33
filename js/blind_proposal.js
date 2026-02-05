@@ -598,14 +598,15 @@ async function initializePage() {
                 let oppStatusBg = 'rgba(255,255,255,0.05)';
                 let oppStatusBorder = '1px solid rgba(255,255,255,0.1)';
 
+                // --- ADDED LOGIC: Check Real-time Status ---
                 if (data.hasOpponentProposed) {
-                    oppStatusText = '✅ 등록 완료';
-                    oppStatusColor = '#4ade80'; // Text Color Green
-                    // Opponent Card: Blue Border to match "Locked" theme, or Green to show completed. 
-                    // Let's use Blue to indicate "Hidden/Locked" but Completed.
+                    oppStatusText = '✅ 등록 완료 (대기 중)';
+                    oppStatusColor = '#4ade80';
                     oppStatusBg = 'rgba(59, 130, 246, 0.1)';
                     oppStatusBorder = '1px solid #3b82f6';
                 }
+
+
 
                 // Inject the rich dashboard HTML if it's not already there
                 // We add a unique marker for "Opponent Proposed" state vs "Both Waiting" state to force re-render if state changes
