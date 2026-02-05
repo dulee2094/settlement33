@@ -4,8 +4,7 @@
 // Depends on: case_detail_view.js, case_detail_chat.js, case_detail_docs.js, case_detail_agreement.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Environment
-    const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // Environment Check Removed (Production Only)
 
     // --- SAFETY CHECK: Utils Fallback ---
     if (typeof window.getRoleText !== 'function') {

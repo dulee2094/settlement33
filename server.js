@@ -13,15 +13,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Better Static File Serving
+// Serve root static files
 app.use(express.static(__dirname));
+
+// Serve sub-directories explicitly
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-
-// --- API ROUTES ---
-
-// Route Loading Helper
+// explicit route for case_detail.html to ensure it works if requested without extension
+app.get('/case_detail', (req, res) => {
+    res.sendFile(path.join(__dirname, 'case_detail.html'));
+});
 function loadRoute(path, name) {
     try {
         const route = require(path);
