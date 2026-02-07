@@ -328,7 +328,6 @@ window.ProposalUI = {
                         </button>
                     </div>
                 `;
-            } else {
                 // State: Default (Start CTA)
                 html = `
                     <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
@@ -342,7 +341,7 @@ window.ProposalUI = {
                         </div>
                         <button onclick="confirmNextRoundIntent()"
                             style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.2s;">
-                            👇 다음 라운드 시작하기 (진행 동의)
+                            <i class="fas fa-redo" style="margin-right: 8px;"></i> ${currentRound < 5 ? (currentRound + 1) + '라운드 제안하러 가기' : '다음 라운드 제안하러 가기'}
                         </button>
                     </div>
                 `;

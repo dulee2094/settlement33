@@ -337,7 +337,7 @@ window.getGuidePageHTML = function () {
                     </p>
                 </div>
 
-                <!-- 2. Benefits for Both Sides (New) -->
+                <!-- 2. Benefits for Both Sides -->
                 <div class="glass-card" style="padding: 30px;">
                     <h3 style="margin-bottom: 25px; text-align: center;">왜 합의가 필요할까요?</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
@@ -369,14 +369,75 @@ window.getGuidePageHTML = function () {
                     </div>
                 </div>
 
-                <!-- 3. Inspirational Quote (New) -->
-                <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); padding: 40px; border-radius: 16px; text-align: center; border: 1px solid rgba(59, 130, 246, 0.2);">
-                    <i class="fas fa-quote-left" style="font-size: 2rem; color: rgba(96, 165, 250, 0.5); margin-bottom: 15px;"></i>
-                    <p style="font-size: 1.2rem; font-style: italic; color: #e2e8f0; margin-bottom: 15px; font-weight: 300;">
-                        "용서는 과거를 바꿀 수 없지만,<br>미래를 확장시킨다."
-                    </p>
-                    <p style="color: #94a3b8; font-size: 0.9rem;">- Paul Boese -</p>
-                </div>
+                <!-- 3. Inspirational Quotes (Dynamic Cards) -->
+                ${(() => {
+            // Quote Database
+            const QUOTES_DB = {
+                offender: [
+                    { text: "잘못을 인정하는 것은 수치가 아니다. 어제보다 오늘 더 현명해졌다는 증거다.", author: "알렉산더 포프", icon: "fa-feather-alt", gradient: "linear-gradient(135deg, #1e293b, #334155)", accent: "#94a3b8" },
+                    { text: "진정한 뉘우침은 과거의 행동을 후회하는 것뿐만 아니라, 미래의 행동을 변화시키는 것이다.", author: "스피노자", icon: "fa-road", gradient: "linear-gradient(135deg, #0f172a, #1e293b)", accent: "#fbbf24" },
+                    { text: "허물이 있다면 고치기를 꺼리지 말라. (과즉물탄개)", author: "공자", icon: "fa-scroll", gradient: "linear-gradient(135deg, #3730a3, #312e81)", accent: "#a5b4fc" },
+                    { text: "자신의 잘못을 인정하는 것은 결백한 사람만이 할 수 있는 용기다.", author: "세네카", icon: "fa-balance-scale", gradient: "linear-gradient(135deg, #701a75, #4a044e)", accent: "#f0abfc" },
+                    { text: "자기 잘못을 시인하면 오히려 존경받는다. 싸움은 끝내고 신뢰는 시작된다.", author: "데일 카네기", icon: "fa-handshake", gradient: "linear-gradient(135deg, #14532d, #052e16)", accent: "#4ade80" },
+                    { text: "가장 위대한 승리는 자기 자신을 이기는 것이다.", author: "톨스토이", icon: "fa-trophy", gradient: "linear-gradient(135deg, #b45309, #78350f)", accent: "#fcd34d" },
+                    { text: "실수를 저지르는 것은 인간이다. 하지만 실수를 고치지 않는 것은 어리석음이다.", author: "소포클레스", icon: "fa-landmark", gradient: "linear-gradient(135deg, #374151, #111827)", accent: "#d1d5db" },
+                    { text: "잘못을 뉘우치는 마음이 곧 도(道)에 들어가는 첫걸음이다.", author: "채근담", icon: "fa-leaf", gradient: "linear-gradient(135deg, #166534, #14532d)", accent: "#86efac" },
+                    { text: "부끄러움을 아는 마음이 의로움의 시작이다 (수오지심).", author: "맹자", icon: "fa-spa", gradient: "linear-gradient(135deg, #9f1239, #881337)", accent: "#fda4af" },
+                    { text: "변명을 잘하는 사람은 그 외에 잘하는 것이 거의 없다.", author: "벤자민 프랭클린", icon: "fa-clock", gradient: "linear-gradient(135deg, #1e1b4b, #020617)", accent: "#6366f1" }
+                ],
+                victim: [
+                    { text: "용서는 과거를 바꿀 수 없지만, 미래를 확장시킨다.", author: "폴 보시", icon: "fa-cloud-sun", gradient: "linear-gradient(135deg, #0c4a6e, #075985)", accent: "#7dd3fc" },
+                    { text: "분노를 품고 있는 것은 독을 마시고 남이 죽기를 바라는 것과 같다.", author: "부처", icon: "fa-fire-alt", gradient: "linear-gradient(135deg, #7f1d1d, #450a0a)", accent: "#fca5a5" },
+                    { text: "약한 자는 절대 용서할 수 없다. 용서는 강한 자의 속성이다.", author: "마하트마 간디", icon: "fa-fist-raised", gradient: "linear-gradient(135deg, #3f6212, #1a2e05)", accent: "#bef264" },
+                    { text: "미움은 미움으로 갚아서는 결코 사라지지 않는다. 오직 자비로만 사라진다.", author: "법구경", icon: "fa-hands-holding-circle", gradient: "linear-gradient(135deg, #c026d3, #a21caf)", accent: "#f0abfc" },
+                    { text: "용기 있는 사람들은 평화를 위해 용서하는 것을 두려워하지 않는다.", author: "넬슨 만델라", icon: "fa-dove", gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)", accent: "#bae6fd" },
+                    { text: "어둠으로 어둠을 몰아낼 수 없다. 오직 빛만이 할 수 있다.", author: "마틴 루터 킹", icon: "fa-lightbulb", gradient: "linear-gradient(135deg, #f59e0b, #d97706)", accent: "#fde047" },
+                    { text: "바꿀 수 없는 것을 받아들이는 평온함을 주소서.", author: "라인홀드 니부어", icon: "fa-water", gradient: "linear-gradient(135deg, #0891b2, #155e75)", accent: "#67e8f9" },
+                    { text: "흐르는 물은 썩지 않나니, 마음의 앙금을 흘려보내라.", author: "장자", icon: "fa-stream", gradient: "linear-gradient(135deg, #0d9488, #115e59)", accent: "#99f6e4" },
+                    { text: "용서란 내가 겪은 고통이 헛되지 않게 하는 것이다.", author: "CS 루이스", icon: "fa-book-open", gradient: "linear-gradient(135deg, #4338ca, #3730a3)", accent: "#a5b4fc" },
+                    { text: "진정한 용서는 과거가 다르기를 바라는 희망을 포기하는 것이다.", author: "오프라 윈프리", icon: "fa-sun", gradient: "linear-gradient(135deg, #be123c, #9f1239)", accent: "#fda4af" }
+                ]
+            };
+
+            const randomOffender = QUOTES_DB.offender[Math.floor(Math.random() * QUOTES_DB.offender.length)];
+            const randomVictim = QUOTES_DB.victim[Math.floor(Math.random() * QUOTES_DB.victim.length)];
+
+            return `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px;">
+                            <!-- Offender Quote Card -->
+                             <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${randomOffender.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                <i class="fas ${randomOffender.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
+                                <div style="position: relative; z-index: 1;">
+                                    <div style="font-size: 0.8rem; color: ${randomOffender.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
+                                        FOR OFFENDER
+                                    </div>
+                                    <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
+                                        "${randomOffender.text}"
+                                    </p>
+                                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
+                                        - ${randomOffender.author}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Victim Quote Card -->
+                             <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${randomVictim.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                <i class="fas ${randomVictim.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
+                                <div style="position: relative; z-index: 1;">
+                                    <div style="font-size: 0.8rem; color: ${randomVictim.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
+                                        FOR VICTIM
+                                    </div>
+                                    <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
+                                        "${randomVictim.text}"
+                                    </p>
+                                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
+                                        - ${randomVictim.author}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+        })()}
 
                 <!-- 4. How to Use (Steps) -->
                 <div class="glass-card">
