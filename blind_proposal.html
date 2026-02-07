@@ -141,8 +141,13 @@
                             style="width: 100%; padding: 15px; font-size: 1rem;">
                             제안 등록하기
                         </button>
-                        <div style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: #888;">
-                            남은 제안 횟수: <span id="leftCount" style="color: #4ade80; font-weight: bold;">?</span>회
+                        <div
+                            style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: #888; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px;">
+                            <span style="margin-right: 10px;">현재 <strong style="color: #60a5fa;"><span
+                                        id="currentRoundDisplay">-</span>라운드</strong> 진행 중</span>
+                            <span style="color: #444;">|</span>
+                            <span style="margin-left: 10px;">남은 기회: <strong style="color: #4ade80;"><span
+                                        id="leftCount">?</span>회</strong></span>
                         </div>
                     </div>
 
@@ -243,9 +248,9 @@
                     <!-- Priority 5: Result Analysis State (Graph) -->
                     <div id="resultState" style="display: none; width: 100%; animation: fade-in 0.5s ease-out;">
                         <!-- Round End Badge -->
-                        <div
+                        <div id="roundEndBadge"
                             style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                            🛑 1라운드 종료
+                            🛑 라운드 종료
                         </div>
 
                         <div id="gapTitle"
@@ -332,6 +337,8 @@
                 <!-- Core Logic Script -->
                 <script src="js/modules/proposal_api.js"></script>
                 <script src="js/modules/proposal_ui.js"></script>
+                <script src="js/modules/proposal_state.js"></script>
+                <script src="js/modules/proposal_handler.js"></script>
                 <script src="js/blind_proposal.js"></script>
             </div>
         </main>

@@ -34,14 +34,27 @@ window.ProposalUI = {
     },
 
     // --- Counter UI ---
-    updateCountUI(current, max) {
+    updateCountUI(current, max, currentRound = 1) {
+        // Legacy Update
         const currentEl = document.getElementById('currentCount');
         const maxEl = document.getElementById('maxCount');
-        const progressEl = document.getElementById('proposalProgress');
-
         if (currentEl) currentEl.innerText = current;
         if (maxEl) maxEl.innerText = max;
 
+        // New Update (Status Footer)
+        const leftCountEl = document.getElementById('leftCount');
+        if (leftCountEl) {
+            const left = Math.max(0, max - current);
+            leftCountEl.textContent = left;
+        }
+
+        const roundDisplayEl = document.getElementById('currentRoundDisplay');
+        if (roundDisplayEl) {
+            roundDisplayEl.textContent = currentRound;
+        }
+
+        // Progress Bar (if exists)
+        const progressEl = document.getElementById('proposalProgress');
         if (progressEl) {
             const percentage = (current / max) * 100;
             progressEl.style.width = `${percentage}%`;
@@ -144,6 +157,10 @@ window.ProposalUI = {
         const gapDesc = document.getElementById('gapDesc');
         const gapGauge = document.getElementById('gapGauge');
         const statusBadge = document.getElementById('statusBadge');
+        const roundEndBadge = document.getElementById('roundEndBadge');
+        if (roundEndBadge) {
+            roundEndBadge.textContent = `🛑 ${currentRound}라운드 종료`;
+        }
 
         const aiAdviceBox = document.querySelector('#resultState .ai-advice-content'); // Add this class to HTML or select by structure
         // Note: HTML might need update to allow easy selection of AI advice text. 

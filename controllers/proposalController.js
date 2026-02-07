@@ -6,10 +6,11 @@ const ProposalController = {
     // 원래 router.get('/')에 해당
     async getStatus(req, res) {
         const { userId, caseId } = req.query;
+        const uid = parseInt(userId, 10);
         try {
             // Get my proposals
             const myProposals = await Proposal.findAll({
-                where: { caseId, proposerId: userId },
+                where: { caseId, proposerId: uid },
                 order: [['createdAt', 'DESC']]
             });
 
@@ -17,7 +18,7 @@ const ProposalController = {
             const opponentProposals = await Proposal.findAll({
                 where: {
                     caseId,
-                    proposerId: { [Op.ne]: userId } // Not me
+                    proposerId: { [Op.ne]: uid } // Not me
                 },
                 order: [['createdAt', 'DESC']]
             });
@@ -27,19 +28,18 @@ const ProposalController = {
             const isExtended = c && c.proposalExtendOffender && c.proposalExtendVictim;
 
             // Check if I agreed to extension
-            const myUid = parseInt(userId);
             let iAgreed = false;
             let oppAgreed = false;
             let myNextRoundIntent = false;
             let oppNextRoundIntent = false;
 
             if (c) {
-                if (c.offenderId === myUid) {
+                if (c.offenderId === uid) {
                     iAgreed = c.proposalExtendOffender;
                     oppAgreed = c.proposalExtendVictim;
                     myNextRoundIntent = c.nextRoundIntentOffender;
                     oppNextRoundIntent = c.nextRoundIntentVictim;
-                } else if (c.victimId === myUid) {
+                } else if (c.victimId === uid) {
                     iAgreed = c.proposalExtendVictim;
                     oppAgreed = c.proposalExtendOffender;
                     myNextRoundIntent = c.nextRoundIntentVictim;
@@ -80,8 +80,8 @@ const ProposalController = {
             );
 
             // Other user's proposal and my proposal
-            const myProposal = allProposals.find(p => p.proposerId == myUid && p.round == currentRound);
-            const oppProposal = allProposals.find(p => p.proposerId != myUid && p.round == currentRound);
+            const myProposal = allProposals.find(p => p.proposerId == uid && p.round == currentRound);
+            const oppProposal = allProposals.find(p => p.proposerId != uid && p.round == currentRound);
 
             if (pOffenderCurrent && pVictimCurrent) {
                 const amt1 = pOffenderCurrent.amount;
