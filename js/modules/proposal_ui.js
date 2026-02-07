@@ -322,7 +322,7 @@ window.ProposalUI = {
                         <p style="color: #e2e8f0; margin-bottom: 20px;">
                             아직 기회는 남아있습니다. 포기하지 마세요.<br>지금 버튼을 눌러 협상을 이어가세요.
                         </p>
-                        <button onclick="ProposalAPI.submitNextRoundIntent('${localStorage.getItem('current_case_id')}', '${localStorage.getItem('user_id')}', 'agree').then(() => checkStatusUpdate())"
+                        <button onclick="confirmNextRoundIntent()"
                             style="width: 100%; padding: 18px; font-size: 1.2rem; font-weight: bold; color: white; background: linear-gradient(135deg, #ef4444, #b91c1c); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s;">
                             🚀 2라운드 바로 입장하기
                         </button>
@@ -340,7 +340,7 @@ window.ProposalUI = {
                         <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
                              ${strategyTip}
                         </div>
-                        <button onclick="ProposalAPI.submitNextRoundIntent('${localStorage.getItem('current_case_id')}', '${localStorage.getItem('user_id')}', 'agree').then(() => checkStatusUpdate())"
+                        <button onclick="confirmNextRoundIntent()"
                             style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.2s;">
                             👇 다음 라운드 시작하기 (진행 동의)
                         </button>
@@ -350,6 +350,52 @@ window.ProposalUI = {
         }
 
         container.innerHTML = html;
+    },
+
+    /**
+     * Toggles the enabled state of the proposal input section
+     * @param {boolean} enable 
+     */
+    toggleProposalInput(enable) {
+        const card = document.getElementById('myProposalCard');
+        if (!card) return;
+
+        const inputs = card.querySelectorAll('input, button');
+        const overlayId = 'proposal-disabled-overlay';
+        let overlay = document.getElementById(overlayId);
+
+        if (!enable) {
+            // Disable
+            inputs.forEach(el => el.disabled = true);
+            card.style.opacity = '0.7';
+            card.style.pointerEvents = 'none';
+
+            // Optional: Add visual overlay if not exists
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = overlayId;
+                overlay.style.cssText = `
+                    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); z-index: 10; border-radius: 12px;
+                    display: flex; align-items: center; justify-content: center;
+                    backdrop-filter: blur(2px);
+                `;
+                overlay.innerHTML = `
+                    <div style="background: #1e293b; padding: 15px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: white; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                        <i class="fas fa-lock" style="color: #94a3b8; margin-right: 8px;"></i> 제안 제출 완료
+                    </div>
+                `;
+                // Make sure card is relative
+                if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+                card.appendChild(overlay);
+            }
+        } else {
+            // Enable
+            inputs.forEach(el => el.disabled = false);
+            card.style.opacity = '1';
+            card.style.pointerEvents = 'auto';
+            if (overlay) overlay.remove();
+        }
     },
 
     // --- Expiration Timer ---

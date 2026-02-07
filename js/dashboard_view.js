@@ -330,11 +330,52 @@ window.getGuidePageHTML = function () {
                     <h3 style="margin-bottom: 20px; font-size: 1.3rem; border-left: 4px solid var(--primary); padding-left: 15px;">
                         형사 합의란 무엇인가요?
                     </h3>
-                    <p style="line-height: 1.8; color: #ddd; margin-bottom: 20px;">
+                    <p style="line-height: 1.8; color: #cbd5e1; margin-bottom: 0;">
                         형사 합의는 단순한 금전적 보상을 넘어, 가해자가 자신의 잘못을 진심으로 뉘우치고 
-                        <span style="color: #4A9EFF; font-weight: bold;">피해 회복을 위해 노력했음</span>을 증명하는 공식적인 법적 절차입니다.<br>
+                        <span style="color: #60a5fa; font-weight: bold;">피해 회복을 위해 노력했음</span>을 증명하는 공식적인 법적 절차입니다.<br>
                         이는 수사기관과 법원에 제출되는 가장 중요한 양형 자료 중 하나로, 사건의 원만한 해결을 위한 첫걸음입니다.
                     </p>
+                </div>
+
+                <!-- 2. Benefits for Both Sides (New) -->
+                <div class="glass-card" style="padding: 30px;">
+                    <h3 style="margin-bottom: 25px; text-align: center;">왜 합의가 필요할까요?</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <!-- Offender Side -->
+                        <div style="background: rgba(255, 255, 255, 0.03); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; align-items: center; margin-bottom: 15px; color: #fbbf24;">
+                                <i class="fas fa-user-tie" style="font-size: 1.2rem; margin-right: 10px;"></i>
+                                <h4 style="margin: 0;">피의자 (가해자) 입장</h4>
+                            </div>
+                            <ul style="padding-left: 20px; color: #94a3b8; font-size: 0.95rem; line-height: 1.8;">
+                                <li style="margin-bottom: 10px;">⚖️ <strong>양형의 핵심 요소</strong><br>감형을 위한 가장 확실하고 필수적인 자료가 됩니다.</li>
+                                <li style="margin-bottom: 10px;">🛡️ <strong>전과 기록 최소화</strong><br>기소유예 등 불이익을 최소화할 수 있는 기회입니다.</li>
+                                <li>🕊️ <strong>심리적 부채 해소</strong><br>처벌과 별개로 도의적 책임을 다했다는 안도감을 줍니다.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Victim Side -->
+                        <div style="background: rgba(255, 255, 255, 0.03); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; align-items: center; margin-bottom: 15px; color: #34d399;">
+                                <i class="fas fa-user-shield" style="font-size: 1.2rem; margin-right: 10px;"></i>
+                                <h4 style="margin: 0;">피해자 입장</h4>
+                            </div>
+                            <ul style="padding-left: 20px; color: #94a3b8; font-size: 0.95rem; line-height: 1.8;">
+                                <li style="margin-bottom: 10px;">💰 <strong>실질적 피해 회복</strong><br>민사 소송보다 빠르고 확실하게 배상받을 수 있습니다.</li>
+                                <li style="margin-bottom: 10px;">🏥 <strong>사건의 조기 종결</strong><br>수사/재판의 긴 스트레스에서 벗어나 일상으로 복귀합니다.</li>
+                                <li>🤝 <strong>진정한 사과 수용</strong><br>가해자의 반성을 공식적으로 확인하고 치유를 시작합니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Inspirational Quote (New) -->
+                <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05)); padding: 40px; border-radius: 16px; text-align: center; border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <i class="fas fa-quote-left" style="font-size: 2rem; color: rgba(96, 165, 250, 0.5); margin-bottom: 15px;"></i>
+                    <p style="font-size: 1.2rem; font-style: italic; color: #e2e8f0; margin-bottom: 15px; font-weight: 300;">
+                        "용서는 과거를 바꿀 수 없지만,<br>미래를 확장시킨다."
+                    </p>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">- Paul Boese -</p>
                 </div>
 
                 <!-- 4. How to Use (Steps) -->

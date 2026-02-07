@@ -343,6 +343,15 @@ async function initializePage() {
 
             ProposalUI.updateCountUI(proposalCount, maxLimit);
 
+            // --- Input Lock Logic (Per Round) ---
+            // If I have already participated in this round (myRound matches or exceeds currentRound), 
+            // OR if the max limit is reached, lock the input.
+            if (myRound >= currentRound || proposalCount >= maxLimit) {
+                ProposalUI.toggleProposalInput(false);
+            } else {
+                ProposalUI.toggleProposalInput(true);
+            }
+
             // --- Show Guide (Moved to run before early returns) ---
             const hasSeenGuide = localStorage.getItem('blind_guide_seen');
             if (!hasSeenGuide) {
