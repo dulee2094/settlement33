@@ -303,7 +303,6 @@ window.getSettingsPageHTML = function () {
 };
 
 window.getHelpPageHTML = function () {
-    // ... (Omitted full repeated content, but assuming standard FAQ structure)
     return `
        <div class="top-bar"><h2>도움말</h2></div>
        <div style="max-width: 900px; margin: 20px auto; display: flex; flex-direction: column; gap: 20px;">
@@ -316,6 +315,48 @@ window.getHelpPageHTML = function () {
 };
 
 window.getGuidePageHTML = function () {
+    // 1. Logic & Data Definition (Refactored: Moved outside of return string for safety)
+    const QUOTES_DB = {
+        offender: [
+            { text: "잘못을 인정하는 것은 수치가 아니다. 어제보다 오늘 더 현명해졌다는 증거다.", author: "알렉산더 포프", icon: "fa-feather-alt" },
+            { text: "진정한 뉘우침은 과거의 행동을 후회하는 것뿐만 아니라, 미래의 행동을 변화시키는 것이다.", author: "스피노자", icon: "fa-road" },
+            { text: "허물이 있다면 고치기를 꺼리지 말라. (과즉물탄개)", author: "공자", icon: "fa-scroll" },
+            { text: "자신의 잘못을 인정하는 것은 결백한 사람만이 할 수 있는 용기다.", author: "세네카", icon: "fa-balance-scale" },
+            { text: "자기 잘못을 시인하면 오히려 존경받는다. 싸움은 끝내고 신뢰는 시작된다.", author: "데일 카네기", icon: "fa-handshake" },
+            { text: "가장 위대한 승리는 자기 자신을 이기는 것이다.", author: "톨스토이", icon: "fa-trophy" },
+            { text: "실수를 저지르는 것은 인간이다. 하지만 실수를 고치지 않는 것은 어리석음이다.", author: "소포클레스", icon: "fa-landmark" },
+            { text: "잘못을 뉘우치는 마음이 곧 도(道)에 들어가는 첫걸음이다.", author: "채근담", icon: "fa-leaf" },
+            { text: "부끄러움을 아는 마음이 의로움의 시작이다 (수오지심).", author: "맹자", icon: "fa-spa" },
+            { text: "변명을 잘하는 사람은 그 외에 잘하는 것이 거의 없다.", author: "벤자민 프랭클린", icon: "fa-clock" }
+        ],
+        victim: [
+            { text: "용서는 과거를 바꿀 수 없지만, 미래를 확장시킨다.", author: "폴 보시", icon: "fa-cloud-sun" },
+            { text: "분노를 품고 있는 것은 독을 마시고 남이 죽기를 바라는 것과 같다.", author: "부처", icon: "fa-fire-alt" },
+            { text: "약한 자는 절대 용서할 수 없다. 용서는 강한 자의 속성이다.", author: "마하트마 간디", icon: "fa-fist-raised" },
+            { text: "미움은 미움으로 갚아서는 결코 사라지지 않는다. 오직 자비로만 사라진다.", author: "법구경", icon: "fa-hands-holding-circle" },
+            { text: "용기 있는 사람들은 평화를 위해 용서하는 것을 두려워하지 않는다.", author: "넬슨 만델라", icon: "fa-dove" },
+            { text: "어둠으로 어둠을 몰아낼 수 없다. 오직 빛만이 할 수 있다.", author: "마틴 루터 킹", icon: "fa-lightbulb" },
+            { text: "바꿀 수 없는 것을 받아들이는 평온함을 주소서.", author: "라인홀드 니부어", icon: "fa-water" },
+            { text: "흐르는 물은 썩지 않나니, 마음의 앙금을 흘려보내라.", author: "장자", icon: "fa-stream" },
+            { text: "용서란 내가 겪은 고통이 헛되지 않게 하는 것이다.", author: "CS 루이스", icon: "fa-book-open" },
+            { text: "진정한 용서는 과거가 다르기를 바라는 희망을 포기하는 것이다.", author: "오프라 윈프리", icon: "fa-sun" }
+        ]
+    };
+
+    const randomOffender = QUOTES_DB.offender[Math.floor(Math.random() * QUOTES_DB.offender.length)];
+    const randomVictim = QUOTES_DB.victim[Math.floor(Math.random() * QUOTES_DB.victim.length)];
+
+    // Fixed Theme Colors
+    const themeOffender = {
+        gradient: "linear-gradient(135deg, #14532d, #052e16)", // Deep Forest Green
+        accent: "#ecc94b" // Gold
+    };
+    const themeVictim = {
+        gradient: "linear-gradient(135deg, #0f766e, #115e59)", // Deep Ocean Teal
+        accent: "#99f6e4" // Mint
+    };
+
+    // 2. Return HTML String
     return `
             <div class="top-bar">
                 <div>
@@ -370,83 +411,39 @@ window.getGuidePageHTML = function () {
                 </div>
 
                 <!-- 3. Inspirational Quotes (Dynamic Cards) -->
-            // Quote Database with reduced properties (gradients handled by fixed theme)
-            const QUOTES_DB = {
-                offender: [
-                    { text: "잘못을 인정하는 것은 수치가 아니다. 어제보다 오늘 더 현명해졌다는 증거다.", author: "알렉산더 포프", icon: "fa-feather-alt" },
-                    { text: "진정한 뉘우침은 과거의 행동을 후회하는 것뿐만 아니라, 미래의 행동을 변화시키는 것이다.", author: "스피노자", icon: "fa-road" },
-                    { text: "허물이 있다면 고치기를 꺼리지 말라. (과즉물탄개)", author: "공자", icon: "fa-scroll" },
-                    { text: "자신의 잘못을 인정하는 것은 결백한 사람만이 할 수 있는 용기다.", author: "세네카", icon: "fa-balance-scale" },
-                    { text: "자기 잘못을 시인하면 오히려 존경받는다. 싸움은 끝내고 신뢰는 시작된다.", author: "데일 카네기", icon: "fa-handshake" },
-                    { text: "가장 위대한 승리는 자기 자신을 이기는 것이다.", author: "톨스토이", icon: "fa-trophy" },
-                    { text: "실수를 저지르는 것은 인간이다. 하지만 실수를 고치지 않는 것은 어리석음이다.", author: "소포클레스", icon: "fa-landmark" },
-                    { text: "잘못을 뉘우치는 마음이 곧 도(道)에 들어가는 첫걸음이다.", author: "채근담", icon: "fa-leaf" },
-                    { text: "부끄러움을 아는 마음이 의로움의 시작이다 (수오지심).", author: "맹자", icon: "fa-spa" },
-                    { text: "변명을 잘하는 사람은 그 외에 잘하는 것이 거의 없다.", author: "벤자민 프랭클린", icon: "fa-clock" }
-                ],
-                victim: [
-                    { text: "용서는 과거를 바꿀 수 없지만, 미래를 확장시킨다.", author: "폴 보시", icon: "fa-cloud-sun" },
-                    { text: "분노를 품고 있는 것은 독을 마시고 남이 죽기를 바라는 것과 같다.", author: "부처", icon: "fa-fire-alt" },
-                    { text: "약한 자는 절대 용서할 수 없다. 용서는 강한 자의 속성이다.", author: "마하트마 간디", icon: "fa-fist-raised" },
-                    { text: "미움은 미움으로 갚아서는 결코 사라지지 않는다. 오직 자비로만 사라진다.", author: "법구경", icon: "fa-hands-holding-circle" },
-                    { text: "용기 있는 사람들은 평화를 위해 용서하는 것을 두려워하지 않는다.", author: "넬슨 만델라", icon: "fa-dove" },
-                    { text: "어둠으로 어둠을 몰아낼 수 없다. 오직 빛만이 할 수 있다.", author: "마틴 루터 킹", icon: "fa-lightbulb" },
-                    { text: "바꿀 수 없는 것을 받아들이는 평온함을 주소서.", author: "라인홀드 니부어", icon: "fa-water" },
-                    { text: "흐르는 물은 썩지 않나니, 마음의 앙금을 흘려보내라.", author: "장자", icon: "fa-stream" },
-                    { text: "용서란 내가 겪은 고통이 헛되지 않게 하는 것이다.", author: "CS 루이스", icon: "fa-book-open" },
-                    { text: "진정한 용서는 과거가 다르기를 바라는 희망을 포기하는 것이다.", author: "오프라 윈프리", icon: "fa-sun" }
-                ]
-            };
-
-            const randomOffender = QUOTES_DB.offender[Math.floor(Math.random() * QUOTES_DB.offender.length)];
-            const randomVictim = QUOTES_DB.victim[Math.floor(Math.random() * QUOTES_DB.victim.length)];
-
-            // Fixed Theme Colors
-            const themeOffender = {
-                gradient: "linear-gradient(135deg, #14532d, #052e16)", // Deep Forest Green
-                accent: "#ecc94b" // Gold
-            };
-            const themeVictim = {
-                gradient: "linear-gradient(135deg, #0f766e, #115e59)", // Deep Ocean Teal
-                accent: "#99f6e4" // Mint
-            };
-
-            return `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px;" >
-                            <!-- Offender Quote Card -->
-                             <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${themeOffender.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                                <i class="fas ${randomOffender.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
-                                <div style="position: relative; z-index: 1;">
-                                    <div style="font-size: 0.8rem; color: ${themeOffender.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
-                                        성찰의 지혜
-                                    </div>
-                                    <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
-                                        "${randomOffender.text}"
-                                    </p>
-                                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
-                                        - ${randomOffender.author}
-                                    </div>
-                                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px;">
+                    <!-- Offender Quote Card -->
+                     <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${themeOffender.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <i class="fas ${randomOffender.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="font-size: 0.8rem; color: ${themeOffender.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
+                                성찰의 지혜
                             </div>
-
-                            <!-- Victim Quote Card -->
-        <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${themeVictim.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <i class="fas ${randomVictim.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
-            <div style="position: relative; z-index: 1;">
-                <div style="font-size: 0.8rem; color: ${themeVictim.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
-                    치유의 지혜
-                </div>
-                <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
-                    "${randomVictim.text}"
-                </p>
-                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
-                    - ${randomVictim.author}
-                </div>
-            </div>
-        </div>
+                            <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
+                                "${randomOffender.text}"
+                            </p>
+                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
+                                - ${randomOffender.author}
+                            </div>
                         </div>
-        `;
-        })()}
+                    </div>
+
+                    <!-- Victim Quote Card -->
+                     <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${themeVictim.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        <i class="fas ${randomVictim.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="font-size: 0.8rem; color: ${themeVictim.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
+                                치유의 지혜
+                            </div>
+                            <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
+                                "${randomVictim.text}"
+                            </p>
+                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); text-align: right;">
+                                - ${randomVictim.author}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- 4. How to Use (Steps) -->
                 <div class="glass-card">
