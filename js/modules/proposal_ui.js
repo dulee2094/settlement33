@@ -125,7 +125,7 @@ window.ProposalUI = {
     },
 
     // --- Gauge & Result Chart ---
-    renderGaugeChart(gapPercent, myAmount) {
+    renderGaugeChart(gapPercent, myAmount, isFinalRound = false, currentRound = 1) {
         this.showRightPanelState('resultState');
 
         // 1. Populate Range Hint Box
@@ -210,14 +210,14 @@ window.ProposalUI = {
             if (container) container.innerHTML = '';
         } else {
             // Case B: Next Round or Extension
-            this.renderNextRoundAction(myAmount, false, false, isFinalRound);
+            this.renderNextRoundAction(myAmount, false, false, isFinalRound, currentRound);
         }
     },
 
     /**
      * Renders the prominent "Next Round" or "Extension" action area
      */
-    renderNextRoundAction(myAmount, myStatus = false, oppStatus = false, isFinalRound = false) {
+    renderNextRoundAction(myAmount, myStatus = false, oppStatus = false, isFinalRound = false, currentRound = 1) {
         // Find or create container
         let container = document.getElementById('nextRoundActionArea');
         if (!container) {
