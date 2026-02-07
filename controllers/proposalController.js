@@ -30,20 +30,35 @@ const ProposalController = {
             const myUid = parseInt(userId);
             let iAgreed = false;
             let oppAgreed = false;
+            let myNextRoundIntent = false;
+            let oppNextRoundIntent = false;
+
             if (c) {
                 if (c.offenderId === myUid) {
                     iAgreed = c.proposalExtendOffender;
                     oppAgreed = c.proposalExtendVictim;
+                    myNextRoundIntent = c.nextRoundIntentOffender;
+                    oppNextRoundIntent = c.nextRoundIntentVictim;
                 } else if (c.victimId === myUid) {
                     iAgreed = c.proposalExtendVictim;
                     oppAgreed = c.proposalExtendOffender;
+                    myNextRoundIntent = c.nextRoundIntentVictim;
+                    oppNextRoundIntent = c.nextRoundIntentOffender;
                 }
             }
 
             // Calculate current round
             const myRound = myProposals.length > 0 ? myProposals[0].round : 0;
             const oppRound = opponentProposals.length > 0 ? opponentProposals[0].round : 0;
-            const currentRound = Math.max(myRound, oppRound);
+            let currentRound = Math.max(myRound, oppRound);
+
+            // Logic to advance round if both agreed
+            // If both sides finished the previous round (equal rounds) and signaled intent:
+            if (c.nextRoundIntentOffender && c.nextRoundIntentVictim) {
+                if (myRound === oppRound && myRound === currentRound) {
+                    currentRound++;
+                }
+            }
 
             // Check Gap Analysis for CURRENT round
             const allProposals = await Proposal.findAll({
@@ -147,6 +162,8 @@ const ProposalController = {
                 isExtended,
                 iAgreed,
                 oppAgreed,
+                myNextRoundIntent,
+                oppNextRoundIntent,
                 status: gapStatus,
                 data: gapData,
                 currentRoundData: currentRoundData,
@@ -225,8 +242,10 @@ const ProposalController = {
 
             if (c.status === 'connected') {
                 c.status = 'negotiating';
-                await c.save();
             }
+            if (userId === c.offenderId) c.nextRoundIntentOffender = false;
+            else if (userId === c.victimId) c.nextRoundIntentVictim = false;
+            await c.save();
 
             // Gap Analysis
             const proposals = await Proposal.findAll({ where: { caseId }, order: [['createdAt', 'DESC']] });
@@ -489,6 +508,34 @@ const ProposalController = {
             }
 
             res.json({ success: true, waiting: true, phase: 2 });
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    },
+
+    async nextRoundIntent(req, res) {
+        const { userId, caseId, round } = req.body;
+        try {
+            const c = await Case.findByPk(caseId);
+            if (!c) return res.json({ success: false, error: 'Case not found' });
+            const uid = parseInt(userId);
+
+            if (c.offenderId === uid) c.nextRoundIntentOffender = true;
+            else if (c.victimId === uid) c.nextRoundIntentVictim = true;
+            else return res.json({ success: false, error: 'Not a participant' });
+
+            await c.save();
+
+            const bothReady = c.nextRoundIntentOffender && c.nextRoundIntentVictim;
+            // logic: if both ready, clients should reload and see new round input?
+            // Actually, client logic just waits for `nextRoundStarted` or both intents.
+
+            res.json({
+                success: true,
+                myNextRoundIntent: true, // echo back
+                nextRoundStarted: bothReady
+            });
         } catch (e) {
             console.error(e);
             res.status(500).json({ success: false, error: e.message });

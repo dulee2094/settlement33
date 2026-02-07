@@ -35,5 +35,8 @@ router.post('/midpoint-procedure-agree', ProposalController.midpointProcedureAgr
 // 8. Step 2: Final Agreement
 router.post('/midpoint-final-agree', ProposalController.midpointFinalAgree);
 
+// 9. Next Round Intent (Wait Sync)
+router.post('/next-round-intent', ProposalController.nextRoundIntent);
+
 
 module.exports = router;

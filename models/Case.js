@@ -36,6 +36,10 @@ const Case = sequelize.define('Case', {
     midpointRejectedBy: { type: DataTypes.STRING }, // 'offender', 'victim', or 'both'
     midpointRejectedAt: { type: DataTypes.DATE }, // When rejected
 
+    // Round Transition Intent (Next Round)
+    nextRoundIntentOffender: { type: DataTypes.BOOLEAN, defaultValue: false },
+    nextRoundIntentVictim: { type: DataTypes.BOOLEAN, defaultValue: false },
+
     finalAmount: { type: DataTypes.INTEGER }
 });
 
