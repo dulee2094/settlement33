@@ -409,7 +409,7 @@ window.getGuidePageHTML = function () {
                                 <i class="fas ${randomOffender.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
                                 <div style="position: relative; z-index: 1;">
                                     <div style="font-size: 0.8rem; color: ${randomOffender.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
-                                        FOR OFFENDER
+                                        성찰의 지혜
                                     </div>
                                     <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
                                         "${randomOffender.text}"
@@ -425,7 +425,7 @@ window.getGuidePageHTML = function () {
                                 <i class="fas ${randomVictim.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
                                 <div style="position: relative; z-index: 1;">
                                     <div style="font-size: 0.8rem; color: ${randomVictim.accent}; margin-bottom: 15px; font-weight: bold; letter-spacing: 1px;">
-                                        FOR VICTIM
+                                        치유의 지혜
                                     </div>
                                     <p style="font-size: 1.1rem; line-height: 1.6; color: white; margin-bottom: 20px; font-family: 'Gowun Dodum', sans-serif;">
                                         "${randomVictim.text}"

@@ -328,6 +328,7 @@ window.ProposalUI = {
                         </button>
                     </div>
                 `;
+            } else {
                 // State: Default (Start CTA)
                 html = `
                     <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
