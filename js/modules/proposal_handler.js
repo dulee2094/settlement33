@@ -200,8 +200,36 @@ window.ProposalHandler = {
                     </div>
                     <div id="expirationTimerDisplay"></div>
                 </div>`;
+        } else if (isNextRoundWait) {
+            // Step 5B: Next Round Waiting (Intent Registered)
+            el.innerHTML = `
+                <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
+                    <div style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">
+                        ⏳ 다음 라운드 대기 중
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+                        <div class="glass-card" style="padding: 20px; border: 1px solid rgba(167, 139, 250, 0.5); background: rgba(167, 139, 250, 0.05);">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🆗</div>
+                            <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px;">나의 상태</div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: #ddd6fe;">준비 완료</div>
+                        </div>
+                        <div class="glass-card" style="padding: 20px; border: 1px solid rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.05); animation: pulse-border 2s infinite;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🕐</div>
+                            <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px;">상대방 상태</div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: #fbbf24;">응답 대기</div>
+                         </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px; text-align: left;">
+                        <h4 style="color: #fff; margin-bottom: 15px; font-size: 1rem;"><i class="fas fa-user-clock" style="color: #a78bfa; margin-right: 8px;"></i>상대방을 기다리고 있습니다</h4>
+                         <p style="color: #cbd5e1; line-height: 1.6; font-size: 0.95rem;">
+                            상대방도 진행에 동의하면<br>
+                            즉시 ${currentRound + 1}라운드가 시작됩니다.
+                        </p>
+                    </div>
+                    <div id="expirationTimerDisplay"></div>
+                </div>`;
         } else {
-            // Round 2+ or Next Round Waiting
+            // Round 2+ Waiting (Proposal Submitted)
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
                     <div style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">
@@ -211,7 +239,7 @@ window.ProposalHandler = {
                         <div class="glass-card" style="padding: 20px; border: 1px solid rgba(167, 139, 250, 0.5); background: rgba(167, 139, 250, 0.05);">
                             <div style="font-size: 3rem; margin-bottom: 10px;">🆗</div>
                             <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px;">나의 수정 제안</div>
-                             <div style="font-size: 1.1rem; font-weight: bold; color: #ddd6fe;">등록 완료</div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: #ddd6fe;">등록 완료</div>
                         </div>
                         <div class="glass-card" style="padding: 20px; border: 1px solid rgba(251, 191, 36, 0.5); background: rgba(251, 191, 36, 0.05); animation: pulse-border 2s infinite;">
                             <div style="font-size: 3rem; margin-bottom: 10px;">💭</div>
