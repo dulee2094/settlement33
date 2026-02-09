@@ -94,8 +94,8 @@ window.submitProposal = async () => {
     else if (selectedDuration === 3) durationHours = 72;
 
     try {
-        // FIXED: ProposalAPI.submitProposal expects internal object structure { caseId, proposerId, amount, duration }
-        const result = await ProposalAPI.submitProposal({ caseId, proposerId: userId, amount, duration: durationHours });
+        // FIXED: ProposalAPI.submitProposal expects { caseId, userId, amount, duration }
+        const result = await ProposalAPI.submitProposal({ caseId, userId, amount, duration: durationHours });
         if (result.success) {
             // alert('제안이 성공적으로 등록되었습니다.'); // Optional: Remove alert for better UX
             amountInput.value = '';
