@@ -197,25 +197,20 @@ async function checkStatus() {
     if (!caseId || !userId) return;
 
     try {
-        // FIXED: ProposalAPI uses checkStatus, not getStatus
         const data = await ProposalAPI.checkStatus(caseId, userId);
 
-        // --- DELEGATE TO HANDLER ---
         if (window.ProposalHandler) {
             window.ProposalHandler.process(data);
-
-            // Sync Global variables needed for Actions
-            if (data.myLastProposal) {
-                window.myLastProposalAmount = data.myLastProposal.amount;
-            }
-        } else {
-            console.error("ProposalHandler is not loaded!");
         }
 
+        // DEBUG
+        if (window.updateDebugInfo) window.updateDebugInfo(data);
     } catch (e) {
-        console.error('Status Check Error:', e);
+        console.error(e);
     }
 }
+
+
 
 // --- Initialization ---
 
