@@ -76,8 +76,12 @@ window.selectDuration = function (days) {
 
 // 3. Submit Proposal
 window.submitProposal = async () => {
-    const amountInput = document.getElementById('proposalAmount');
-    if (!amountInput) return;
+    const amountInput = document.getElementById('myAmount');
+    if (!amountInput) {
+        console.error('Submission Error: Input element #myAmount not found');
+        alert('입력 필드를 찾을 수 없습니다.');
+        return;
+    }
 
     const amount = parseInt(amountInput.value.replace(/,/g, ''), 10);
     if (!amount || isNaN(amount) || amount <= 0) {
@@ -200,14 +204,14 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('[Controller] Initializing Blind Proposal...');
 
     // Initial Setup
-    ProposalUI.init(); // Sets up generic UI listeners
+    // ProposalUI.init(); // Removed: Method does not exist and is not needed.
 
     // Start Poll
     checkStatus();
     setInterval(checkStatus, 3000); // 3-second poll
 
     // Input Formatting
-    const input = document.getElementById('proposalAmount');
+    const input = document.getElementById('myAmount');
     if (input) {
         input.addEventListener('input', (e) => {
             let val = e.target.value.replace(/[^0-9]/g, '');
