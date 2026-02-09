@@ -59,7 +59,14 @@ window.ProposalState = {
         const currentRound = data.currentRound || 1;
         const myRound = data.myRound || 0;
 
-        // 1. Result View State (Most stable state)
+        // 1. Input Phase (Highest Priority for New Round)
+        // If my round is lagging behind Current Round (e.g., My: 1, Current: 2)
+        // This means a new round has started and I haven't submitted yet.
+        if (myRound < currentRound) {
+            return PROPOSAL_STATE.STEP_1_INPUT;
+        }
+
+        // 2. Result View State (Most stable state)
         // If I have viewed the result of the CURRENT round
         // AND both have proposed in this round (implied by result availability)
         // BUT: If a new round has started (currentRound > myRound), we enter Step 1.
@@ -100,8 +107,7 @@ window.ProposalState = {
         }
 
         // 6. Input Phase (Step 1)
-        // My round is lagging behind Current Round (e.g., My: 1, Current: 2)
-        // OR My Round matches Current but I haven't submitted (My: 0, Current: 1)
+        // Redundant check removed (handled at top)
         if (myRound < currentRound) {
             return PROPOSAL_STATE.STEP_1_INPUT;
         }
