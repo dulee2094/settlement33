@@ -97,20 +97,39 @@ window.submitProposal = async () => {
     if (selectedDuration === '6h') durationHours = 6;
     else if (selectedDuration === 3) durationHours = 72;
 
+    // Prevent Double Click
+    const submitBtn = document.querySelector('button[onclick="submitProposal()"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "처리 중...";
+    }
+
     try {
         // FIXED: ProposalAPI.submitProposal expects { caseId, userId, amount, duration }
         const result = await ProposalAPI.submitProposal({ caseId, userId, amount, duration: durationHours });
         if (result.success) {
-            // alert('제안이 성공적으로 등록되었습니다.'); // Optional: Remove alert for better UX
+            // alert('제안이 성공적으로 등록되었습니다.');
             amountInput.value = '';
-            // Immediately refresh status
-            checkStatus();
+
+            // Force immediate update
+            await checkStatus();
+
+            // Note: Button remains disabled as the UI will likely update to "Waiting" state immediately
+            // If the state doesn't change for some reason, we might want to re-enable, but usually it's safer to keep disabled to prevent races.
         } else {
             alert(result.error || '제안 등록에 실패했습니다.');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "제안 등록하기";
+            }
         }
     } catch (e) {
         console.error("Submission Error:", e);
         alert('서버 통신 중 오류가 발생했습니다.');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "제안 등록하기";
+        }
     }
 };
 

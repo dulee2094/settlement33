@@ -20,6 +20,13 @@ window.ProposalUI = {
         });
     },
 
+    updateSidebar(title, name) {
+        const titleEl = document.getElementById('sidebarCaseNumber');
+        const nameEl = document.getElementById('sidebarCounterparty');
+        if (titleEl) titleEl.textContent = title;
+        if (nameEl) nameEl.textContent = name;
+    },
+
     showRightPanelState(stateId) {
         // Optimization: Prevent flashing if already shown
         const el = document.getElementById(stateId);

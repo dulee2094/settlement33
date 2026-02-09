@@ -16,6 +16,11 @@ window.ProposalHandler = {
         // Augment data with computed properties (Fix for missing maxLimit)
         data.maxLimit = data.isExtended ? 8 : 5;
 
+        // Update Sidebar
+        if (data.caseTitle && data.opponentName) {
+            ProposalUI.updateSidebar(data.caseTitle, data.opponentName);
+        }
+
         // Use ProposalState logic
         const state = ProposalState.determineState(data);
         console.log(`[ProposalHandler] Processing State: ${state}`);

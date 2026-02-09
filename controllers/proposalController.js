@@ -1,4 +1,7 @@
-const { Proposal, Case } = require('../models');
+// ... (existing imports)
+const { Proposal, Case, User } = require('../models'); // ensuring User is imported
+
+
 const { Op } = require('sequelize');
 
 const ProposalController = {
@@ -26,6 +29,15 @@ const ProposalController = {
             // Check Case Extension Status
             const c = await Case.findByPk(caseId);
             const isExtended = c && c.proposalExtendOffender && c.proposalExtendVictim;
+
+            // Get Case Title & Opponent Name
+            let caseTitle = c.roomTitle || c.caseNumber;
+            let opponentName = '-';
+
+            if (c.status !== 'pending' && c.victimId && c.offenderId) {
+                const opponent = await User.findByPk((uid === c.offenderId) ? c.victimId : c.offenderId);
+                if (opponent) opponentName = opponent.name || opponent.username;
+            }
 
             // Check if I agreed to extension
             let iAgreed = false;
@@ -164,6 +176,8 @@ const ProposalController = {
                 oppAgreed,
                 myNextRoundIntent,
                 oppNextRoundIntent,
+                caseTitle,
+                opponentName,
                 status: gapStatus,
                 data: gapData,
                 currentRoundData: currentRoundData,
