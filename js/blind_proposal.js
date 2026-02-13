@@ -83,7 +83,7 @@ window.submitProposal = async () => {
         return;
     }
 
-    const amount = parseInt(amountInput.value.replace(/,/g, ''), 10);
+    const amount = parseInt(amountInput.value.replace(/,/g, ''), 10) * 10000;
     if (!amount || isNaN(amount) || amount <= 0) {
         alert('유효한 합의 금액을 입력해주세요.');
         return;

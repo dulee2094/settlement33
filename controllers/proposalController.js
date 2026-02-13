@@ -160,7 +160,7 @@ const ProposalController = {
                 myProposalCount: myProposals.length,
                 myLastProposal: myProposals.length > 0 ? myProposals[0] : null,
                 opponentProposalCount: opponentProposals.length,
-                hasOpponentProposed: opponentProposals.length > 0,
+                hasOpponentProposed: oppRound === currentRound,
                 opponentLastProposal: opponentProposals.length > 0 ? {
                     expiresAt: opponentProposals[0].expiresAt,
                     createdAt: opponentProposals[0].createdAt
