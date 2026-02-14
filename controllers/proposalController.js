@@ -120,6 +120,18 @@ const ProposalController = {
                     completed: true,
                     bothViewed: bothViewed
                 };
+
+                // Midpoint Check
+                const maxVal = Math.max(amt1, amt2);
+                const gapPercent = (diff / maxVal) * 100;
+                if (gapPercent <= 10) {
+                    // Midpoint Active!
+                    midpointStatus = {
+                        isMidpointActive: true,
+                        gapPercent: gapPercent,
+                        midpointAmount: Math.floor((amt1 + amt2) / 2) // Integer midpoint
+                    };
+                }
             } else if (pOffenderCurrent || pVictimCurrent) {
                 roundStatus = 'proposing'; // One side proposed
 
@@ -143,8 +155,8 @@ const ProposalController = {
                         round: r,
                         offenderAmount: pOff.amount,
                         victimAmount: pVic.amount,
-                        diff: Math.abs(pOff.amount - pVic.amount),
-                        completed: true
+                        completed: true,
+                        resultViewed: pOff.resultViewed && pVic.resultViewed
                     });
                 } else {
                     previousRounds.push({
@@ -181,7 +193,8 @@ const ProposalController = {
                 status: gapStatus,
                 data: gapData,
                 currentRoundData: currentRoundData,
-                previousRounds: previousRounds
+                previousRounds: previousRounds,
+                midpointStatus: midpointStatus // Include in response
             });
 
         } catch (e) {

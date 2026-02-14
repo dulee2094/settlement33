@@ -340,10 +340,25 @@ window.ProposalHandler = {
         // Use data.isExtended if available
         const isFinalLoop = (data.currentRound >= 5 && !data.isExtended);
 
-        ProposalUI.renderGaugeChart(gapPercent, window.myLastProposalAmount, isFinalLoop, data.currentRound);
+        // Determine my amount for display
+        // We need to know if I am offender or victim. 
+        // Using 'myLastProposal' which contains 'amount' if available, otherwise 0
+        // Or comparing user ID if available in 'data'. 
+        // Simplest: Check data.myLastProposal.amount
+        let myAmount = 0;
+        if (data.myLastProposal && data.myLastProposal.amount) {
+            myAmount = data.myLastProposal.amount;
+        } else {
+            // Fallback: If ProposalState sets it correctly, we might infer.
+            // But data.myLastProposal should be robust.
+            // If not, use window global fallback (legacy)
+            myAmount = window.myLastProposalAmount || 0;
+        }
+
+        ProposalUI.renderGaugeChart(gapPercent, myAmount, isFinalLoop, data.currentRound);
 
         ProposalUI.renderNextRoundAction(
-            window.myLastProposalAmount,
+            myAmount,
             data.myNextRoundIntent,
             data.oppNextRoundIntent,
             isFinalLoop,
