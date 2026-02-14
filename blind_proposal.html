@@ -109,7 +109,7 @@
                                 style="display: block; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">합의
                                 희망 금액 (만원)</label>
                             <div style="position: relative;">
-                                <input type="number" id="myAmount" placeholder="예: 500"
+                                <input type="text" inputmode="numeric" id="myAmount" placeholder="예: 500"
                                     style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; color: white; font-size: 1.1rem; padding-right: 50px;">
                                 <span
                                     style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #888;">만원</span>
@@ -230,7 +230,7 @@
                         <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">
                             🎉
                         </div>
-                        <h3 style="color: #fff; margin-bottom: 15px;">1라운드 분석 완료!</h3>
+                        <h3 style="color: #fff; margin-bottom: 15px;">분석 완료!</h3>
                         <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 30px;">
                             양측의 제안이 모두 등록되어<br>
                             AI 격차 분석이 완료되었습니다.<br>
@@ -335,12 +335,12 @@
                 </div>
 
                 <!-- Core Logic Script -->
-                <script src="js/modules/proposal_api.js"></script>
-                <script src="js/modules/proposal_ui.js"></script>
-                <script src="js/modules/proposal_debug.js"></script>
-                <script src="js/modules/proposal_state.js"></script>
-                <script src="js/modules/proposal_handler.js"></script>
-                <script src="js/blind_proposal.js"></script>
+                <script src="js/modules/proposal_api.js?v=2.1"></script>
+                <script src="js/modules/proposal_ui.js?v=2.1"></script>
+                <script src="js/modules/proposal_debug.js?v=2.1"></script>
+                <script src="js/modules/proposal_state.js?v=2.1"></script>
+                <script src="js/modules/proposal_handler.js?v=2.1"></script>
+                <script src="js/blind_proposal.js?v=2.1"></script>
             </div>
         </main>
 

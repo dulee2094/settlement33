@@ -34,7 +34,7 @@ const ProposalController = {
             let caseTitle = c.roomTitle || c.caseNumber;
             let opponentName = '-';
 
-            if (c.status !== 'pending' && c.victimId && c.offenderId) {
+            if (c.victimId && c.offenderId) {
                 const opponent = await User.findByPk((uid === c.offenderId) ? c.victimId : c.offenderId);
                 if (opponent) opponentName = opponent.name || opponent.username;
             }

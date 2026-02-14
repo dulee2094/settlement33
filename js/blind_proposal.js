@@ -134,22 +134,38 @@ window.submitProposal = async () => {
 };
 
 // 4. Confirm View Result
-window.confirmViewResultBase = async () => {
-    // Logic extracted from original confirmViewResult
-    // Call API to mark result as viewed
+// 4. Confirm View Result
+window.viewAnalysisResult = async () => {
+    console.log('[UI] View Analysis Result Clicked');
+
     const caseId = localStorage.getItem('current_case_id');
     const userId = localStorage.getItem('user_id');
+    // Get round directly from debug data if available, or UI
+    // Fallback to 1 if parsing fails
     const currentRound = parseInt(document.getElementById('currentRoundDisplay')?.textContent || '1');
 
+    console.log(`[UI] Requesting View Result: Case=${caseId}, User=${userId}, Round=${currentRound}`);
+
     try {
-        const res = await ProposalAPI.markResultViewed(caseId, userId, currentRound);
+        const res = await ProposalAPI.viewAnalysisResult(userId, caseId, currentRound);
+        console.log('[UI] View Result Response:', res);
+
         if (res.success) {
-            checkStatus(); // Refresh to update state
+            if (!res.bothViewed) {
+                alert('1라운드 결과 확인 완료.\n상대방이 아직 결과를 확인하지 않았습니다.\n상대방이 확인할 때까지 잠시 대기해주세요.');
+            }
+            await checkStatus(); // Refresh to update state
+        } else {
+            alert(res.message || '결과를 불러오는데 실패했습니다.');
         }
     } catch (e) {
-        console.error(e);
+        console.error('[UI] View Result Error:', e);
+        alert('서버 통신 중 오류가 발생했습니다.');
     }
 };
+
+// Alias for compatibility if HTML calls legacy name
+window.confirmViewResultBase = window.viewAnalysisResult;
 
 // 5. Next Round Intent
 window.confirmNextRoundIntent = async () => {

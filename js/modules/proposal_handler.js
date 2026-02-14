@@ -77,7 +77,10 @@ window.ProposalHandler = {
             let guideTitle = "진행 안내";
             let guideIcon = "fa-info-circle";
             let guideColor = "#60a5fa";
-            let topBadge = "📍 1라운드 진행 중";
+            // let topBadge = "📍 1라운드 진행 중"; // Removed in favor of Headline
+            let headlineColor = "#60a5fa";
+            let headlineText = "제안 입력 단계";
+
             let myCardBorder = "1px solid rgba(251, 191, 36, 0.5)";
             let myCardBg = "rgba(251, 191, 36, 0.05)";
             let myStatusText = "입력 대기";
@@ -85,7 +88,10 @@ window.ProposalHandler = {
             let myIcon = "✏️";
 
             if (data.hasOpponentProposed) {
-                topBadge = "🚀 상대방 제안 등록 완료!";
+                // topBadge = "🚀 상대방 제안 등록 완료!";
+                headlineText = "상대방 제안 등록 완료!";
+                headlineColor = "#4ade80";
+
                 guideTitle = "이제 고객님의 차례입니다";
                 guideIcon = "fa-bell";
                 guideColor = "#ef4444";
@@ -98,9 +104,16 @@ window.ProposalHandler = {
 
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <div style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 600;">
-                        ${topBadge}
+                    <!-- Headline Style Round Display -->
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: ${headlineColor}; line-height: 1.2; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+                            1 <span style="font-size: 1.5rem; vertical-align: middle; margin-left: -5px;">ROUND</span>
+                        </div>
+                        <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">
+                            ${headlineText}
+                        </div>
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                         <div class="glass-card" style="padding: 20px; border: ${myCardBorder}; background: ${myCardBg}; ${data.hasOpponentProposed ? 'animation: pulse-border 2s infinite;' : ''}">
                             <div style="font-size: 3rem; margin-bottom: 10px;">${myIcon}</div>
@@ -139,9 +152,16 @@ window.ProposalHandler = {
 
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <div style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 600;">
-                        🔄 ${currentRound}라운드 제안 진행 중
+                    <!-- Headline Style Round Display -->
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: #60a5fa; line-height: 1.2; text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+                            ${currentRound} <span style="font-size: 1.5rem; vertical-align: middle; margin-left: -5px;">ROUND</span>
+                        </div>
+                        <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">
+                            제안 진행 중
+                        </div>
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                         <div class="glass-card" style="padding: 20px; border: 2px solid #f59e0b; background: rgba(251, 191, 36, 0.05); animation: pulse-border 2s infinite;">
                             <div style="font-size: 3rem; margin-bottom: 10px;">✏️</div>
@@ -175,9 +195,16 @@ window.ProposalHandler = {
         if (currentRound === 1 && !isNextRoundWait) {
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <div style="background: rgba(74, 222, 128, 0.1); color: #4ade80; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(74, 222, 128, 0.3); font-weight: 600;">
-                        📍 1라운드: 상대방 입력 대기 중
+                    <!-- Headline Style Round Display -->
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: #4ade80; line-height: 1.2; text-shadow: 0 0 20px rgba(74, 222, 128, 0.3);">
+                            1 <span style="font-size: 1.5rem; vertical-align: middle; margin-left: -5px;">ROUND</span>
+                        </div>
+                        <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">
+                            상대방 입력 대기 중
+                        </div>
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                         <div class="glass-card" style="padding: 20px; border: 1px solid rgba(74, 222, 128, 0.5); background: rgba(74, 222, 128, 0.05);">
                             <div style="font-size: 3rem; margin-bottom: 10px;">✅</div>
@@ -204,9 +231,16 @@ window.ProposalHandler = {
             // Step 5B: Next Round Waiting (Intent Registered)
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <div style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">
-                        ⏳ 다음 라운드 대기 중
+                    <!-- Headline Style Round Display -->
+                     <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: #a78bfa; line-height: 1.2; text-shadow: 0 0 20px rgba(167, 139, 250, 0.3);">
+                            ${currentRound} <span style="font-size: 1.5rem; vertical-align: middle; margin-left: -5px;">ROUND</span>
+                        </div>
+                        <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">
+                            다음 라운드 대기 중
+                        </div>
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                         <div class="glass-card" style="padding: 20px; border: 1px solid rgba(167, 139, 250, 0.5); background: rgba(167, 139, 250, 0.05);">
                             <div style="font-size: 3rem; margin-bottom: 10px;">🆗</div>
@@ -232,9 +266,16 @@ window.ProposalHandler = {
             // Round 2+ Waiting (Proposal Submitted)
             el.innerHTML = `
                 <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <div style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 0.9rem; margin: 0 auto 20px auto; border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600;">
-                        🔄 ${currentRound}라운드: 상대방 응답 대기 중
+                    <!-- Headline Style Round Display -->
+                     <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3.5rem; font-weight: 800; color: #a78bfa; line-height: 1.2; text-shadow: 0 0 20px rgba(167, 139, 250, 0.3);">
+                            ${currentRound} <span style="font-size: 1.5rem; vertical-align: middle; margin-left: -5px;">ROUND</span>
+                        </div>
+                        <div style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">
+                            상대방 응답 대기 중
+                        </div>
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                         <div class="glass-card" style="padding: 20px; border: 1px solid rgba(167, 139, 250, 0.5); background: rgba(167, 139, 250, 0.05);">
                             <div style="font-size: 3rem; margin-bottom: 10px;">🆗</div>
@@ -266,6 +307,19 @@ window.ProposalHandler = {
     renderReadyDashboard(data) {
         ProposalUI.updateCountUI(data.myProposalCount, data.maxLimit, data.currentRound);
         ProposalUI.toggleProposalInput(false);
+
+        // Update Dynamic Text for Analysis Ready State
+        const stateEl = document.getElementById('analysisReadyState');
+        if (stateEl) {
+            const h3 = stateEl.querySelector('h3');
+            if (h3) h3.textContent = `${data.currentRound}라운드 분석 완료!`;
+
+            const footerP = stateEl.querySelector('p:last-of-type');
+            if (footerP && footerP.textContent.includes('라운드가 종료됩니다')) {
+                footerP.textContent = `* 결과를 확인하면 ${data.currentRound}라운드가 종료됩니다.`;
+            }
+        }
+
         ProposalUI.showRightPanelState('analysisReadyState');
     },
 
