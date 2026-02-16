@@ -85,6 +85,7 @@ const ProposalController = {
             let gapData = {};
             let currentRoundData = null;
             let roundStatus = 'waiting';
+            let midpointStatus = null; // Defined here to avoid ReferenceError
 
             // Find proposals for current round
             const pOffenderCurrent = allProposals.find(p =>
