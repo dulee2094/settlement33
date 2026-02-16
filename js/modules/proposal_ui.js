@@ -328,7 +328,7 @@ window.ProposalUI = {
                         <div style="font-size: 2rem; margin-bottom: 10px; animation: bounce 2s infinite;">⏳</div>
                         <h3 style="color: #60a5fa; margin-bottom: 5px;">다음 라운드 대기 중</h3>
                         <p style="color: #94a3b8; font-size: 0.9rem;">
-                            귀하는 2라운드 진행에 동의하셨습니다.<br>상대방이 동의하면 즉시 다음 단계로 넘어갑니다.
+                            귀하는 ${currentRound + 1}라운드 진행에 동의하셨습니다.<br>상대방이 동의하면 즉시 다음 단계로 넘어갑니다.
                         </p>
                         <button disabled style="margin-top: 15px; padding: 10px 25px; background: #334155; color: #94a3b8; border: none; border-radius: 8px; cursor: not-allowed;">
                             상대방 대기 중...
@@ -342,13 +342,13 @@ window.ProposalUI = {
                         <div style="margin-bottom: 15px;">
                             <span style="background: #ef4444; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">🔔 상대방 대기 중</span>
                         </div>
-                        <h3 style="color: #fca5a5; margin-bottom: 10px; font-size: 1.4rem;">상대방이 2라운드 시작을 기다립니다!</h3>
+                        <h3 style="color: #fca5a5; margin-bottom: 10px; font-size: 1.4rem;">상대방이 ${currentRound + 1}라운드 시작을 기다립니다!</h3>
                         <p style="color: #e2e8f0; margin-bottom: 20px;">
                             아직 기회는 남아있습니다. 포기하지 마세요.<br>지금 버튼을 눌러 협상을 이어가세요.
                         </p>
                         <button onclick="confirmNextRoundIntent()"
                             style="width: 100%; padding: 18px; font-size: 1.2rem; font-weight: bold; color: white; background: linear-gradient(135deg, #ef4444, #b91c1c); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: transform 0.2s;">
-                            🚀 2라운드 바로 입장하기
+                            🚀 ${currentRound + 1}라운드 바로 입장하기
                         </button>
                     </div>
                 `;
