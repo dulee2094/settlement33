@@ -232,12 +232,26 @@ async function checkStatus() {
 
         if (data && !data.success) {
             console.warn('[BlindProposal] Status Check Failed:', data.error);
+
+            // Add visual feedback for error
             if (data.error === 'Case not found') {
-                clearInterval(window.statusPollInterval); // Stop polling
+                clearInterval(window.statusPollInterval);
                 alert('사건 정보를 찾을 수 없습니다. 대시보드로 이동합니다.');
                 window.location.href = 'dashboard.html';
+                return;
+            } else {
+                // For diagnosis
+                console.error("Server Error:", data.error);
+                // Only alert once to avoid spamming
+                if (!window._errorAlerted) {
+                    alert('Status Check Error: ' + data.error);
+                    window._errorAlerted = true;
+                }
             }
         }
+
+        // Reset alert flag on success
+        if (data && data.success) window._errorAlerted = false;
 
         // DEBUG
         if (window.updateDebugInfo) window.updateDebugInfo(data);
