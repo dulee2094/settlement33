@@ -183,10 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.openCaseDetail = (caseId, caseNumber, myRole, status, counterpartyName, registrationDate, roomTitle, summary, apologyStatus, apologyContent) => {
         localStorage.setItem('current_case_id', caseId);
-        localStorage.setItem('current_case_number', caseNumber);
-        localStorage.setItem('current_case_role', myRole);
-        localStorage.setItem('current_case_status', status);
-        localStorage.setItem('current_counterparty', counterpartyName);
+        localStorage.setItem('current_case_number', caseNumber || '');
+        localStorage.setItem('current_case_role', myRole || '');
+        localStorage.setItem('current_case_status', status || '');
+        localStorage.setItem('current_counterparty', counterpartyName || '-');
         localStorage.setItem('current_case_date', registrationDate || '2024.01.01');
         localStorage.setItem('current_case_title', roomTitle || '');
         localStorage.setItem('current_case_summary', summary || '');

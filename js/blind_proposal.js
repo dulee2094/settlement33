@@ -126,9 +126,15 @@ window.submitProposal = async () => {
     } catch (e) {
         console.error("Submission Error:", e);
         alert('서버 통신 중 오류가 발생했습니다.');
+    } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = "제안 등록하기";
+            if (amountInput) amountInput.disabled = false;
+            // Restore button text only if we didn't navigate away or succeed fully (success case reloads anyway)
+            // Check if "Processing..." is still there, meaning we didn't succeed
+            if (submitBtn.innerText === "처리 중...") {
+                submitBtn.innerText = "제안 등록하기";
+            }
         }
     }
 };
@@ -210,7 +216,12 @@ async function checkStatus() {
     const caseId = localStorage.getItem('current_case_id');
     const userId = localStorage.getItem('user_id');
 
-    if (!caseId || !userId) return;
+    if (!caseId || !userId) {
+        console.warn('[BlindProposal] Missing credentials. Redirecting...');
+        alert('사건 정보가 유실되었습니다. 대시보드에서 사건을 다시 선택해주세요.');
+        window.location.href = 'dashboard.html';
+        return;
+    }
 
     try {
         const data = await ProposalAPI.checkStatus(caseId, userId);
@@ -242,8 +253,18 @@ async function checkStatus() {
 window.addEventListener('DOMContentLoaded', () => {
     console.log('[Controller] Initializing Blind Proposal...');
 
-    // Initial Setup
-    // ProposalUI.init(); // Removed: Method does not exist and is not needed.
+    // Quick Sidebar Update from LocalStorage (Fallback)
+    const savedTitle = localStorage.getItem('current_case_title') || localStorage.getItem('current_case_number');
+    const savedOpponent = localStorage.getItem('current_counterparty');
+
+    if (savedTitle) {
+        const el = document.getElementById('sidebarCaseNumber');
+        if (el) el.textContent = savedTitle;
+    }
+    if (savedOpponent) {
+        const el = document.getElementById('sidebarCounterparty');
+        if (el) el.textContent = savedOpponent;
+    }
 
     // Start Poll
     checkStatus();
