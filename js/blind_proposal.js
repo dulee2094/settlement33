@@ -219,6 +219,15 @@ async function checkStatus() {
             window.ProposalHandler.process(data);
         }
 
+        if (data && !data.success) {
+            console.warn('[BlindProposal] Status Check Failed:', data.error);
+            if (data.error === 'Case not found') {
+                clearInterval(window.statusPollInterval); // Stop polling
+                alert('사건 정보를 찾을 수 없습니다. 대시보드로 이동합니다.');
+                window.location.href = 'dashboard.html';
+            }
+        }
+
         // DEBUG
         if (window.updateDebugInfo) window.updateDebugInfo(data);
     } catch (e) {
@@ -238,7 +247,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Start Poll
     checkStatus();
-    setInterval(checkStatus, 3000); // 3-second poll
+    window.statusPollInterval = setInterval(checkStatus, 3000); // 3-second poll
 
     // Input Formatting
     const input = document.getElementById('myAmount');

@@ -28,7 +28,10 @@ const ProposalController = {
 
             // Check Case Extension Status
             const c = await Case.findByPk(caseId);
-            const isExtended = c && c.proposalExtendOffender && c.proposalExtendVictim;
+            if (!c) {
+                return res.json({ success: false, error: 'Case not found' });
+            }
+            const isExtended = c.proposalExtendOffender && c.proposalExtendVictim;
 
             // Get Case Title & Opponent Name
             let caseTitle = c.roomTitle || c.caseNumber;

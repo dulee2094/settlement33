@@ -11,7 +11,10 @@ window.ProposalHandler = {
      * Main entry point
      */
     process(data) {
-        if (!data) return;
+        if (!data || !data.success) {
+            console.warn('[ProposalHandler] Invalid data or API error:', data);
+            return;
+        }
 
         // Augment data with computed properties (Fix for missing maxLimit)
         data.maxLimit = data.isExtended ? 8 : 5;
