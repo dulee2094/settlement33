@@ -1,4 +1,4 @@
-/**
+1/**
  * ProposalHandler.js
  * Handles UI transitions based on state
  * Replaces complex logic in blind_proposal.js
@@ -362,8 +362,8 @@ window.ProposalHandler = {
 
         ProposalUI.renderNextRoundAction(
             myAmount,
-            data.myNextRoundIntent,
-            data.oppNextRoundIntent,
+            isFinalLoop ? data.iAgreed : data.myNextRoundIntent,
+            isFinalLoop ? data.oppAgreed : data.oppNextRoundIntent,
             isFinalLoop,
             data.currentRound
         );

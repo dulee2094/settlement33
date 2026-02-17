@@ -68,7 +68,7 @@ window.selectDuration = function (days) {
     // Update explanation text
     const desc = document.getElementById('duration-desc');
     if (desc) {
-        if (days === '6h') desc.textContent = '빠른 합의를 원할 때 적합합니다.';
+        if (days === '6h' || days === 0.25) desc.textContent = '빠른 합의를 원할 때 적합합니다.';
         else if (days === 1) desc.textContent = '표준적인 대기 시간입니다.';
         else if (days === 3) desc.textContent = '상대방에게 충분한 시간을 줍니다.';
     }
@@ -92,10 +92,10 @@ window.submitProposal = async () => {
     const caseId = localStorage.getItem('current_case_id');
     const userId = localStorage.getItem('user_id');
 
-    // Calculate expiration
-    let durationHours = 24;
-    if (selectedDuration === '6h') durationHours = 6;
-    else if (selectedDuration === 3) durationHours = 72;
+    // Calculate expiration (In Days)
+    let durationDays = 1;
+    if (selectedDuration === '6h' || selectedDuration === 0.25) durationDays = 0.25;
+    else if (selectedDuration === 3) durationDays = 3;
 
     // Prevent Double Click
     const submitBtn = document.querySelector('button[onclick="submitProposal()"]');
@@ -106,7 +106,7 @@ window.submitProposal = async () => {
 
     try {
         // FIXED: ProposalAPI.submitProposal expects { caseId, userId, amount, duration }
-        const result = await ProposalAPI.submitProposal({ caseId, userId, amount, duration: durationHours });
+        const result = await ProposalAPI.submitProposal({ caseId, userId, amount, duration: durationDays });
         if (result.success) {
             // alert('제안이 성공적으로 등록되었습니다.');
             amountInput.value = '';
@@ -158,7 +158,7 @@ window.viewAnalysisResult = async () => {
 
         if (res.success) {
             if (!res.bothViewed) {
-                alert('1라운드 결과 확인 완료.\n상대방이 아직 결과를 확인하지 않았습니다.\n상대방이 확인할 때까지 잠시 대기해주세요.');
+                alert('결과 확인이 완료되었습니다.\n상대방이 아직 결과를 확인하지 않았습니다.\n상대방이 확인할 때까지 잠시 대기해주세요.');
             }
             await checkStatus(); // Refresh to update state
         } else {
@@ -208,6 +208,33 @@ window.acceptMidpoint = async () => {
 };
 window.rejectMidpoint = async () => {
     alert('중간값 합의 거절 로직 구현 필요');
+};
+
+// 7. Request Extension
+window.requestExtension = async () => {
+    const caseId = localStorage.getItem('current_case_id');
+    const userId = localStorage.getItem('user_id');
+
+    // Confirm dialog
+    if (!confirm('3라운드 추가 진행을 요청하시겠습니까?\n상대방도 동의하면 총 8라운드까지 기회가 늘어납니다.')) return;
+
+    try {
+        const res = await ProposalAPI.requestExtension(caseId, userId);
+        if (res.success) {
+            if (res.isExtended) {
+                alert('양측 모두 동의하여 3라운드가 추가되었습니다!\n협상을 계속 진행해주세요.');
+            } else {
+                alert('연장 요청을 보냈습니다.\n상대방이 동의하면 즉시 라운드가 추가됩니다.');
+            }
+            // Force status update
+            await checkStatus();
+        } else {
+            alert(res.error || '요청 처리에 실패했습니다.');
+        }
+    } catch (e) {
+        console.error("Extension Request Error:", e);
+        alert('서버 통신 중 오류가 발생했습니다.');
+    }
 };
 
 // --- Main Loop ---

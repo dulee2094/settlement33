@@ -84,7 +84,7 @@ window.initializeProposal = async () => {
 window.submitProposal = async () => {
     const amount = document.getElementById('proposalAmount').value;
     const durationInput = document.getElementById('selectedDuration');
-    const duration = durationInput ? durationInput.value : null;
+    const duration = durationInput ? parseFloat(durationInput.value) : null;
 
     const caseId = localStorage.getItem('current_case_id');
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
