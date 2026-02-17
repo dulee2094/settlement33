@@ -127,6 +127,7 @@ window.ProposalHandler = {
                             <div style="font-size: 3rem; margin-bottom: 10px;">${data.hasOpponentProposed ? '🔒' : '👤'}</div>
                             <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px;">상대방 상태</div>
                             <div style="font-size: 1.1rem; font-weight: bold; color: ${oppStatusColor};">${oppStatusText}</div>
+                            ${data.hasOpponentProposed ? '<div id="oppExpirationTimerDisplay" style="margin-top:10px;"></div>' : ''}
                         </div>
                     </div>
                     <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px; text-align: left;">
@@ -175,6 +176,7 @@ window.ProposalHandler = {
                             <div style="font-size: 3rem; margin-bottom: 10px;">${data.hasOpponentProposed ? '🔒' : '👤'}</div>
                              <div style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 5px;">상대방 상태</div>
                             <div style="font-size: 1.1rem; font-weight: bold; color: ${oppStatusColor};">${oppStatusText}</div>
+                            ${data.hasOpponentProposed ? '<div id="oppExpirationTimerDisplay" style="margin-top:10px;"></div>' : ''}
                         </div>
                     </div>
                      <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 20px; text-align: left;">
@@ -185,6 +187,11 @@ window.ProposalHandler = {
                         </div>
                     </div>
                 </div>`;
+        }
+
+        // --- NEW: Start Opponent Expiration Timer if exists ---
+        if (data.hasOpponentProposed && data.opponentLastProposal && data.opponentLastProposal.expiresAt) {
+            ProposalUI.startExpirationTimer(data.opponentLastProposal.expiresAt, 'oppExpirationTimerDisplay');
         }
     },
 

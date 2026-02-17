@@ -201,13 +201,46 @@ window.confirmNextRoundIntent = async () => {
 
 // 6. Midpoint Actions
 window.acceptMidpoint = async () => {
-    // Legacy logic
-    // ... (Implementation if needed, or rely on existing API)
-    // For now, let's keep it minimal
-    alert('중간값 합의 수락 로직 구현 필요');
+    const caseId = localStorage.getItem('current_case_id');
+    const userId = localStorage.getItem('user_id');
+
+    if (!confirm('중간값 합의에 동의하시겠습니까?\n양측 모두 동의하면 즉시 합의금이 확정됩니다.')) return;
+
+    try {
+        const res = await ProposalAPI.decideMidpoint(userId, caseId, true, 1); // Phase 1 is initial agreement
+        if (res.success) {
+            alert('중간값 합의에 동의하셨습니다.\n상대방의 동의를 기다립니다.');
+            await checkStatus();
+        } else {
+            alert(res.message || '처리 중 오류가 발생했습니다.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('서버 통신 오류');
+    }
 };
+
 window.rejectMidpoint = async () => {
-    alert('중간값 합의 거절 로직 구현 필요');
+    const caseId = localStorage.getItem('current_case_id');
+    const userId = localStorage.getItem('user_id');
+
+    if (!confirm('중간값 합의를 거절하고 협상을 계속하시겠습니까?')) return;
+
+    try {
+        // Rejecting midpoint essentially means moving to next round intent
+        // Or explicitly rejecting. The API might handle 'agreed: false' as rejection.
+        const res = await ProposalAPI.decideMidpoint(userId, caseId, false, 1);
+        if (res.success) {
+            alert('중간값 합의를 거절했습니다.\n다음 라운드 제안 단계로 이동합니다.');
+            // Automatically trigger next round intent if needed, or just refresh to show next round UI
+            await checkStatus();
+        } else {
+            alert(res.message || '처리 중 오류가 발생했습니다.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('서버 통신 오류');
+    }
 };
 
 // 7. Request Extension
