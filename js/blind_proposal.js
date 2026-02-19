@@ -95,7 +95,7 @@ window.submitProposal = async () => {
     // Calculate expiration (In Days)
     let durationDays = 1;
     if (selectedDuration === '6h' || selectedDuration === 0.25) durationDays = 0.25;
-    else if (selectedDuration === 3) durationDays = 3;
+    else if (selectedDuration == 3) durationDays = 3; // Use loose equality for safety
 
     // Prevent Double Click
     const submitBtn = document.querySelector('button[onclick="submitProposal()"]');
@@ -355,5 +355,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 e.target.value = '';
             }
         });
+    }
+
+    // Midpoint Buttons Binding
+    const btnAgree = document.getElementById('btnAgreeMidpoint');
+    const btnReject = document.getElementById('btnRejectMidpoint');
+    if (btnAgree) {
+        btnAgree.onclick = window.acceptMidpoint;
+        console.log('[Controller] Bound acceptMidpoint to button');
+    }
+    if (btnReject) {
+        btnReject.onclick = window.rejectMidpoint;
+        console.log('[Controller] Bound rejectMidpoint to button');
     }
 });
