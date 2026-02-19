@@ -379,6 +379,143 @@ window.ProposalHandler = {
     renderMidpointDashboard(data) {
         ProposalUI.updateCountUI(data.myProposalCount, data.maxLimit, data.currentRound);
         ProposalUI.toggleProposalInput(false);
-        ProposalUI.showRightPanelState('midpointAgreementState');
+        const ms = data.midpointStatus;
+        if (!ms) return;
+
+        const el = ProposalUI.showRightPanelState('midpointAgreementState');
+
+        // --- PHASE 1: PROCEDURE AGREEMENT ---
+        if (ms.phase === 1) {
+            // Check specific agreement status
+            if (ms.myAgreement && !ms.oppAgreement) {
+                // I agreed, Waiting for Opponent
+                el.innerHTML = `
+                    <div style="font-size: 4rem; margin-bottom: 20px; animation: pulse 2s infinite;">⏳</div>
+                    <h3 style="color: #fbbf24; margin-bottom: 15px;">상대방의 동의를 기다립니다</h3>
+                    <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 25px;">
+                        귀하는 [중간값 합의] 절차에 <strong>동의</strong>하셨습니다.<br>
+                        상대방도 동의하면 즉시 합의금이 공개됩니다.
+                    </p>
+                    <button class="btn btn-secondary" disabled style="opacity:0.7; cursor:wait; background:#334155; color:#94a3b8; border:none; padding:10px 20px; border-radius:8px;">
+                        상대방 응답 대기 중...
+                    </button>
+                    <p style="margin-top: 20px; font-size: 0.8rem; color: #64748b;">
+                         * 상대방이 동의하지 않으면 자동으로 다음 라운드 제안 단계로 넘어갑니다.
+                    </p>
+                `;
+            } else if (!ms.myAgreement && ms.oppAgreement) {
+                // Opponent agreed, Urging Me
+                el.innerHTML = `
+                    <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce 1s infinite;">🔔</div>
+                    <h3 style="color: #EF4444; margin-bottom: 15px;">상대방이 [중간값 합의]를 원합니다!</h3>
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #EF4444; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                         <p style="color: #fca5a5; font-weight: bold; margin-bottom: 10px;">
+                            <i class="fas fa-exclamation-circle"></i> 상대방 동의 완료
+                        </p>
+                        <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
+                            상대방은 이미 동의했습니다.<br>
+                            귀하가 동의하면 <strong>즉시 금액이 확정</strong>됩니다.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                         <button id="btnRejectMidpoint" onclick="rejectMidpoint()" class="btn btn-glass" style="flex: 1; border: 1px solid rgba(255,100,100,0.3); color: #fca5a5;">
+                            거절 (협상 계속)
+                        </button>
+                        <button id="btnAgreeMidpoint" onclick="acceptMidpoint()" class="btn btn-primary" style="flex: 1.5; background: linear-gradient(135deg, #EF4444, #B91C1C); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);">
+                            네, 동의합니다
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Default: Both not agreed yet (Show Original HTML logic)
+                el.innerHTML = `
+                    <div style="font-size: 4rem; margin-bottom: 20px; animation: bounce-icon 2s infinite;">⚖️</div>
+                    <h3 style="color: #fff; margin-bottom: 15px;">합의 가능 구간(10%) 진입!</h3>
+                    <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                        <p style="color: #fca5a5; font-weight: bold; margin-bottom: 10px;">
+                            <i class="fas fa-lock"></i> 금액 비공개
+                        </p>
+                        <p style="color: #cbd5e1; line-height: 1.6; margin: 0;">
+                            양측의 제안 차이가 <strong>10% 이내</strong>로 좁혀졌습니다.<br>
+                            두 금액의 <strong>[정확한 중간값]</strong>으로<br>
+                            합의금을 확정하시겠습니까?
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button id="btnRejectMidpoint" onclick="rejectMidpoint()" class="btn btn-glass" style="flex: 1; border: 1px solid rgba(255,100,100,0.3); color: #fca5a5;">
+                            아니오<br><span style="font-size: 0.8rem;">협상 계속</span>
+                        </button>
+                        <button id="btnAgreeMidpoint" onclick="acceptMidpoint()" class="btn btn-primary" style="flex: 1.5; background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);">
+                            네, 동의합니다<br><span style="font-size: 0.8rem;">즉시 타결</span>
+                        </button>
+                    </div>
+                     <p style="margin-top: 20px; font-size: 0.8rem; color: #64748b;">
+                        * 양측 모두 동의 시 합의가 성립되며 금액이 공개됩니다.
+                    </p>
+                `;
+            }
+        }
+
+        // --- PHASE 2: FINAL CONFIRMATION (AMOUNT REVEALED) ---
+        else if (ms.phase === 2) {
+            const amount = ms.midpointAmount ? ms.midpointAmount.toLocaleString() : '?';
+
+            // Check if I already agreed to Final
+            // Since getStatus doesn't return myFinalAgreement explicitly in `ms` (we only added myAgreement which is procedure),
+            // We might need to rely on `midpointStatus` from controller having more data or just showing the prompt.
+            // Controller's getStatus update: "phase: midPhase".
+            // We didn't add final agreement flags to `getStatus` in Step 1.
+            // However, `getMidpointStatus` has them.
+            // For now, let's assume if phase is 2, we show the prompt. 
+            // If user clicks agree again, server handles idempotency or returns 'waiting'.
+
+            el.innerHTML = `
+                <div style="font-size: 4rem; margin-bottom: 20px; animation: tada 1s;">🎉</div>
+                <h3 style="color: #fff; margin-bottom: 10px;">중간값 제안 금액 공개</h3>
+                <p style="color: #94a3b8; margin-bottom: 25px;">양측의 동의로 중간값이 산출되었습니다.</p>
+                
+                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #3b82f6; padding: 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);">
+                    <div style="font-size: 0.9rem; color: #60a5fa; margin-bottom: 10px; font-weight: bold;">최종 합의 제안금</div>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: #fff; text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);">
+                        ${amount} <span style="font-size: 1.2rem; color: #94a3b8;">원</span>
+                    </div>
+                </div>
+
+                <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 30px;">
+                    이 금액으로 최종 합의하시겠습니까?<br>
+                    <strong>'동의' 버튼을 누르면 사건이 즉시 종결됩니다.</strong>
+                </p>
+
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="rejectMidpointFinal()" class="btn btn-glass" style="flex: 1; border: 1px solid rgba(255,100,100,0.3); color: #fca5a5;">
+                        거절<br><span style="font-size: 0.8rem;">다음 라운드 진행</span>
+                    </button>
+                    <button onclick="acceptMidpointFinal()" class="btn btn-primary" style="flex: 1.5; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);">
+                        최종 동의 (확정)
+                    </button>
+                </div>
+            `;
+        }
+
+        // --- PHASE 3: SETTLED ---
+        else if (ms.phase === 3) {
+            const amount = ms.midpointAmount ? ms.midpointAmount.toLocaleString() : '?';
+            el.innerHTML = `
+                <div style="font-size: 5rem; margin-bottom: 20px; animation: bounce 1s;">🎊</div>
+                <h3 style="color: #fff; margin-bottom: 10px; font-size: 1.8rem;">합의가 성사되었습니다!</h3>
+                <p style="color: #94a3b8; margin-bottom: 30px;">소중한 합의에 도달하신 것을 축하드립니다.</p>
+                
+                <div style="background: rgba(74, 222, 128, 0.1); border: 2px solid #4ade80; padding: 40px; border-radius: 20px; margin-bottom: 30px;">
+                     <div style="font-size: 1rem; color: #4ade80; margin-bottom: 10px; font-weight: bold;">최종 합의금</div>
+                    <div style="font-size: 3rem; font-weight: 900; color: #fff; text-shadow: 0 0 30px rgba(74, 222, 128, 0.5);">
+                        ${amount} <span style="font-size: 1.5rem; color: #94a3b8;">원</span>
+                    </div>
+                </div>
+                
+                 <button onclick="location.href='dashboard.html'" class="btn btn-primary" style="margin-top: 30px; padding: 15px 40px; border-radius: 50px; background: #fff; color: #000; font-weight: bold;">
+                    대시보드로 돌아가기
+                </button>
+            `;
+        }
     }
 };

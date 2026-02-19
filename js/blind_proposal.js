@@ -94,8 +94,17 @@ window.submitProposal = async () => {
 
     // Calculate expiration (In Days)
     let durationDays = 1;
-    if (selectedDuration === '6h' || selectedDuration === 0.25) durationDays = 0.25;
-    else if (selectedDuration == 3) durationDays = 3; // Use loose equality for safety
+
+    // Normalize selectedDuration
+    const sel = String(selectedDuration);
+
+    if (sel === '6h' || sel === '0.25') {
+        durationDays = 0.25;
+    } else if (sel === '3') {
+        durationDays = 3;
+    }
+
+    console.log(`[UI] Submitting Proposal: Amount=${amount}, Duration=${durationDays} (Selected=${selectedDuration})`);
 
     // Prevent Double Click
     const submitBtn = document.querySelector('button[onclick="submitProposal()"]');
@@ -220,6 +229,7 @@ window.acceptMidpoint = async () => {
     }
 };
 
+// Phase 1 Rejection
 window.rejectMidpoint = async () => {
     const caseId = localStorage.getItem('current_case_id');
     const userId = localStorage.getItem('user_id');
@@ -233,6 +243,47 @@ window.rejectMidpoint = async () => {
         if (res.success) {
             alert('중간값 합의를 거절했습니다.\n다음 라운드 제안 단계로 이동합니다.');
             // Automatically trigger next round intent if needed, or just refresh to show next round UI
+            await checkStatus();
+        } else {
+            alert(res.message || '처리 중 오류가 발생했습니다.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('서버 통신 오류');
+    }
+};
+
+// Phase 2 Final Agreement
+window.acceptMidpointFinal = async () => {
+    const caseId = localStorage.getItem('current_case_id');
+    const userId = localStorage.getItem('user_id');
+
+    if (!confirm('최종 합의 금액에 동의하시겠습니까?\n이 결정은 번복할 수 없으며 사건이 종결됩니다.')) return;
+
+    try {
+        const res = await ProposalAPI.decideMidpoint(userId, caseId, true, 2); // Phase 2 Final Agreement
+        if (res.success) {
+            alert('최종 합의에 동의하셨습니다.\n상대방의 최종 동의를 기다립니다.');
+            await checkStatus();
+        } else {
+            alert(res.message || '처리 중 오류가 발생했습니다.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('서버 통신 오류');
+    }
+};
+
+window.rejectMidpointFinal = async () => {
+    const caseId = localStorage.getItem('current_case_id');
+    const userId = localStorage.getItem('user_id');
+
+    if (!confirm('중간값 합의를 최종 거절하시겠습니까?\n거절 시 다음 라운드로 넘어갑니다.')) return;
+
+    try {
+        const res = await ProposalAPI.decideMidpoint(userId, caseId, false, 2); // Phase 2 Rejection
+        if (res.success) {
+            alert('최종 합의를 거절했습니다.\n다음 라운드로 진행됩니다.');
             await checkStatus();
         } else {
             alert(res.message || '처리 중 오류가 발생했습니다.');

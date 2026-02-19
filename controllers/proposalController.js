@@ -130,10 +130,21 @@ const ProposalController = {
                 const gapPercent = (diff / maxVal) * 100;
                 if (gapPercent <= 10) {
                     // Midpoint Active!
+                    let midPhase = 1;
+                    const iProcedureAgreed = (uid === c.offenderId) ? c.midpointProcedureOffenderAgreed : c.midpointProcedureVictimAgreed;
+                    const oppProcedureAgreed = (uid === c.offenderId) ? c.midpointProcedureVictimAgreed : c.midpointProcedureOffenderAgreed;
+
+                    if (c.midpointAmountRevealed) midPhase = 2;
+                    if (c.status === 'settled' || (c.midpointOffenderAgreed && c.midpointVictimAgreed)) midPhase = 3;
+
                     midpointStatus = {
                         isMidpointActive: true,
                         gapPercent: gapPercent,
-                        midpointAmount: Math.floor((amt1 + amt2) / 2) // Integer midpoint
+                        midpointAmount: Math.floor((amt1 + amt2) / 2),
+                        phase: midPhase,
+                        myAgreement: iProcedureAgreed,
+                        oppAgreement: oppProcedureAgreed,
+                        midpointRevealed: c.midpointAmountRevealed
                     };
                 }
             } else if (pOffenderCurrent || pVictimCurrent) {
@@ -258,8 +269,11 @@ const ProposalController = {
             }
 
             const expiresAt = new Date();
-            if (duration === 0.25) expiresAt.setHours(expiresAt.getHours() + 6);
-            else expiresAt.setDate(expiresAt.getDate() + duration);
+            const dur = parseFloat(duration);
+
+            if (dur === 0.25) expiresAt.setHours(expiresAt.getHours() + 6); // 6 Hours
+            else if (dur === 3) expiresAt.setDate(expiresAt.getDate() + 3); // 3 Days
+            else expiresAt.setDate(expiresAt.getDate() + 1); // Default to 1 Day (Safety)
 
             await Proposal.create({
                 caseId,
