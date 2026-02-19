@@ -421,9 +421,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // Check Onboarding Guide
-    const guideSeen = localStorage.getItem('blind_guide_seen');
+    // Changed key to 'blind_guide_seen_v2' to reset visibility for all users
+    const guideSeen = localStorage.getItem('blind_guide_seen_v2');
     if (!guideSeen && window.ProposalUI && window.ProposalUI.showGuide) {
-        console.log('[Controller] Showing Onboarding Guide');
+        console.log('[Controller] Showing Onboarding Guide (v2)');
         setTimeout(() => {
             window.ProposalUI.showGuide();
         }, 500);

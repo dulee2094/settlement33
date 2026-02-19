@@ -1,5 +1,5 @@
 // ... (existing imports)
-const { Proposal, Case, User } = require('../models'); // ensuring User is imported
+const { Proposal, Case, User, ProposalNextRound } = require('../models'); // ensuring User is imported
 
 
 const { Op } = require('sequelize');
