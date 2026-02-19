@@ -365,39 +365,77 @@
                 </div>
 
                 <!-- 4 Rules Grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; background: #fff;">
+                <div style="padding: 25px; background: #fff; text-align: left; max-height: 60vh; overflow-y: auto;">
 
-                    <!-- Rule 1 -->
-                    <div style="text-align: center; padding: 15px;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🙈</div>
-                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">철저한 비공개</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">상대에게 내 제안 금액이<br>절대
-                            보이지 않습니다.</p>
+                    <!-- Section 1: Core Principles -->
+                    <div style="margin-bottom: 25px;">
+                        <h4
+                            style="color: #1e293b; font-size: 1.1rem; margin: 0 0 12px 0; border-left: 4px solid #3b82f6; padding-left: 10px;">
+                            🛡️ 핵심 원칙</h4>
+                        <div
+                            style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                            <ul
+                                style="margin: 0; padding-left: 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">
+                                <li style="margin-bottom: 8px;"><strong>철저한 비공개:</strong> 제안하신 금액은 합의가 성사되기 전까지 상대방에게
+                                    <strong>절대 공개되지 않습니다</strong>.</li>
+                                <li><strong>합의 수렴 원칙:</strong> 본인에게 더 불리한 금액(피해자는 감액, 가해자는 증액)으로만 수정 제안이 가능하여 소모적인 탐색전을
+                                    방지합니다.</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <!-- Rule 2 -->
-                    <div style="text-align: center; padding: 15px;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🚦</div>
-                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">색상으로 격차 확인</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">금액 대신 격차 수준만<br>신호등
-                            색상으로 알려줍니다.</p>
+                    <!-- Section 2: Traffic Light System -->
+                    <div style="margin-bottom: 25px;">
+                        <h4
+                            style="color: #1e293b; font-size: 1.1rem; margin: 0 0 12px 0; border-left: 4px solid #f59e0b; padding-left: 10px;">
+                            🚦 신호등 시스템 (격차 확인)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div
+                                style="display: flex; align-items: center; background: rgba(74, 222, 128, 0.1); padding: 10px; border-radius: 8px;">
+                                <span style="font-size: 1.2rem; margin-right: 10px;">🟢</span>
+                                <div><strong style="color: #15803d;">성사 임박 (10% 이내)</strong> <span
+                                        style="font-size: 0.85rem; color: #64748b;">- 즉시 중간값 합의 가능</span></div>
+                            </div>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px;">
+                                <span style="font-size: 1.2rem; margin-right: 10px;">🔵</span>
+                                <div><strong style="color: #1d4ed8;">긍정적 (30% 이내)</strong> <span
+                                        style="font-size: 0.85rem; color: #64748b;">- 조금만 더 조율하면 합의 가능</span></div>
+                            </div>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px;">
+                                <span style="font-size: 1.2rem; margin-right: 10px;">🟡</span>
+                                <div><strong style="color: #b45309;">차이 발생 (60% 이내)</strong> <span
+                                        style="font-size: 0.85rem; color: #64748b;">- 서로 양보가 필요한 단계</span></div>
+                            </div>
+                            <div
+                                style="display: flex; align-items: center; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;">
+                                <span style="font-size: 1.2rem; margin-right: 10px;">🔴</span>
+                                <div><strong style="color: #b91c1c;">매우 큰 격차 (60% 이상)</strong> <span
+                                        style="font-size: 0.85rem; color: #64748b;">- 입장 차이가 매우 큽니다</span></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Rule 3 -->
-                    <div style="text-align: center; padding: 15px;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
-                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">제안 기회 5회</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">기회는 단 5번뿐입니다.<br>신중하게
-                            제안하세요.</p>
+                    <!-- Section 3: Rules -->
+                    <div>
+                        <h4
+                            style="color: #1e293b; font-size: 1.1rem; margin: 0 0 12px 0; border-left: 4px solid #ef4444; padding-left: 10px;">
+                            ⚡ 진행 규칙</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div
+                                style="background: #fff1f2; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #ffe4e6;">
+                                <div style="font-weight: bold; color: #be123c; margin-bottom: 4px;">총 5회 기회</div>
+                                <div style="font-size: 0.8rem; color: #881337;">5번 안에 합의점을<br>찾아야 합니다.</div>
+                            </div>
+                            <div
+                                style="background: #eff6ff; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #dbeafe;">
+                                <div style="font-weight: bold; color: #1d4ed8; margin-bottom: 4px;">AI 자동 타결</div>
+                                <div style="font-size: 0.8rem; color: #1e40af;">격차 10% 미만 시<br>중간값으로 확정</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Rule 4 -->
-                    <div style="text-align: center; padding: 15px;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🤖</div>
-                        <h4 style="color: #1e293b; margin-bottom: 8px; font-weight: bold;">AI 자동 타결</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0;">격차가 10% 이내로
-                            줄어들면<br>중간값으로 즉시 합의됩니다.</p>
-                    </div>
                 </div>
 
                 <!-- Footer Action -->

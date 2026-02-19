@@ -1,5 +1,11 @@
-// ... (existing imports)
-const { Proposal, Case, User, ProposalNextRound } = require('../models'); // ensuring User is imported
+// Proposal Controller
+const models = require('../models');
+const { Proposal, Case, User, ProposalNextRound: _ProposalNextRound } = models;
+const ProposalNextRound = _ProposalNextRound || (models.sequelize && models.sequelize.models.ProposalNextRound);
+
+if (!ProposalNextRound) {
+    console.error("❌ CRITICAL: ProposalNextRound model could not be loaded. Next Round logic will fail.");
+}
 
 
 const { Op } = require('sequelize');
