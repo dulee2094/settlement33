@@ -43,9 +43,17 @@
 
             <nav class="nav-links">
                 <div class="nav-item active"
-                    style="margin-bottom: 30px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
+                    style="margin-bottom: 10px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
                     <i class="fas fa-search-dollar"></i>
                     <span>블라인드 제안 중</span>
+                </div>
+
+                <div class="nav-item" onclick="window.ProposalUI.showGuide()"
+                    style="margin-bottom: 30px; cursor: pointer; color: #94a3b8; background: rgba(255,255,255,0.03); transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='white'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.color='#94a3b8'">
+                    <i class="fas fa-book-open"></i>
+                    <span>이용 가이드</span>
                 </div>
 
                 <div class="nav-item" onclick="location.href='case_detail.html'"
@@ -60,15 +68,7 @@
         <main class="main-content">
             <div class="top-bar">
                 <div>
-                    <h2 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px;">
-                        블라인드 합의 제안
-                        <span onclick="window.ProposalUI.showGuide()"
-                            style="cursor: pointer; font-size: 0.8rem; color: #64748b; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; transition: all 0.2s; font-weight: normal; vertical-align: middle;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.color='#fff'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#64748b'">
-                            <i class="fas fa-question-circle" style="margin-right: 4px;"></i> 규칙 보기
-                        </span>
-                    </h2>
+                    <h2 style="margin-bottom: 5px;">블라인드 합의 제안</h2>
                     <p style="color: var(--text-muted);">감정 소모 없이 희망 금액을 조율해보세요.</p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center;">
