@@ -69,8 +69,14 @@ const ProposalController = {
             if (pRound === 0) pRound = 1;
 
             // Check if we should advance to next round based on intents
-            const myIntent = await ProposalNextRound.findOne({ where: { caseId, userId: uid, round: pRound } });
-            const oppIntent = await ProposalNextRound.findOne({ where: { caseId, userId: { [Op.ne]: uid }, round: pRound } });
+            let myIntent = null;
+            let oppIntent = null;
+            const NextRoundModel = ProposalNextRound || (Proposal.sequelize && Proposal.sequelize.models.ProposalNextRound);
+
+            if (NextRoundModel) {
+                myIntent = await NextRoundModel.findOne({ where: { caseId, userId: uid, round: pRound } });
+                oppIntent = await NextRoundModel.findOne({ where: { caseId, userId: { [Op.ne]: uid }, round: pRound } });
+            }
 
             let currentRound = pRound;
             let nextRoundStarted = false;

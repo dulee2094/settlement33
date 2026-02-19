@@ -94,7 +94,7 @@ window.ProposalUI = {
 
         const checkbox = document.getElementById('dontShowAgain');
         if (checkbox && checkbox.checked) {
-            localStorage.setItem('blind_guide_seen', 'true');
+            localStorage.setItem('blind_guide_seen_v2', 'true');
         }
     },
 
