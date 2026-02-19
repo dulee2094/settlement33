@@ -62,16 +62,35 @@ const ProposalController = {
                 }
             }
 
-            // Calculate current round
+            // Calculate current round based on PROPOSALS first
             const myRound = myProposals.length > 0 ? myProposals[0].round : 0;
             const oppRound = opponentProposals.length > 0 ? opponentProposals[0].round : 0;
-            let currentRound = Math.max(myRound, oppRound);
+            let pRound = Math.max(myRound, oppRound);
+            if (pRound === 0) pRound = 1;
 
-            // Logic to advance round if both agreed
-            // If both sides finished the previous round (equal rounds) and signaled intent:
-            if (c.nextRoundIntentOffender && c.nextRoundIntentVictim) {
-                if (myRound === oppRound && myRound === currentRound) {
-                    currentRound++;
+            // Check if we should advance to next round based on intents
+            const myIntent = await ProposalNextRound.findOne({ where: { caseId, userId: uid, round: pRound } });
+            const oppIntent = await ProposalNextRound.findOne({ where: { caseId, userId: { [Op.ne]: uid }, round: pRound } });
+
+            let currentRound = pRound;
+            let nextRoundStarted = false;
+
+            if (myIntent && oppIntent) {
+                currentRound++;
+                nextRoundStarted = true;
+            }
+
+            // Check Expiration (only if still in pRound)
+            let isExpired = false;
+            if (!nextRoundStarted) {
+                const now = new Date();
+                const myCurrentProp = myProposals.find(p => p.round === pRound);
+                const oppCurrentProp = opponentProposals.find(p => p.round === pRound);
+
+                // If incomplete pair (one of them is missing)
+                if (!myCurrentProp || !oppCurrentProp) {
+                    if (myCurrentProp && new Date(myCurrentProp.expiresAt) < now) isExpired = true;
+                    if (oppCurrentProp && new Date(oppCurrentProp.expiresAt) < now) isExpired = true;
                 }
             }
 
@@ -371,8 +390,25 @@ const ProposalController = {
             const midpointPossible = diffPercent <= 10;
             const midpointResolved = c.midpointRejected || c.status === 'settled';
 
+            // Determine if the round is expired
+            let isExpired = false;
+            if (myProposal.expiresAt && new Date(myProposal.expiresAt) < new Date()) {
+                isExpired = true;
+            }
+            if (oppProposal.expiresAt && new Date(oppProposal.expiresAt) < new Date()) {
+                isExpired = true;
+            }
+
+            // Determine if next round has started (both intents are true)
+            const nextRoundStarted = c.nextRoundIntentOffender && c.nextRoundIntentVictim;
+
             res.json({
                 success: true,
+                caseId,
+                caseTitle: c.caseTitle || c.caseNumber,
+                currentRound: round, // Use the round from the request for this context
+                isExpired,
+                nextRoundStarted: !!nextRoundStarted,
                 bothViewed: true,
                 analysis: {
                     myAmount,

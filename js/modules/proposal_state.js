@@ -7,6 +7,9 @@
 const PROPOSAL_STATE = {
     LOADING: 'LOADING',
 
+    // Step 0: Expired (Round Ended due to timeout)
+    STEP_EXPIRED: 'STEP_EXPIRED',
+
     // Step 1: Input Required (Both might be idle, or I am idle)
     // Round 1 and Round 2+ are logically same functionality (Input), just different context
     STEP_1_INPUT: 'STEP_1_INPUT',
@@ -45,6 +48,11 @@ window.ProposalState = {
      */
     determineState(data, localState) {
         if (!data) return PROPOSAL_STATE.LOADING;
+
+        // 0. Expiration Check (Priority Interrupt)
+        if (data.isExpired) {
+            return PROPOSAL_STATE.STEP_EXPIRED;
+        }
 
         // 0. Extension Check (Highest Priority Interrupt)
         // If extension is requested but not fully agreed/rejected yet

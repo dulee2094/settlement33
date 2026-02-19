@@ -419,4 +419,13 @@ window.addEventListener('DOMContentLoaded', () => {
         btnReject.onclick = window.rejectMidpoint;
         console.log('[Controller] Bound rejectMidpoint to button');
     }
+
+    // Check Onboarding Guide
+    const guideSeen = localStorage.getItem('blind_guide_seen');
+    if (!guideSeen && window.ProposalUI && window.ProposalUI.showGuide) {
+        console.log('[Controller] Showing Onboarding Guide');
+        setTimeout(() => {
+            window.ProposalUI.showGuide();
+        }, 500);
+    }
 });

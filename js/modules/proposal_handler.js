@@ -48,6 +48,9 @@ window.ProposalHandler = {
             case ProposalState.CONST.STEP_5B_NEXT_ROUND_WAITING:
                 this.renderWaitingDashboard(data, true); // True for Next Round Waiting
                 break;
+            case ProposalState.CONST.STEP_EXPIRED:
+                this.renderExpiredDashboard(data);
+                break;
             default:
                 console.warn('[ProposalHandler] Unknown State:', state);
         }
@@ -56,6 +59,58 @@ window.ProposalHandler = {
     },
 
     // --- Phase Handlers ---
+
+    renderExpiredDashboard(data) {
+        ProposalUI.updateCountUI(data.myProposalCount, data.maxLimit, data.currentRound);
+        ProposalUI.toggleProposalInput(false);
+        const el = ProposalUI.showRightPanelState('waitingState'); // Reuse waitingState container
+
+        el.innerHTML = `
+            <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; animation: fade-in 0.5s;">
+                 <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.3);">
+                        🛑 ${data.currentRound}라운드 종료
+                    </div>
+                    <div style="font-size: 4rem; margin-bottom: 15px;">⏰</div>
+                    <h3 style="color: #ef4444; font-size: 1.8rem; margin-bottom: 15px;">유효기간 만료</h3>
+                    <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6;">
+                        제안 유효기간이 지났으나 합의가 이루어지지 않았습니다.<br>
+                        이번 라운드는 <strong>자동으로 종료</strong>됩니다.
+                    </p>
+                </div>
+
+                <div id="nextRoundActionArea"></div>
+            </div>
+        `;
+
+        const actionArea = el.querySelector('#nextRoundActionArea');
+
+        // Render Action Button
+        if (data.myNextRoundIntent && !data.nextRoundStarted) {
+            actionArea.innerHTML = `
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; padding: 25px; border-radius: 16px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px; animation: bounce 2s infinite;">⏳</div>
+                    <h3 style="color: #60a5fa; margin-bottom: 5px;">다음 라운드 대기 중</h3>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">
+                        다음 라운드 진행에 동의하셨습니다.<br>상대방이 동의하면 즉시 다음 단계로 넘어갑니다.
+                    </p>
+                </div>
+            `;
+        } else {
+            actionArea.innerHTML = `
+                <div style="background: rgba(255,255,255,0.03); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                    <h3 style="color: #fff; margin-bottom: 10px;">협상을 계속하시겠습니까?</h3>
+                    <p style="color: #94a3b8; margin-bottom: 25px; font-size: 0.95rem;">
+                        다음 라운드에서 새로운 제안을 등록할 수 있습니다.
+                    </p>
+                    <button onclick="confirmNextRoundIntent()"
+                        style="width: 100%; padding: 18px; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(135deg, #ef4444, #b91c1c); border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); transition: all 0.2s;">
+                        <i class="fas fa-redo" style="margin-right: 8px;"></i> ${parseInt(data.currentRound) + 1}라운드 진행하기
+                    </button>
+                </div>
+            `;
+        }
+    },
 
     renderInputDashboard(data) {
         ProposalUI.updateCountUI(data.myProposalCount, data.maxLimit, data.currentRound);

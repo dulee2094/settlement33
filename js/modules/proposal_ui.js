@@ -454,6 +454,7 @@ window.ProposalUI = {
                 return;
             }
 
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -468,11 +469,16 @@ window.ProposalUI = {
                 timeColor = '#f59e0b';
             }
 
+            let timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (days > 0) {
+                timeString = `<span style="font-size:0.6em; vertical-align:middle; margin-right:5px;">${days}일</span>${timeString}`;
+            }
+
             timerEl.innerHTML = `
                 <div style="${containerStyle} padding: 15px; border-radius: 12px; margin-top: 20px;">
                     <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">제안 유효 시간</div>
                     <div style="font-size: 1.8rem; font-weight: bold; color: ${timeColor}; font-family: monospace;">
-                        ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
+                        ${timeString}
                     </div>
                 </div>
                 `;
