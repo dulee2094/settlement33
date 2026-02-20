@@ -357,11 +357,18 @@
             <div class="guide-modal" style="max-width: 700px; padding: 0; overflow: hidden; border-radius: 24px;">
                 <!-- Header -->
                 <div
-                    style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 2.5rem; margin-bottom: 15px;">⚖️</div>
-                    <h2 style="color: white; margin: 0; font-size: 1.5rem;">블라인드 합의 제안 규칙</h2>
-                    <p style="color: #94a3b8; margin: 10px 0 0; font-size: 0.95rem;">공정하고 안전한 합의를 위해 4가지 원칙을 꼭 확인하세요.
-                    </p>
+                    style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 25px 30px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h2
+                            style="color: white; margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.8rem;">📖</span> 블라인드 합의 제안 이용 안내
+                        </h2>
+                        <p style="color: #94a3b8; margin: 8px 0 0; font-size: 0.9rem;">
+                            감정 소모 없이 오직 '금액'에만 집중하여 합리적인 합의점을 찾을 수 있도록 돕는 시스템입니다.
+                        </p>
+                    </div>
+                    <button onclick="ProposalUI.closeGuide()"
+                        style="background: none; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer;">&times;</button>
                 </div>
 
                 <!-- 4 Rules Grid -->
@@ -377,42 +384,71 @@
                             <ul
                                 style="margin: 0; padding-left: 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">
                                 <li style="margin-bottom: 8px;"><strong>철저한 비공개:</strong> 제안하신 금액은 합의가 성사되기 전까지 상대방에게
-                                    <strong>절대 공개되지 않습니다</strong>.</li>
+                                    <strong>절대 공개되지 않습니다</strong>.
+                                </li>
                                 <li><strong>합의 수렴 원칙:</strong> 본인에게 더 불리한 금액(피해자는 감액, 가해자는 증액)으로만 수정 제안이 가능하여 소모적인 탐색전을
                                     방지합니다.</li>
                             </ul>
                         </div>
                     </div>
 
-                    <!-- Section 2: Traffic Light System -->
-                    <div style="margin-bottom: 25px;">
+                    <!-- 2. Traffic Light System -->
+                    <div style="margin-bottom: 30px;">
                         <h4
-                            style="color: #1e293b; font-size: 1.1rem; margin: 0 0 12px 0; border-left: 4px solid #f59e0b; padding-left: 10px;">
-                            🚦 신호등 시스템 (격차 확인)</h4>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            style="color: #1e293b; font-size: 1.15rem; margin-bottom: 15px; border-left: 5px solid #f59e0b; padding-left: 12px;">
+                            2. AI 격차 분석 (신호등 시스템)
+                        </h4>
+                        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 15px;">
+                            양측이 모두 금액을 입력하면, AI가 두 금액의 차이를 분석하여 <strong>신호등 색상</strong>으로만 알려줍니다.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Green -->
                             <div
-                                style="display: flex; align-items: center; background: rgba(74, 222, 128, 0.1); padding: 10px; border-radius: 8px;">
-                                <span style="font-size: 1.2rem; margin-right: 10px;">🟢</span>
-                                <div><strong style="color: #15803d;">성사 임박 (10% 이내)</strong> <span
-                                        style="font-size: 0.85rem; color: #64748b;">- 즉시 중간값 합의 가능</span></div>
+                                style="display: flex; align-items: center; background: rgba(74, 222, 128, 0.1); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(74, 222, 128, 0.2);">
+                                <div style="width: 40px; text-align: center; font-size: 1.5rem; margin-right: 15px;">🟢
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: #15803d; font-size: 1rem;">성사 임박 (격차 10% 이내)
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #64748b;">합의 가능성이 매우 높습니다. <strong>자동으로 중간값
+                                            합의</strong> 단계로 넘어갑니다.</div>
+                                </div>
                             </div>
+                            <!-- Blue -->
                             <div
-                                style="display: flex; align-items: center; background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px;">
-                                <span style="font-size: 1.2rem; margin-right: 10px;">🔵</span>
-                                <div><strong style="color: #1d4ed8;">긍정적 (30% 이내)</strong> <span
-                                        style="font-size: 0.85rem; color: #64748b;">- 조금만 더 조율하면 합의 가능</span></div>
+                                style="display: flex; align-items: center; background: rgba(59, 130, 246, 0.1); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <div style="width: 40px; text-align: center; font-size: 1.5rem; margin-right: 15px;">🔵
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: #1d4ed8; font-size: 1rem;">긍정적 (격차 30% 이내)
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #64748b;">큰 이견이 없는 상태입니다. 조금만 더 양보하면 합의점을 찾을 수
+                                        있습니다.</div>
+                                </div>
                             </div>
+                            <!-- Yellow -->
                             <div
-                                style="display: flex; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 10px; border-radius: 8px;">
-                                <span style="font-size: 1.2rem; margin-right: 10px;">🟡</span>
-                                <div><strong style="color: #b45309;">차이 발생 (60% 이내)</strong> <span
-                                        style="font-size: 0.85rem; color: #64748b;">- 서로 양보가 필요한 단계</span></div>
+                                style="display: flex; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                <div style="width: 40px; text-align: center; font-size: 1.5rem; margin-right: 15px;">🟡
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: #b45309; font-size: 1rem;">차이 발생 (격차 60% 이내)
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #64748b;">서로 생각하는 금액에 차이가 있습니다. 상호 양보가 필요한
+                                        단계입니다.</div>
+                                </div>
                             </div>
+                            <!-- Red -->
                             <div
-                                style="display: flex; align-items: center; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px;">
-                                <span style="font-size: 1.2rem; margin-right: 10px;">🔴</span>
-                                <div><strong style="color: #b91c1c;">매우 큰 격차 (60% 이상)</strong> <span
-                                        style="font-size: 0.85rem; color: #64748b;">- 입장 차이가 매우 큽니다</span></div>
+                                style="display: flex; align-items: center; background: rgba(239, 68, 68, 0.1); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                <div style="width: 40px; text-align: center; font-size: 1.5rem; margin-right: 15px;">🔴
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: #b91c1c; font-size: 1rem;">매우 큰 격차 (격차 60% 이상)
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: #64748b;">입장 차이가 매우 큽니다. 현실적인 금액으로 다시 고민해보세요.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
