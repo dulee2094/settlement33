@@ -87,7 +87,7 @@ const ProposalController = {
             let currentRound = pRound;
             let nextRoundStarted = false;
 
-            if (myIntent && oppIntent) {
+            if ((myIntent && oppIntent) || (myNextRoundIntent && oppNextRoundIntent)) {
                 currentRound++;
                 nextRoundStarted = true;
             }
@@ -234,6 +234,7 @@ const ProposalController = {
                 oppAgreed,
                 myNextRoundIntent,
                 oppNextRoundIntent,
+                nextRoundStarted,
                 caseTitle,
                 opponentName,
                 status: gapStatus,
