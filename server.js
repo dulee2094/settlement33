@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -45,6 +45,11 @@ try {
     app.use('/api/notification', require('./routes/notification'));
     console.log('✅ Route loaded: notification');
 } catch (e) { console.error('❌ Failed to load route: notification', e.message); }
+
+try {
+    app.use('/api', require('./routes/consultation'));
+    console.log('✅ Route loaded: consultation');
+} catch (e) { console.error('❌ Failed to load route: consultation', e.message); }
 
 // Case related routes
 loadRoute('./routes/proposal', 'proposal');
