@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -92,11 +92,20 @@
                                 style="width: 100%; padding: 14px; font-size: 1rem; margin-bottom: 20px;">로그인</button>
 
                             <div
-                                style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
+                                style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
                                 <a href="#" style="color: var(--text-muted); text-decoration: none;">비밀번호 찾기</a>
-                                <a href="signup.html"
+                                <a href="login.html"
                                     style="color: var(--secondary); text-decoration: none; font-weight: 600;">회원가입</a>
                             </div>
+
+                            <div style="text-align: center; margin: 15px 0;">
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">또는</span>
+                            </div>
+
+                            <button type="button" class="btn" onclick="handleGuestLogin()"
+                                style="width: 100%; padding: 14px; font-size: 1rem; margin-bottom: 10px; background: rgba(74, 158, 255, 0.15); color: #7bbaff; border: 1px solid rgba(74, 158, 255, 0.4); font-weight: 600;">
+                                <i class="fas fa-eye" style="margin-right:8px;"></i> 가입 없이 체험하기 (둘러보기)
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -279,6 +288,31 @@
             } catch (err) {
                 console.error(err);
                 alert(`서버 연결 오류:\n${err.message}\n(서버 상태를 확인해주세요)`);
+            }
+        }
+
+        async function handleGuestLogin() {
+            const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const API_BASE = IS_LOCAL ? 'http://localhost:3300/api' : '/api';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/guest-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('user_id', data.userId);
+                    localStorage.setItem('user_name', data.name);
+                    localStorage.setItem('is_guest', 'true');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('둘러보기 요소를 준비하다가 문제가 생겼습니다: ' + data.error);
+                }
+            } catch (err) {
+                alert('서버 연결을 확인해주세요.');
+                console.error(err);
             }
         }
     </script>

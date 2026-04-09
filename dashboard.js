@@ -518,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             alert('오류: ' + err.message);
+        }
     };
 
     // --- Notification Settings Logic ---
