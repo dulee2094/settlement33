@@ -224,6 +224,7 @@
                     // Save User Info
                     localStorage.setItem('user_id', data.userId);
                     localStorage.setItem('user_name', data.name);
+                    localStorage.removeItem('is_guest'); // 핵심: 진짜 회원 로그인 시 게스트 모드 해제
 
                     alert(`${data.name}님 환영합니다!`);
                     location.href = 'dashboard.html';
