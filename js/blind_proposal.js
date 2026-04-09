@@ -306,9 +306,9 @@ window.requestExtension = async () => {
         const res = await ProposalAPI.requestExtension(caseId, userId);
         if (res.success) {
             if (res.isExtended) {
-                alert('양측 모두 동의하여 3라운드가 추가되었습니다!\n협상을 계속 진행해주세요.');
+                alert('양측 모두 동의하여 3라운드가 추가되었습니다!\n곧바로 6라운드로 진행됩니다.');
             } else {
-                alert('연장 요청을 보냈습니다.\n상대방이 동의하면 즉시 라운드가 추가됩니다.');
+                alert('연장 요청을 보냈습니다.\n상대방이 동의하면 즉시 다음 라운드가 시작됩니다.');
             }
             // Force status update
             await checkStatus();
@@ -339,6 +339,19 @@ async function checkStatus() {
 
         if (window.ProposalHandler) {
             window.ProposalHandler.process(data);
+        }
+
+        // [해결책 B-2 보완] 백엔드 레이스 컨디션 방지
+        // 양측이 연장 합의에 최종 도달(isExtended=true)했으나 다음 라운드로 전환되지 않았다면 폴링 단계에서 안전하게 6라운드 진행 처리
+        if (data && data.success && data.isExtended && data.currentRound >= 5 && !data.myNextRoundIntent) {
+            console.log('[Auto-Advance] Extension fully agreed. Auto-sending next round intent.');
+            try {
+                await fetch('/api/case/proposal/next-round-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, caseId, round: data.currentRound })
+                });
+            } catch(e) {}
         }
 
         if (data && !data.success) {
