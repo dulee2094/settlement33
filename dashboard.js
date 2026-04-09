@@ -1,4 +1,4 @@
-﻿// dashboard.js
+// dashboard.js
 // Main Dashboard Controller (Logic & API only)
 // View rendering is handled by js/dashboard_view.js
 
@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'settings':
                 content.innerHTML = window.getSettingsPageHTML();
+                if (window.loadNotificationSettings) window.loadNotificationSettings();
                 break;
             case 'help':
                 content.innerHTML = window.getHelpPageHTML();
@@ -125,7 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const userId = localStorage.getItem('user_id');
         try {
             let data;
-            if (DEMO_MODE) {
+            if (localStorage.getItem('is_guest') === 'true') {
+                data = {
+                    found: true,
+                    cases: [
+                        { id: 'demo1', caseNumber: 'DEMO-2026-001', roomTitle: '데모 사건: 강남역 범퍼 접촉사고', status: 'IN_PROGRESS', myRole: '피해자', counterpartyName: '김철수(가해자)', summary: '수리비 합의 중', createdAt: new Date().toISOString() },
+                        { id: 'demo2', caseNumber: 'DEMO-2026-002', roomTitle: '데모 완료: 중고장터 미배송건', status: 'COMPLETED', myRole: '피의자', counterpartyName: '이영희(피해자)', summary: '합의 완료 (지급 대기)', createdAt: new Date(Date.now() - 86400000 * 3).toISOString() }
+                    ]
+                };
+            } else if (DEMO_MODE) {
                 data = { found: false, cases: [] };
             } else {
                 const res = await fetch(`${API_BASE}/case/status?userId=${userId}`);
@@ -202,8 +211,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Guest Check Helper
+    function checkGuestRestriction() {
+        if (localStorage.getItem('is_guest') === 'true') {
+            if (confirm('실제 합의 방 개설 및 상세 설정은 회원가입이 필요합니다. 10초 만에 간편 가입하시겠습니까?')) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+            return true;
+        }
+        return false;
+    }
+
     // Modal Logic
     window.openRegisterModal = function () {
+        if (checkGuestRestriction()) return;
         document.getElementById('choiceModal').style.display = 'flex';
     };
     window.closeChoiceModal = function () {
@@ -244,6 +266,167 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             alert('오류 발생: ' + err.message);
+        }
+    };
+
+    window.openDeleteAccountModal = function () {
+        if (checkGuestRestriction()) return;
+        document.getElementById('deleteAccountModal').style.display = 'flex';
+        document.getElementById('daCurrentPw').value = '';
+        document.getElementById('daConfirmCheck').checked = false;
+        document.getElementById('daSubmitBtn').disabled = true;
+    };
+
+    window.closeDeleteAccountModal = function () {
+        document.getElementById('deleteAccountModal').style.display = 'none';
+    };
+
+    window.submitDeleteAccount = async function (e) {
+        e.preventDefault();
+        const currentPassword = document.getElementById('daCurrentPw').value;
+        const confirmCheck = document.getElementById('daConfirmCheck').checked;
+
+        if (!confirmCheck) {
+            alert('탈퇴 동의란에 체크해주세요.');
+            return;
+        }
+
+        const userId = localStorage.getItem('user_id');
+
+        // Demo Mode Bypass
+        if (DEMO_MODE) {
+            alert('데모 모드: 회원 탈퇴가 처리되었습니다. (실제 데이터는 보존됩니다.)');
+            localStorage.clear();
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/auth/delete-account`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, currentPassword })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert('회원 탈퇴가 완료되었습니다. 그동안 서비스를 이용해주셔서 감사합니다.');
+                localStorage.clear();
+                window.location.href = 'index.html';
+            } else {
+                alert('탈퇴 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류 발생: ' + err.message);
+        }
+    };
+
+    window.openChangeEmailModal = function () {
+        if (checkGuestRestriction()) return;
+        document.getElementById('changeEmailModal').style.display = 'flex';
+        document.getElementById('ceCurrentPw').value = '';
+        document.getElementById('ceNewEmail').value = '';
+        document.getElementById('ceConfirmEmail').value = '';
+        document.getElementById('ceError').style.display = 'none';
+    };
+
+    window.closeChangeEmailModal = function () {
+        document.getElementById('changeEmailModal').style.display = 'none';
+    };
+
+    window.submitChangeEmail = async function (e) {
+        e.preventDefault();
+        const currentPassword = document.getElementById('ceCurrentPw').value;
+        const newEmail = document.getElementById('ceNewEmail').value;
+        const confirmEmail = document.getElementById('ceConfirmEmail').value;
+        const errEl = document.getElementById('ceError');
+
+        if (newEmail !== confirmEmail) {
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+
+        const userId = localStorage.getItem('user_id');
+        
+        // Demo Mode Bypass
+        if (DEMO_MODE) {
+             alert('데모 모드: 이메일이 성공적으로 변경되었습니다.\n새 아이디: ' + newEmail);
+             localStorage.clear();
+             window.location.href = 'index.html';
+             return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/auth/change-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, newEmail, currentPassword })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('이메일(아이디)이 성공적으로 변경되었습니다. 보안을 위해 새 이메일로 다시 로그인해 주세요.');
+                localStorage.clear();
+                window.location.href = 'index.html';
+            } else {
+                alert('변경 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류: ' + err.message);
+        }
+    };
+
+    window.openChangePasswordModal = function () {
+        if (checkGuestRestriction()) return;
+        document.getElementById('changePasswordModal').style.display = 'flex';
+        document.getElementById('cpCurrent').value = '';
+        document.getElementById('cpNew').value = '';
+        document.getElementById('cpConfirm').value = '';
+        document.getElementById('cpError').style.display = 'none';
+    };
+
+    window.closeChangePasswordModal = function () {
+        document.getElementById('changePasswordModal').style.display = 'none';
+    };
+
+    window.submitChangePassword = async function (e) {
+        e.preventDefault();
+        const currentPassword = document.getElementById('cpCurrent').value;
+        const newPassword = document.getElementById('cpNew').value;
+        const cpConfirm = document.getElementById('cpConfirm').value;
+        const errEl = document.getElementById('cpError');
+
+        if (newPassword !== cpConfirm) {
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+
+        const userId = localStorage.getItem('user_id');
+        
+        // Demo Mode Bypass
+        if (DEMO_MODE) {
+             alert('데모 모드: 비밀번호가 성공적으로 변경되었습니다.\n새 비밀번호: ' + newPassword);
+             closeChangePasswordModal();
+             return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/auth/change-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, currentPassword, newPassword })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('비밀번호가 성공적으로 변경되었습니다. 보안을 위해 다시 로그인해 주세요.');
+                localStorage.clear();
+                window.location.href = 'index.html';
+            } else {
+                alert('비밀번호 변경 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류: ' + err.message);
         }
     };
 
@@ -335,7 +518,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             alert('오류: ' + err.message);
+    };
+
+    // --- Notification Settings Logic ---
+    window.loadNotificationSettings = async function () {
+        const toggle = document.getElementById('notiToggle');
+        if (!toggle) return;
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/notification/settings/${userId}`);
+            const data = await res.json();
+            if (data.success) {
+                toggle.checked = data.messageNotification;
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
         }
+    };
+
+    window.toggleMessageNotification = async function (isChecked) {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        if (DEMO_MODE) {
+            window.showToast('데모 모드: 알림 설정이 변경되었습니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/notification/settings`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, enabled: isChecked })
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.showToast('알림 설정이 변경되었습니다.');
+            } else {
+                alert('설정 변경 실패: ' + data.error);
+                document.getElementById('notiToggle').checked = !isChecked; // revert
+            }
+        } catch (err) {
+            alert('오류: ' + err.message);
+            document.getElementById('notiToggle').checked = !isChecked; // revert
+        }
+    };
+
+    window.showToast = function(message) {
+        const div = document.createElement('div');
+        div.textContent = message;
+        div.style.cssText = 'position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(74, 158, 255, 0.9); color: white; padding: 12px 24px; border-radius: 30px; z-index: 9999; opacity: 0; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: opacity 0.3s ease-in-out; font-size: 0.95rem;';
+        document.body.appendChild(div);
+        
+        // Trigger reflow for transition
+        void div.offsetWidth;
+        div.style.opacity = '1';
+        
+        setTimeout(() => {
+            div.style.opacity = '0';
+            setTimeout(() => div.remove(), 300);
+        }, 3000);
     };
 
     // Notifications Logic

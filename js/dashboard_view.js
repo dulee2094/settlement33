@@ -249,11 +249,11 @@ window.getSettingsPageHTML = function () {
             <div class="glass-card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-user-cog"></i> 계정 설정</h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;">
+                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;" onclick="openChangeEmailModal()">
                         <span><i class="fas fa-envelope" style="margin-right: 10px;"></i> 이메일 변경</span>
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;">
+                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;" onclick="openChangePasswordModal()">
                         <span><i class="fas fa-key" style="margin-right: 10px;"></i> 비밀번호 변경</span>
                         <i class="fas fa-chevron-right"></i>
                     </button>
@@ -270,7 +270,7 @@ window.getSettingsPageHTML = function () {
                             <div style="font-size: 0.85rem; color: var(--text-muted);">상대방이 메시지를 보낼 때 알림</div>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" id="notiToggle" onchange="toggleMessageNotification(this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -281,11 +281,11 @@ window.getSettingsPageHTML = function () {
              <div class="glass-card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-ellipsis-h"></i> 기타</h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;">
+                    <button class="btn btn-glass" style="justify-content: space-between; width: 100%; text-align: left;" onclick="window.open('privacy.html', '_blank')">
                         <span><i class="fas fa-file-contract" style="margin-right: 10px;"></i> 개인정보 처리방침</span>
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <button class="btn" style="justify-content: center; width: 100%; background: rgba(255,0,0,0.1); color: #ff4444; border: 1px solid rgba(255,0,0,0.3);">
+                    <button class="btn" style="justify-content: center; width: 100%; background: rgba(255,0,0,0.1); color: #ff4444; border: 1px solid rgba(255,0,0,0.3);" onclick="openDeleteAccountModal()">
                         <i class="fas fa-user-times" style="margin-right: 10px;"></i> 회원 탈퇴
                     </button>
                 </div>
