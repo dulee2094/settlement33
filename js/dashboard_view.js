@@ -308,7 +308,100 @@ window.getHelpPageHTML = function () {
        <div style="max-width: 900px; margin: 20px auto; display: flex; flex-direction: column; gap: 20px;">
            <div class="glass-card">
                <h3 style="margin-bottom: 20px;">자주 묻는 질문 (FAQ)</h3>
-               <p style="color:var(--text-muted);">준비 중입니다.</p>
+               
+               <style>
+                 details.faq-item {
+                     background: rgba(255, 255, 255, 0.03);
+                     border: 1px solid rgba(255, 255, 255, 0.1);
+                     border-radius: 10px;
+                     margin-bottom: 15px;
+                     overflow: hidden;
+                     transition: all 0.3s ease;
+                 }
+                 details.faq-item[open] {
+                     background: rgba(255, 255, 255, 0.08);
+                     border-color: rgba(59, 130, 246, 0.5); /* blue glow */
+                 }
+                 summary.faq-summary {
+                     padding: 18px 20px;
+                     cursor: pointer;
+                     font-weight: 600;
+                     font-size: 1.05rem;
+                     color: #fff;
+                     list-style: none;
+                     display: flex;
+                     justify-content: space-between;
+                     align-items: center;
+                 }
+                 summary.faq-summary::-webkit-details-marker {
+                     display: none;
+                 }
+                 summary.faq-summary i {
+                     color: #3b82f6; /* primary color */
+                     transition: transform 0.3s ease;
+                 }
+                 details.faq-item[open] summary.faq-summary i {
+                     transform: rotate(180deg);
+                 }
+                 .faq-content {
+                     padding: 0 20px 20px 20px;
+                     color: #d1d5db;
+                     line-height: 1.7;
+                     font-size: 0.95rem;
+                     border-top: 1px solid rgba(255, 255, 255, 0.05);
+                     margin-top: 5px;
+                     padding-top: 15px;
+                 }
+                 .faq-q-mark {
+                     color: #3b82f6;
+                     margin-right: 8px;
+                     font-weight: bold;
+                     font-size: 1.1rem;
+                 }
+                 .faq-a-mark {
+                     color: #10b981; /* emerald indicating answer */
+                     margin-right: 8px;
+                     font-weight: bold;
+                     font-size: 1.1rem;
+                 }
+                 .faq-highlight {
+                     color: #fff;
+                     font-weight: bold;
+                     background: rgba(255,255,255,0.1);
+                     padding: 2px 6px;
+                     border-radius: 4px;
+                 }
+               </style>
+
+               <details class="faq-item">
+                   <summary class="faq-summary">
+                       <span><span class="faq-q-mark">Q.</span> "블라인드 합의"란 무엇인가요? 내 제시액이 상대방에게 공개되나요?</span>
+                       <i class="fas fa-chevron-down"></i>
+                   </summary>
+                   <div class="faq-content">
+                       <span class="faq-a-mark">A.</span> 블라인드 합의는 양측이 원하는 합의금을 서로 모르는 상태에서 비밀리에 시스템에 입력하는 방식입니다. <span class="faq-highlight">입력하신 금액은 절대 상대방에게 노출되지 않습니다.</span> 양측이 입력한 금액이 서로 교차(가해자 제시액 ≥ 피해자 요구액)할 때만 합의가 성사되며, 성사 시에만 알림이 전송되므로 심리전 없이 안전하게 속마음을 타진해볼 수 있습니다.
+                   </div>
+               </details>
+
+               <details class="faq-item">
+                   <summary class="faq-summary">
+                       <span><span class="faq-q-mark">Q.</span> 합의가 성사되면 바로 법적인 효력이 발생하나요?</span>
+                       <i class="fas fa-chevron-down"></i>
+                   </summary>
+                   <div class="faq-content">
+                       <span class="faq-a-mark">A.</span> 시스템상 합의가 매칭되는 것은 '금액에 대한 양측의 합의 의사'가 일치했음을 의미할 뿐, 완벽한 의미의 법적 효력(처벌불원, 민형사상 청구 포기 등)을 시스템이 직접 보장하지는 않습니다. 따라서 가장 안전하고 확실한 법적 마무리를 위해서는 매칭 결과에 만족하셨더라도 <span class="faq-highlight">변호사 등 법률 전문가와 별도로 상담하여 합의서의 효력과 이후 절차를 꼼꼼히 확인</span>받고 진행하시는 것을 권장합니다.
+                   </div>
+               </details>
+
+               <details class="faq-item">
+                   <summary class="faq-summary">
+                       <span><span class="faq-q-mark">Q.</span> 사이트 이용 중 오류나 문제가 발생하면 어떻게 하나요?</span>
+                       <i class="fas fa-chevron-down"></i>
+                   </summary>
+                   <div class="faq-content">
+                       <span class="faq-a-mark">A.</span> 세이프합의는 소모적인 감정싸움 없이 형사합의의 성공 가능성을 높이고자 개발되었으며, 현재 모든 기능을 <span class="faq-highlight">무료로 제공</span>하고 있습니다. 무료로 운영 및 관리되는 플랫폼 특성상 이용 중 불가피하게 시스템 오류나 일시적인 문제가 발생할 수 있음을 양해 부탁드립니다. 문제 발생 시 언제든지 <span class="faq-highlight">관리자 이메일(dulee2094@naver.com)</span>로 상황을 알려주시면 신속하게 확인하여 조치하겠습니다.
+                   </div>
+               </details>
            </div>
        </div>
    `;
