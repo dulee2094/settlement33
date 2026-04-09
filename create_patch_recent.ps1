@@ -1,16 +1,23 @@
 param (
-    [int]$Minutes = 60
+    [int]$Minutes = 4320,
+    [switch]$Clean
 )
 
 $sourceDir = Get-Location
 $patchDir = Join-Path $sourceDir "GITHUB_PATCH"
 
-# Clean patch dir (create fresh)
-if (Test-Path $patchDir) { Remove-Item -Path $patchDir -Recurse -Force }
-New-Item -Path $patchDir -ItemType Directory | Out-Null
+# Clean patch dir if requested
+if ($Clean -and (Test-Path $patchDir)) { 
+    Remove-Item -Path $patchDir -Recurse -Force 
+    Write-Host "Cleaned existing patch directory." -ForegroundColor Yellow
+}
+
+if (-not (Test-Path $patchDir)) {
+    New-Item -Path $patchDir -ItemType Directory | Out-Null
+}
 
 # Exclude list
-$exclude = @("node_modules", ".git", "GITHUB_PATCH", "GITHUB_UPLOAD", "dist", ".vscode", "package-lock.json", ".DS_Store")
+$exclude = @("node_modules", ".git", "GITHUB_PATCH", "GITHUB_UPLOAD", "dist", ".vscode", "package-lock.json", ".DS_Store", "create_patch_recent.ps1")
 
 $cutoff = (Get-Date).AddMinutes(-$Minutes)
 
