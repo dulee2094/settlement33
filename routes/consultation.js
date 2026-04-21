@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Consultation } = require('../models');
+const { Consultation, User } = require('../models');
 const nodemailer = require('nodemailer');
 
 // Endpoint 1: Submit Consultation
@@ -61,6 +61,24 @@ router.get('/admin/consultations', async (req, res) => {
     try {
         const list = await Consultation.findAll({ order: [['submittedAt', 'DESC']] });
         res.json({ success: true, list });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Endpoint 3: Admin - Get All Users (password 제외)
+router.get('/admin/users', async (req, res) => {
+    const { adminKey } = req.query;
+    if (adminKey !== 'admin1234') {
+        return res.status(403).json({ success: false, error: '관리자 권한이 없습니다.' });
+    }
+    try {
+        const list = await User.findAll({
+            attributes: ['id', 'name', 'email', 'phoneNumber', 'messageNotification', 'createdAt'],
+            order: [['createdAt', 'DESC']]
+        });
+        res.json({ success: true, list, total: list.length });
     } catch (e) {
         console.error(e);
         res.status(500).json({ success: false, error: e.message });
