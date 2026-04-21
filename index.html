@@ -7,6 +7,17 @@
     <title>SafeHappE - 형사사건 비대면 안전 합의 플랫폼</title>
     <meta name="description" content="피해자와 피의자 모두를 위한 안전하고 공정한 비대면 합의 플랫폼. 익명성 보장, 에스크로 안전 결제, 법률 데이터 기반 합의금 산정.">
 
+    <!-- Google Analytics GA4 -->
+    <!-- ⚠️ 아래 G-XXXXXXXXXX를 실제 Google Analytics 측정 ID로 교체하세요 -->
+    <!-- 발급 방법: analytics.google.com → 관리 → 데이터 스트림 → 측정 ID 복사 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -354,7 +365,16 @@
             if (!hideModalUntil || now > parseInt(hideModalUntil)) {
                 setTimeout(() => {
                     const modal = document.getElementById('welcomeModal');
-                    if (modal) modal.classList.add('show');
+                    if (modal) {
+                        modal.classList.add('show');
+                        
+                        // 배경(오버레이) 클릭 시 닫기 기능 추가
+                        modal.addEventListener('click', (e) => {
+                            if (e.target === modal) {
+                                closeWelcomeModal();
+                            }
+                        });
+                    }
                 }, 500); // 0.5초 뒤 부드럽게 등장
             }
         });

@@ -1131,6 +1131,10 @@ footer {
     padding: 35px 30px;
     max-width: 600px;
     width: 100%;
+    max-height: 85vh; /* Fallback for older browsers */
+    max-height: 85dvh;          /* 화면 높이의 85% 초과 금지 */
+    display: flex;
+    flex-direction: column;     /* header / body / footer 세로 분리 */
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     transform: translateY(20px);
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -1147,6 +1151,7 @@ footer {
     margin-bottom: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 15px;
+    flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -1166,6 +1171,14 @@ footer {
 
 .close-modal-btn:hover {
     color: var(--accent);
+}
+
+.modal-body {
+    overflow-y: auto;           /* 내용이 넘치면 내부 스크롤 */
+    flex: 1 1 auto;             /* 남은 공간 모두 사용, 축소 가능 */
+    min-height: 0;              /* 플렉스 자식이 컨텐츠 크기 이하로 축소되도록 강제 (중요) */
+    -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+    padding-right: 5px;         /* 스크롤바 영역 확보 */
 }
 
 .modal-body p {
@@ -1213,6 +1226,7 @@ footer {
     margin-top: 25px;
     padding-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
 }
 
 .dont-show-again {
@@ -1229,4 +1243,44 @@ footer {
     width: 16px;
     height: 16px;
     cursor: pointer;
+}
+
+/* ── 모바일 팝업 대응 (Option A) ── */
+@media (max-width: 768px) {
+    .welcome-modal-overlay {
+        align-items: flex-start;    /* 팝업을 화면 상단부터 배치 → 닫기 버튼 항상 보임 */
+        padding: 16px 12px;         /* 좌우 여백 축소 */
+        padding-top: max(16px, env(safe-area-inset-top)); /* 노치 대응 */
+    }
+
+    .welcome-modal-content {
+        padding: 20px 16px;         /* 모바일 패딩 축소 */
+        max-height: 90vh;           /* Fallback */
+        max-height: 90dvh;          /* 모바일에서 조금 더 여유 확보 */
+        border-radius: var(--radius-sm);
+    }
+
+    .modal-header h3 {
+        font-size: 1.1rem;          /* 제목 폰트 축소 */
+    }
+
+    .close-modal-btn {
+        font-size: 2rem;            /* 터치 대상 크기 확대 */
+        min-width: 44px;            /* 최소 터치 영역 44px (iOS 권장) */
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .modal-footer {
+        flex-direction: column;     /* 체크박스 + 닫기버튼 세로 배치 */
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .modal-footer .btn {
+        width: 100%;                /* 닫기 버튼 풀 너비 */
+        padding: 14px;
+    }
 }
