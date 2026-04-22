@@ -54,7 +54,7 @@ router.post('/consultation', async (req, res) => {
 // Endpoint 2: Admin - Get All Consultations
 router.get('/admin/consultations', async (req, res) => {
     const { adminKey } = req.query;
-    if (adminKey !== 'admin1234') { // Simple hardcoded key for mvp
+    if (adminKey !== 'younjin2094') { // Simple hardcoded key for mvp
         return res.status(403).json({ success: false, error: '관리자 권한이 없습니다.' });
     }
 
@@ -70,7 +70,7 @@ router.get('/admin/consultations', async (req, res) => {
 // Endpoint 3: Admin - Get All Users (password 제외)
 router.get('/admin/users', async (req, res) => {
     const { adminKey } = req.query;
-    if (adminKey !== 'admin1234') {
+    if (adminKey !== 'younjin2094') {
         return res.status(403).json({ success: false, error: '관리자 권한이 없습니다.' });
     }
     try {
