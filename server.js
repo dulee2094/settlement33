@@ -51,6 +51,11 @@ try {
     console.log('✅ Route loaded: consultation');
 } catch (e) { console.error('❌ Failed to load route: consultation', e.message); }
 
+try {
+    app.use('/api', require('./routes/visit'));
+    console.log('✅ Route loaded: visit');
+} catch (e) { console.error('❌ Failed to load route: visit', e.message); }
+
 // Case related routes
 loadRoute('./routes/proposal', 'proposal');
 loadRoute('./routes/apology', 'apology');
