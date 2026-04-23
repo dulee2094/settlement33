@@ -8,6 +8,7 @@ const Consultation = require('./Consultation');
 const Document = require('./Document');
 const Notification = require('./Notification');
 const ProposalNextRound = require('./ProposalNextRound');
+const PageVisit = require('./PageVisit');
 
 // Associations
 // Case.hasMany(Proposal, { foreignKey: 'caseId' });
@@ -23,5 +24,6 @@ module.exports = {
     Consultation,
     Document,
     Notification,
-    ProposalNextRound
+    ProposalNextRound,
+    PageVisit
 };
