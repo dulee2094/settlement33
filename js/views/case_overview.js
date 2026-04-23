@@ -18,9 +18,9 @@ window.getOverviewHTML = function () {
     let titleRow = '';
     if (caseTitle) {
         titleRow = `
-            <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div class="info-row" style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <span style="color: var(--text-muted);">방 제목</span>
-                <span style="font-weight: 600;">${caseTitle}</span>
+                <span class="info-val">${caseTitle}</span>
             </div>`;
     }
 
@@ -30,25 +30,25 @@ window.getOverviewHTML = function () {
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-info-circle"></i> 사건 정보</h3>
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     ${titleRow}
-                    <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="info-row" style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span style="color: var(--text-muted);">사건번호</span>
-                        <span style="font-weight: 600;">${caseNumber}</span>
+                        <span class="info-val">${caseNumber}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="info-row" style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span style="color: var(--text-muted);">내 역할</span>
-                        <span style="font-weight: 600;">${window.getRoleText(myRole)}</span>
+                        <span class="info-val">${window.getRoleText(myRole)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="info-row" style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span style="color: var(--text-muted);">상대방</span>
-                        <span style="font-weight: 600;">${counterparty}</span>
+                        <span class="info-val">${counterparty}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div class="info-row" style="padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span style="color: var(--text-muted);">등록일</span>
-                        <span style="font-weight: 600;">${date}</span>
+                        <span class="info-val">${date}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
+                    <div class="info-row">
                         <span style="color: var(--text-muted);">연결 상태</span>
-                        <span style="font-weight: 600; color: var(--secondary);">${window.getStatusText(status)}</span>
+                        <span class="info-val" style="color: var(--secondary);">${window.getStatusText(status)}</span>
                     </div>
                 </div>
             </div>
