@@ -535,6 +535,7 @@ footer {
     position: fixed;
     height: 100vh;
     z-index: 100;
+    overflow: hidden; /* 사이드바 자체는 넘침 숨김 */
 }
 
 .sidebar .logo {
@@ -546,6 +547,39 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1;              /* 남은 공간을 모두 차지 */
+    min-height: 0;        /* Flexbox 내에서 스크롤이 작동하기 위해 필수 */
+    overflow-y: auto;     /* 메뉴가 넘칠 때 세로 스크롤 */
+    overflow-x: hidden;
+    padding-right: 4px;   /* 스크롤바 공간 확보 */
+    /* 스크롤바 스타일 (Webkit 계열) */
+    scrollbar-width: thin;
+    scrollbar-color: hsla(0, 0%, 100%, 0.15) transparent;
+}
+
+.nav-links::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nav-links::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.nav-links::-webkit-scrollbar-thumb {
+    background: hsla(0, 0%, 100%, 0.15);
+    border-radius: 4px;
+}
+
+.nav-links::-webkit-scrollbar-thumb:hover {
+    background: hsla(0, 0%, 100%, 0.3);
+}
+
+/* 로그아웃 버튼 - 사이드바 최하단 고정 */
+.sidebar-logout {
+    flex-shrink: 0;       /* 줄어들지 않도록 고정 */
+    padding-top: 10px;
+    border-top: 1px solid hsla(0, 0%, 100%, 0.06);
+    margin-top: 8px;
 }
 
 .nav-item {

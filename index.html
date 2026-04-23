@@ -356,8 +356,24 @@
             }
         }
 
-        // Welcome Modal Logic
+        // Welcome Modal Logic & Visit Tracking
         document.addEventListener('DOMContentLoaded', () => {
+            // Visit Tracking
+            const visitToken = localStorage.getItem('visit_token') || 'vtok_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('visit_token', visitToken);
+            
+            const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const API_BASE = IS_LOCAL ? 'http://localhost:3300/api' : '/api';
+            
+            fetch(`${API_BASE}/visit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    sessionToken: visitToken, 
+                    pageUrl: window.location.pathname 
+                })
+            }).catch(e => console.error('Visit tracking failed', e));
+
             const hideModalUntil = localStorage.getItem('hideWelcomeModalUntil');
             const now = new Date().getTime();
             
