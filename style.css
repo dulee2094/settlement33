@@ -635,6 +635,16 @@ footer {
     }
 }
 
+/* Info Row for Case Overview */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.info-row .info-val {
+    font-weight: 600;
+}
+
 @media (min-width: 769px) {
     .mobile-bottom-nav, .mobile-drawer-header, .mobile-drawer-overlay {
         display: none !important;
@@ -649,6 +659,23 @@ footer {
         flex-direction: column;
         padding-bottom: 70px;
         /* Space for bottom nav */
+    }
+
+    /* Hide debug panel on mobile */
+    #proposal-debug-panel {
+        display: none !important;
+    }
+
+    /* Info Row Vertical Stacking */
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .info-row .info-val {
+        width: 100%;
+        line-height: 1.4;
+        word-break: keep-all;
     }
 
     /* Mobile Bottom Nav */
