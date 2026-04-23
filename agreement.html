@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -16,9 +16,30 @@
 
 <body>
 
+    <div class="mobile-drawer-overlay" onclick="toggleMobileSidebar()"></div>
     <div class="dashboard-layout">
+        <!-- Mobile Bottom Nav -->
+        <nav class="mobile-bottom-nav">
+            <div class="nav-item" onclick="location.href='dashboard.html?page=cases'">
+                <i class="fas fa-th-large"></i><span>사건 목록</span>
+            </div>
+            <div class="nav-item" onclick="location.href='case_detail.html'">
+                <i class="fas fa-chart-pie"></i><span>사건 현황</span>
+            </div>
+            <div class="nav-item" onclick="location.href='case_detail.html'">
+                <i class="fas fa-hand-holding-usd"></i><span>합의금 제안</span>
+            </div>
+            <div class="nav-item" onclick="toggleMobileSidebar()">
+                <i class="fas fa-bars"></i><span>더보기</span>
+            </div>
+        </nav>
+
         <!-- Sidebar (Reused) -->
         <aside class="sidebar">
+            <div class="mobile-drawer-header">
+                <h3 style="margin:0; color:#fff;">전체 메뉴</h3>
+                <i class="fas fa-times" onclick="toggleMobileSidebar()" style="cursor:pointer; font-size:1.2rem;"></i>
+            </div>
             <a href="index.html" class="logo">
                 <div class="logo-grid">
                     <span class="logo-row-en logo-en-left">Safe</span>
@@ -193,6 +214,14 @@
     </style>
 
     <script src="agreement.js"></script>
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            if(sidebar) sidebar.classList.toggle('drawer-open');
+            const overlay = document.querySelector('.mobile-drawer-overlay');
+            if (overlay) overlay.classList.toggle('active');
+        }
+    </script>
 </body>
 
 </html>
