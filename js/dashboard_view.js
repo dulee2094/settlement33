@@ -474,7 +474,7 @@ window.getGuidePageHTML = function () {
                 <!-- 2. Benefits for Both Sides -->
                 <div class="glass-card" style="padding: 30px;">
                     <h3 style="margin-bottom: 25px; text-align: center;">왜 합의가 필요할까요?</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="guide-grid" style="gap: 30px;">
                         <!-- Offender Side -->
                         <div style="background: rgba(255, 255, 255, 0.03); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                             <div style="display: flex; align-items: center; margin-bottom: 15px; color: #fbbf24;">
@@ -504,7 +504,7 @@ window.getGuidePageHTML = function () {
                 </div>
 
                 <!-- 3. Inspirational Quotes (Dynamic Cards) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 10px;">
+                <div class="guide-grid" style="gap: 20px; margin-bottom: 10px;">
                     <!-- Offender Quote Card -->
                      <div class="glass-card" style="position: relative; overflow: hidden; padding: 30px; border: none; background: ${themeOffender.gradient}; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                         <i class="fas ${randomOffender.icon}" style="position: absolute; top: -10px; right: -10px; font-size: 10rem; opacity: 0.1; color: white;"></i>
