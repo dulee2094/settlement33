@@ -140,6 +140,9 @@ router.get('/status', async (req, res) => {
                 }
             }
 
+            const cDate = new Date(caseData.createdAt);
+            const formattedDate = `${cDate.getFullYear()}.${String(cDate.getMonth() + 1).padStart(2, '0')}.${String(cDate.getDate()).padStart(2, '0')}`;
+
             return {
                 caseId: caseData.id,
                 caseNumber: caseData.caseNumber,
@@ -148,7 +151,8 @@ router.get('/status', async (req, res) => {
                 myRole: isOffender ? 'offender' : 'victim',
                 connectionStatus: caseData.connectionStatus || 'none',
                 counterpartyName: counterpartyName || (isOffender ? '피해자 (가입 대기 중)' : '피의자 (가입 대기 중)'),
-                status: caseData.status
+                status: caseData.status,
+                registrationDate: formattedDate
             };
         }));
 
@@ -157,6 +161,41 @@ router.get('/status', async (req, res) => {
             cases: caseList
         });
 
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+// 7. Delete or Leave Case
+router.post('/delete', async (req, res) => {
+    const { userId, caseId } = req.body;
+    const uid = parseInt(userId, 10);
+
+    try {
+        const caseData = await Case.findByPk(caseId);
+        if (!caseData) return res.json({ success: false, error: '존재하지 않는 방입니다.' });
+
+        const isOffender = (caseData.offenderId === uid);
+        const isVictim = (caseData.victimId === uid);
+
+        if (!isOffender && !isVictim) {
+            return res.json({ success: false, error: '권한이 없습니다.' });
+        }
+
+        const hasBoth = caseData.offenderId && caseData.victimId;
+
+        if (hasBoth) {
+            // Leave room (Soft delete/detach for this user)
+            if (isOffender) caseData.offenderId = null;
+            if (isVictim) caseData.victimId = null;
+            caseData.connectionStatus = 'pending'; // Revert to pending
+            await caseData.save();
+        } else {
+            // Delete room completely
+            await caseData.destroy();
+        }
+
+        res.json({ success: true });
     } catch (e) {
         console.error(e);
         res.status(500).json({ success: false, error: e.message });

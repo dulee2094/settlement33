@@ -65,30 +65,53 @@ window.createCaseCard = function (caseItem) {
 
     if (displayTitle.length > 25) displayTitle = displayTitle.substring(0, 25) + '...';
 
+    card.draggable = true;
+    card.dataset.caseId = caseItem.caseId;
+    card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', caseItem.caseId);
+        card.style.opacity = '0.5';
+    });
+    card.addEventListener('dragend', () => {
+        card.style.opacity = '1';
+        if (window.saveRoomOrder) window.saveRoomOrder();
+    });
+
     card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-            <div>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                    <i class="fas ${roleIcon}" style="color: var(--text-muted);"></i>
-                    <h3 style="font-size: 1.1rem; margin: 0;">${displayTitle} ${subTitle}</h3>
-                </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">내 역할: ${roleText}</p>
-            </div>
-            ${statusBadge}
-        </div>
-        <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-            <div style="width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-user-friends" style="font-size: 1.2rem; color: ${getStatusColor(caseItem.connectionStatus)};"></i>
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="cursor: grab; color: var(--text-muted); padding-top: 5px; opacity: 0.5;" title="드래그하여 순서 변경">
+                <i class="fas fa-bars"></i>
             </div>
             <div style="flex: 1;">
-                <div style="font-size: 0.8rem; color: var(--text-muted);">합의 상대방</div>
-                <div style="font-weight: 600; font-size: 1rem;">${caseItem.counterpartyName}</div>
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                            <i class="fas ${roleIcon}" style="color: var(--text-muted);"></i>
+                            <h3 style="font-size: 1.1rem; margin: 0;">${displayTitle} ${subTitle}</h3>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">내 역할: ${roleText}</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${statusBadge}
+                        <button class="btn btn-icon" onclick="event.stopPropagation(); window.deleteCase('${caseItem.caseId}')" title="방 나가기/삭제" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; font-size: 1.1rem; transition: color 0.2s;">
+                            <i class="fas fa-trash-alt" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text-muted)'"></i>
+                        </button>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-user-friends" style="font-size: 1.2rem; color: ${getStatusColor(caseItem.connectionStatus)};"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">합의 상대방</div>
+                        <div style="font-weight: 600; font-size: 1rem;">${caseItem.counterpartyName}</div>
+                    </div>
+                    <div style="text-align: right; margin-right: 15px;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">등록일</div>
+                            <div style="font-size: 0.9rem;">${caseItem.registrationDate || '2024.01.01'}</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+                </div>
             </div>
-            <div style="text-align: right; margin-right: 15px;">
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">등록일</div>
-                    <div style="font-size: 0.9rem;">${caseItem.registrationDate || '2024.01.01'}</div>
-            </div>
-            <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 1.2rem;"></i>
         </div>
     `;
 
