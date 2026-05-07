@@ -130,8 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 data = {
                     found: true,
                     cases: [
-                        { id: 'demo1', caseNumber: 'DEMO-2026-001', roomTitle: '데모 사건: 강남역 범퍼 접촉사고', status: 'IN_PROGRESS', myRole: '피해자', counterpartyName: '김철수(가해자)', summary: '수리비 합의 중', createdAt: new Date().toISOString() },
-                        { id: 'demo2', caseNumber: 'DEMO-2026-002', roomTitle: '데모 완료: 중고장터 미배송건', status: 'COMPLETED', myRole: '피의자', counterpartyName: '이영희(피해자)', summary: '합의 완료 (지급 대기)', createdAt: new Date(Date.now() - 86400000 * 3).toISOString() }
+                        { id: 'demo1', caseNumber: 'DEMO-2026-001', roomTitle: '데모 사건: 강남역 범퍼 접촉사고', status: 'IN_PROGRESS', myRole: '피해자', counterpartyName: '김철수(가해자)', summary: '수리비 합의 중', registrationDate: new Date().toLocaleDateString('ko-KR').replace(/\.\s?/g, '.').replace(/\.$/, '') },
+                        { id: 'demo2', caseNumber: 'DEMO-2026-002', roomTitle: '데모 완료: 중고장터 미배송건', status: 'COMPLETED', myRole: '피의자', counterpartyName: '이영희(피해자)', summary: '합의 완료 (지급 대기)', registrationDate: new Date(Date.now() - 86400000 * 3).toLocaleDateString('ko-KR').replace(/\.\s?/g, '.').replace(/\.$/, '') }
                     ]
                 };
             } else if (DEMO_MODE) {
@@ -147,9 +147,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.found && data.cases) {
                 container.innerHTML = '';
+                
+                // Sort cases by saved order
+                const savedOrder = JSON.parse(localStorage.getItem('roomOrder') || '[]');
+                data.cases.sort((a, b) => {
+                    const idxA = savedOrder.indexOf(String(a.caseId));
+                    const idxB = savedOrder.indexOf(String(b.caseId));
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return 0; // maintain original order for new rooms
+                });
+
                 data.cases.forEach(caseItem => {
                     const caseCard = window.createCaseCard(caseItem);
                     container.appendChild(caseCard);
+                });
+
+                // Add drag over events to container
+                container.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const draggable = document.querySelector('[draggable="true"][style*="opacity: 0.5"]');
+                    if (!draggable) return;
+                    
+                    const afterElement = getDragAfterElement(container, e.clientY);
+                    if (afterElement == null) {
+                        // Append before the 'new case' card
+                        const newCaseCard = container.lastElementChild;
+                        if(newCaseCard && newCaseCard.innerHTML.includes('새로운 사건 등록')) {
+                            container.insertBefore(draggable, newCaseCard);
+                        } else {
+                            container.appendChild(draggable);
+                        }
+                    } else {
+                        container.insertBefore(draggable, afterElement);
+                    }
                 });
 
                 const newCaseCard = document.createElement('div');
@@ -187,6 +219,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {
             console.error('Failed to fetch cases:', e);
+        }
+    };
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('[draggable="true"]:not([style*="opacity: 0.5"])')];
+        
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    window.saveRoomOrder = function() {
+        const container = document.getElementById('casesContainer');
+        if (!container) return;
+        const cards = container.querySelectorAll('[draggable="true"]');
+        const order = Array.from(cards).map(card => card.dataset.caseId);
+        localStorage.setItem('roomOrder', JSON.stringify(order));
+    };
+
+    window.deleteCase = async function(caseId) {
+        if (!confirm('정말 이 방을 삭제/나가기 하시겠습니까?\n상대방이 참여 중인 방은 목록에서만 지워집니다.')) return;
+        
+        const userId = localStorage.getItem('user_id');
+        
+        if (DEMO_MODE || localStorage.getItem('is_guest') === 'true') {
+            alert('데모 모드: 방이 삭제되었습니다.');
+            if (window.fetchAllCases) window.fetchAllCases();
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/case/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, caseId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.showToast('방이 성공적으로 삭제/정리되었습니다.');
+                if (window.fetchAllCases) window.fetchAllCases();
+            } else {
+                alert('삭제 실패: ' + data.error);
+            }
+        } catch (err) {
+            alert('오류 발생: ' + err.message);
         }
     };
 
